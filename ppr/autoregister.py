@@ -186,6 +186,8 @@ def _register(row: dict, venue: Venue, ws: Workspace, snap: _Snapshot,
                      year=reg.get("year"))
     elif venue.source == "usenix":
         register_usenix(conf_id, reg["slug"], snap.file(ws.usenix_module))
+    else:
+        raise Hold(f"no registration writer for source {venue.source!r}")
     return row["count"]
 
 
@@ -279,12 +281,19 @@ def default_crawl(openreview: Callable[[], object]) -> Crawl:
 
 def git_commit(root: Path) -> Callable[[list[Path], str], None]:
     def commit(files: list[Path], message: str) -> None:
-        subprocess.run(["git", "add", "--", *map(str, files)], cwd=root, check=True)
-        subprocess.run(
-            ["git", "commit", "-m", message, "-m",
-             "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"],
-            cwd=root, check=True,
-        )
+        paths = [str(f) for f in files]
+        try:
+            subprocess.run(["git", "add", "--", *paths], cwd=root, check=True)
+            # Scoped to our paths so anything else staged is never swept in.
+            subprocess.run(
+                ["git", "commit", "-m", message, "-m",
+                 "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>", "--", *paths],
+                cwd=root, check=True,
+            )
+        except subprocess.CalledProcessError:
+            # The caller reverts the working tree; the index must follow.
+            subprocess.run(["git", "reset", "-q", "--", *paths], cwd=root, check=False)
+            raise
     return commit
 
 

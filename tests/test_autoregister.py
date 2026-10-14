@@ -1,10 +1,11 @@
 import json
+import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
-from ppr.autoregister import Outcome, Workspace, autoregister, outcomes_to_json
+from ppr.autoregister import Outcome, Workspace, autoregister, git_commit, outcomes_to_json
 from ppr.venues import Venue
 
 README = """### NLP
@@ -115,6 +116,13 @@ class TestCandidates:
         assert outcomes == []
         assert commits == []
 
+    def test_live_non_mechanical_and_unknown_prefix_rows_are_skipped(self, ws):
+        rows = [_row("acl_2027", 10, {"url": "https://x.test"}),
+                _row("siggraph_2026", 10, {"key": "k"})]
+        outcomes, commits = _run(rows, ws, counts={"acl_2027": 10, "siggraph_2026": 10})
+        assert outcomes == []
+        assert commits == []
+
     def test_live_row_without_a_registration_payload_holds(self, ws):
         outcomes, _ = _run([_row("icse_2026", 250, {})], ws, counts={"icse_2026": 250})
         assert outcomes[0].status == "held"
@@ -135,8 +143,9 @@ class TestDblpVenue:
 
     def test_dblp_sources_skip_dblp_validation(self, ws):
         calls = []
-        _run([ICSE], ws, counts={"icse_2026": 250},
-             validate=lambda c: calls.append(c) or "FAIL")
+        outcomes, _ = _run([ICSE], ws, counts={"icse_2026": 250},
+                           validate=lambda c: calls.append(c) or "FAIL")
+        assert outcomes[0].status == "registered"
         assert calls == []
 
 
@@ -261,3 +270,54 @@ class TestJson:
         payload = json.loads(outcomes_to_json([Outcome("icse_2026", "held", reason="r")]))
         assert payload["outcomes"][0]["conf_id"] == "icse_2026"
         assert payload["outcomes"][0]["status"] == "held"
+
+
+class TestCommitFailure:
+    def test_failing_commit_is_a_hold_and_restores_files(self, ws):
+        def boom(files, msg):
+            raise subprocess.CalledProcessError(1, "git")
+        outcomes = autoregister([ICSE], REGISTRY, ws, crawl=_crawler({"icse_2026": 250}),
+                                validate=lambda c: "NO_DATA", commit=boom,
+                                openreview=_openreview({}))
+        assert outcomes[0].status == "held"
+        assert ws.dblp_module.read_text() == DBLP_SRC
+        assert ws.readme.read_text() == README
+
+
+def _git(root, *args):
+    return subprocess.run(["git", *args], cwd=root, check=True, capture_output=True,
+                          text=True).stdout
+
+
+@pytest.fixture
+def repo(tmp_path):
+    _git(tmp_path, "init", "-q")
+    _git(tmp_path, "config", "user.name", "t")
+    _git(tmp_path, "config", "user.email", "t@example.com")
+    _git(tmp_path, "config", "commit.gpgsign", "false")
+    (tmp_path / "seed").write_text("s")
+    _git(tmp_path, "add", "seed")
+    _git(tmp_path, "commit", "-q", "-m", "seed")
+    return tmp_path
+
+
+class TestGitCommit:
+    def test_failed_commit_leaves_nothing_staged(self, repo):
+        hook = repo / ".git" / "hooks" / "pre-commit"
+        hook.write_text("#!/bin/sh\nexit 1\n")
+        hook.chmod(0o755)
+        f = repo / "a.txt"
+        f.write_text("a")
+        with pytest.raises(subprocess.CalledProcessError):
+            git_commit(repo)([f], "msg")
+        assert _git(repo, "diff", "--cached", "--name-only") == ""
+
+    def test_unrelated_staged_file_is_not_swept_in(self, repo):
+        other = repo / "other.txt"
+        other.write_text("o")
+        _git(repo, "add", "other.txt")
+        f = repo / "a.txt"
+        f.write_text("a")
+        git_commit(repo)([f], "msg")
+        assert _git(repo, "show", "--name-only", "--format=", "HEAD").split() == ["a.txt"]
+        assert _git(repo, "diff", "--cached", "--name-only").split() == ["other.txt"]
