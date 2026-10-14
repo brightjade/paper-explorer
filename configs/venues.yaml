@@ -19,6 +19,8 @@ venues:
     cadence: annual
     announce_month: 9
     probe: {venue_id: "NeurIPS.cc/{year}/Conference"}
+    extra_tracks:
+      - {venue_id: "NeurIPS.cc/{year}/Datasets_and_Benchmarks_Track", prefix: datasets}
   icml:
     name: ICML
     source: openreview

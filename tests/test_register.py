@@ -3,12 +3,14 @@ from unittest.mock import MagicMock
 import pytest
 
 from ppr.register import (
+    TRACK_VOCABULARY,
     RegistrationError,
     openreview_selections,
     register_cvf,
     register_dblp,
     register_usenix,
     render_openreview_config,
+    selections_from_notes,
 )
 
 
@@ -244,3 +246,52 @@ class TestRenderOpenreviewConfig:
         p.write_text(text)
         config = CrawlConfig.from_yaml(p)
         assert config.api_version == 2
+
+
+class TestRegularIsMain:
+    def test_icml_2026_regular_maps_to_main(self):
+        client = TestOpenreviewSelections()._client(
+            ["ICML 2026 regular"] * 10 + ["ICML 2026 spotlight"] * 3
+        )
+        assert openreview_selections(client, "ICML.cc/2026/Conference") == {
+            "main": "ICML 2026 regular",
+            "spotlight": "ICML 2026 spotlight",
+        }
+
+    def test_unknown_word_still_falls_back_to_a_slug(self):
+        # Manual registration keeps its old behaviour; autoregister is the one
+        # that refuses names outside TRACK_VOCABULARY.
+        client = TestOpenreviewSelections()._client(["X 2026 Long", "X 2026 Poster"])
+        sel = openreview_selections(client, "X.cc/2026/Conference")
+        assert sel["x_2026_long"] == "X 2026 Long"
+
+    def test_vocabulary(self):
+        assert TRACK_VOCABULARY == ("main", "oral", "spotlight", "poster", "findings", "industry")
+
+
+class TestSelectionsFromNotes:
+    def test_works_on_notes_directly(self):
+        notes = TestOpenreviewSelections()._client(["COLM 2026"] * 3).get_all_notes()
+        assert selections_from_notes(notes, "colmweb.org/COLM/2026/Conference") == {
+            "main": "COLM 2026"
+        }
+
+
+class TestRenderExtraVenueIds:
+    def test_extra_venue_ids_round_trip_through_crawlconfig(self, tmp_path):
+        from ppr.config import CrawlConfig
+
+        text = render_openreview_config(
+            "NeurIPS", 2026, "NeurIPS.cc/2026/Conference",
+            {"poster": "NeurIPS 2026 poster", "datasets_poster": "NeurIPS 2026 Datasets and Benchmarks Track poster"},
+            extra_venue_ids=["NeurIPS.cc/2026/Datasets_and_Benchmarks_Track"],
+        )
+        p = tmp_path / "neurips_2026.yaml"
+        p.write_text(text)
+        config = CrawlConfig.from_yaml(p)
+        assert config.extra_venue_ids == ["NeurIPS.cc/2026/Datasets_and_Benchmarks_Track"]
+        assert config.selections["datasets_poster"].endswith("Track poster")
+
+    def test_no_extra_ids_renders_no_key(self):
+        text = render_openreview_config("CoRL", 2026, "v", {"main": "CoRL 2026"})
+        assert "extra_venue_ids" not in text

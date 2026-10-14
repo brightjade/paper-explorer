@@ -1,5 +1,6 @@
 """The registry of conference venues discovery knows how to look for."""
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -30,6 +31,27 @@ class Venue:
     cadence: str
     probe: dict
     announce_month: int
+    # Additional OpenReview venue IDs crawled into the same conference-year,
+    # e.g. NeurIPS's Datasets & Benchmarks track. Autoregister includes one
+    # only when the API returns papers for it -- a template, never a promise.
+    extra_tracks: tuple[dict, ...] = ()
+
+
+def _parse_extra_tracks(prefix: str, entry: dict) -> tuple[dict, ...]:
+    tracks = entry.get("extra_tracks") or []
+    if tracks and entry["source"] != "openreview":
+        raise ValueError(f"venue {prefix!r}: extra_tracks is only valid for openreview")
+    parsed = []
+    for track in tracks:
+        if not isinstance(track.get("venue_id"), str):
+            raise ValueError(f"venue {prefix!r}: extra_tracks entry needs a venue_id")
+        if not re.fullmatch(r"[a-z]+", str(track.get("prefix", ""))):
+            raise ValueError(
+                f"venue {prefix!r}: extra_tracks prefix must be lowercase letters, "
+                f"got {track.get('prefix')!r}"
+            )
+        parsed.append({"venue_id": track["venue_id"], "prefix": track["prefix"]})
+    return tuple(parsed)
 
 
 def load_registry(path: Path = REGISTRY_PATH) -> dict[str, Venue]:
@@ -68,6 +90,7 @@ def load_registry(path: Path = REGISTRY_PATH) -> dict[str, Venue]:
             cadence=entry["cadence"],
             probe=entry["probe"],
             announce_month=month,
+            extra_tracks=_parse_extra_tracks(prefix, entry),
         )
 
     return registry

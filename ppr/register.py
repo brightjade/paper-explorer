@@ -101,6 +101,16 @@ def register_usenix(conf_id: str, slug: str, path: Path) -> None:
 # Words that appear in OpenReview venue strings and name a track.
 _TRACK_WORDS = ("oral", "spotlight", "poster", "findings", "industry")
 
+# The selection names the project uses. 61k papers already carry `main`, and the
+# web app's track breakdown reads these; autoregister holds any venue whose
+# derived names fall outside this set rather than ship a slug like
+# `icml_2026_regular` to the site.
+TRACK_VOCABULARY = ("main",) + _TRACK_WORDS
+
+# Venue-string words that name the base track under another name. ICML 2026
+# tagged its main track "ICML 2026 regular".
+_MAIN_ALIASES = ("regular",)
+
 
 def openreview_selections(client, venue_id: str) -> dict[str, str]:
     """Read a conference's actual `venue` values and turn them into selections.
@@ -110,7 +120,12 @@ def openreview_selections(client, venue_id: str) -> dict[str, str]:
     but CoRL 2024 tags all 264 papers plain "CoRL 2024". The crawl matched
     nothing, wrote an empty file, and reported success.
     """
-    notes = client.get_all_notes(content={"venueid": venue_id})
+    return selections_from_notes(client.get_all_notes(content={"venueid": venue_id}), venue_id)
+
+
+def selections_from_notes(notes: list, venue_id: str) -> dict[str, str]:
+    """Selections from already-fetched notes, so a caller that also needs the
+    count does not query OpenReview twice."""
     if not notes:
         raise RegistrationError(f"{venue_id} returned no papers -- nothing to register")
 
@@ -138,6 +153,8 @@ def openreview_selections(client, venue_id: str) -> dict[str, str]:
     for value in sorted(values):
         lowered = value.lower().replace(" ", "")
         name = next((w for w in _TRACK_WORDS if w in lowered), None)
+        if name is None and any(alias in lowered for alias in _MAIN_ALIASES):
+            name = "main"
         key = name or value.lower().replace(" ", "_")
         if key in selections:
             raise RegistrationError(
@@ -149,7 +166,11 @@ def openreview_selections(client, venue_id: str) -> dict[str, str]:
 
 
 def render_openreview_config(
-    name: str, year: int, venue_id: str, selections: dict[str, str]
+    name: str,
+    year: int,
+    venue_id: str,
+    selections: dict[str, str],
+    extra_venue_ids: list[str] | None = None,
 ) -> str:
     """Render a `configs/<id>.yaml` body.
 
@@ -166,7 +187,10 @@ def render_openreview_config(
         f'  name: "{name}"',
         f"  year: {year}",
         f'  venue_id: "{venue_id}"',
-        "  selections:",
     ]
+    if extra_venue_ids:
+        lines.append("  extra_venue_ids:")
+        lines += [f'    - "{vid}"' for vid in extra_venue_ids]
+    lines.append("  selections:")
     lines += [f'    {key}: "{value}"' for key, value in selections.items()]
     return "\n".join(lines) + "\n"

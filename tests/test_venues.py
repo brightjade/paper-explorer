@@ -124,3 +124,35 @@ class TestConfigsDirExcludesRegistry:
         from ppr.discover import known_conference_ids
 
         assert set(_available_conferences()) == known_conference_ids()
+
+
+class TestExtraTracks:
+    def _with(self, tmp_path, source, extra):
+        data = {"venues": {"neurips": {
+            "name": "NeurIPS", "source": source, "cadence": "annual",
+            "announce_month": 9, "probe": {"venue_id": "NeurIPS.cc/{year}/Conference"},
+            "extra_tracks": extra,
+        }}}
+        return _write(tmp_path, data)
+
+    def test_parsed_into_a_tuple(self, tmp_path):
+        reg = load_registry(self._with(tmp_path, "openreview", [
+            {"venue_id": "NeurIPS.cc/{year}/Datasets_and_Benchmarks_Track", "prefix": "datasets"},
+        ]))
+        assert reg["neurips"].extra_tracks == (
+            {"venue_id": "NeurIPS.cc/{year}/Datasets_and_Benchmarks_Track", "prefix": "datasets"},
+        )
+
+    def test_defaults_to_empty(self, tmp_path):
+        assert load_registry(_write(tmp_path, VALID))["icse"].extra_tracks == ()
+
+    def test_rejected_on_a_non_openreview_source(self, tmp_path):
+        with pytest.raises(ValueError, match="extra_tracks"):
+            load_registry(self._with(tmp_path, "dblp", [{"venue_id": "x", "prefix": "d"}]))
+
+    def test_prefix_must_be_lowercase_letters(self, tmp_path):
+        with pytest.raises(ValueError, match="prefix"):
+            load_registry(self._with(tmp_path, "openreview", [{"venue_id": "x", "prefix": "D&B"}]))
+
+    def test_shipped_neurips_declares_datasets_track(self):
+        assert load_registry()["neurips"].extra_tracks[0]["prefix"] == "datasets"
