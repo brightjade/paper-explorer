@@ -150,6 +150,19 @@ def build_parser() -> argparse.ArgumentParser:
                                      help="Commit each registered venue (used by the monthly workflow).")
     _add_auth_args(autoregister_parser)
 
+    # report
+    report_parser = subparsers.add_parser("report", help="Pipeline state and issue decisions")
+    report_sub = report_parser.add_subparsers(dest="report_command", required=True)
+    state_parser = report_sub.add_parser("state", help="Update deferral streaks from an enrich report")
+    state_parser.add_argument("--enrich", type=Path, required=True)
+    state_parser.add_argument("--state", type=Path, required=True)
+    issue_parser = report_sub.add_parser("issue", help="Decide the tracking-issue action")
+    for name in ("discover", "register", "enrich", "state"):
+        issue_parser.add_argument(f"--{name}", type=Path, default=None)
+    issue_parser.add_argument("--pipeline-result", required=True)
+    issue_parser.add_argument("--run-url", required=True)
+    issue_parser.add_argument("--out", type=Path, required=True)
+
     return parser
 
 
@@ -342,6 +355,35 @@ def cmd_autoregister(args: argparse.Namespace) -> None:
         print(f"{o.conf_id:<24} {o.status:<11} {o.count:>6}/{o.expected:<6} {o.reason}")
 
 
+def _read_json(path: Path | None):
+    import json
+
+    if path is None or not path.exists():
+        return None
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def cmd_report(args: argparse.Namespace) -> None:
+    import json
+    from datetime import date
+
+    from ppr.report import decide_issue, update_state
+
+    if args.report_command == "state":
+        state = _read_json(args.state) or {}
+        enrich = _read_json(args.enrich) or {"results": []}
+        args.state.write_text(json.dumps(update_state(state, enrich["results"]), indent=2),
+                              encoding="utf-8")
+        return
+    action = decide_issue(
+        discover=_read_json(args.discover), register=_read_json(args.register),
+        enrich=_read_json(args.enrich), state=_read_json(args.state),
+        pipeline_result=args.pipeline_result, run_url=args.run_url,
+        today=date.today().isoformat(),
+    )
+    args.out.write_text(json.dumps(action, indent=2), encoding="utf-8")
+
+
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
@@ -352,6 +394,7 @@ def main() -> None:
         "validate": cmd_validate,
         "discover": cmd_discover,
         "autoregister": cmd_autoregister,
+        "report": cmd_report,
     }
 
     if args.command in commands:
