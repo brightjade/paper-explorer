@@ -124,3 +124,61 @@ class TestCli:
         cli.cmd_report(args)
         cli.cmd_report(args)
         assert json.loads(state.read_text())["deferred_streak"] == {"a_2026": 2}
+
+
+class TestDeferredGate:
+    """A streak only alerts on a conference that deferred in this run."""
+
+    def test_failed_row_with_streak_does_not_alert(self):
+        rows = [{"conf_id": "icml_2026", "status": "failed", "total": 0, "unbound": 0, "deferred": 0, "reason": "boom"}]
+        a = _decide(enrich={"results": rows}, state={"deferred_streak": {"icml_2026": 3}})
+        assert a["action"] == "close"
+
+    def test_skipped_row_with_streak_has_no_deferred_section(self):
+        rows = [{"conf_id": "icml_2026", "status": "skipped", "total": 0, "unbound": 0, "deferred": 0, "reason": "guard"}]
+        a = _decide(enrich={"results": rows}, state={"deferred_streak": {"icml_2026": 3}})
+        assert a["action"] == "notify"
+        assert "Skipped by an enrich guard" in a["body"]
+        assert "runs in a row" not in a["body"]
+
+    def test_enriched_row_with_streak_but_no_deferral_this_run_does_not_alert(self):
+        rows = [{"conf_id": "icml_2026", "status": "enriched", "total": 10, "unbound": 0, "deferred": 0, "reason": ""}]
+        a = _decide(enrich={"results": rows}, state={"deferred_streak": {"icml_2026": 3}})
+        assert a["action"] == "close"
+
+    def test_row_missing_deferred_key_does_not_raise(self):
+        rows = [{"conf_id": "icml_2026", "status": "enriched", "total": 10, "unbound": 0}]
+        a = _decide(enrich={"results": rows}, state={"deferred_streak": {"icml_2026": 3}})
+        assert a["action"] == "close"
+
+
+class TestSparseRows:
+    """Report rows missing optional keys must not raise on the failure path."""
+
+    def test_held_row_without_reason_still_decides(self):
+        a = _decide(pipeline_result="failure", register={"outcomes": [{"conf_id": "x_2027", "status": "held"}]})
+        assert a["action"] == "notify"
+        assert "x_2027" in a["body"]
+
+    def test_sparse_enrich_and_discover_rows_do_not_raise(self):
+        d = {"results": [{"conf_id": "fse_2026", "status": "unreachable"},
+                         {"conf_id": "acl_2027", "status": "needs-manual"}], "stale_empty": []}
+        e = {"results": [{"conf_id": "a_2025", "status": "skipped"},
+                         {"conf_id": "b_2025", "status": "enriched", "total": 100}]}
+        a = _decide(discover=d, enrich=e, pipeline_result="failure")
+        assert a["action"] == "notify"
+
+
+class TestCorruptJson:
+    def test_corrupt_enrich_file_reads_as_none_and_failure_still_notifies(self, tmp_path):
+        from ppr import cli
+
+        bad = tmp_path / "enrich.json"
+        bad.write_text("{not json", encoding="utf-8")
+        out = tmp_path / "action.json"
+        args = cli.build_parser().parse_args([
+            "report", "issue", "--enrich", str(bad),
+            "--pipeline-result", "failure", "--run-url", RUN, "--out", str(out),
+        ])
+        cli.cmd_report(args)
+        assert json.loads(out.read_text())["action"] == "notify"

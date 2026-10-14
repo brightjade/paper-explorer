@@ -29,12 +29,12 @@ def update_state(state: dict, enrich_results: list[dict]) -> dict:
 
 def _last_stage(discover, register, enrich) -> str:
     if discover is None:
-        return "setup or discover (steps 1-2)"
+        return "setup or discover"
     if register is None:
-        return "autoregister (step 3)"
+        return "autoregister"
     if enrich is None:
-        return "tests or enrich (steps 4-5)"
-    return "state, build, release, push or deploy (steps 6-9)"
+        return "tests or enrich"
+    return "state, build, release, push or deploy"
 
 
 def _section(title: str, lines: list[str]) -> str:
@@ -52,23 +52,26 @@ def decide_issue(*, discover: dict | None, register: dict | None, enrich: dict |
         [f"- The pipeline job ended `{pipeline_result}` during {_last_stage(discover, register, enrich)}. {run_url}"]
         if pipeline_result in ("failure", "cancelled") else []
     )
-    held = [f"- `{o['conf_id']}` — {o['reason']} — {o.get('url', '')}"
-            for o in outcomes if o["status"] == "held"]
+    held = [f"- `{o['conf_id']}` — {o.get('reason', '')} — {o.get('url', '')}"
+            for o in outcomes if o.get("status") == "held"]
     stale = [f"- `{c}`" for c in (discover or {}).get("stale_empty", [])]
     skipped = [f"- `{r['conf_id']}` — {r.get('reason', '')}"
-               for r in enrich_rows if r["status"] == "skipped"]
-    unbound = [f"- `{r['conf_id']}` — {r['unbound']} of {r['total']} unbound"
+               for r in enrich_rows if r.get("status") == "skipped"]
+    unbound = [f"- `{r['conf_id']}` — {r.get('unbound', 0)} of {r['total']} unbound"
                for r in enrich_rows
                if r.get("total") and r.get("unbound", 0) > UNBOUND_ALERT_RATIO * r["total"]]
-    deferred = [f"- `{r['conf_id']}` — deferred {r['deferred']} papers, {streak[r['conf_id']]} runs in a row"
+    # Gated on this run's own deferral: a failed or skipped conference keeps its
+    # streak, and must not be reported as deferring while it did not run.
+    deferred = [f"- `{r['conf_id']}` — deferred {r.get('deferred', 0)} papers, {streak[r['conf_id']]} runs in a row"
                 for r in enrich_rows
-                if streak.get(r["conf_id"], 0) >= DEFERRED_STREAK_ALERT]
+                if r.get("status") == "enriched" and r.get("deferred", 0) > 0
+                and streak.get(r["conf_id"], 0) >= DEFERRED_STREAK_ALERT]
     unreachable = [f"- `{r['conf_id']}` — {r.get('note', '')}"
-                   for r in results if r["status"] == "unreachable"]
+                   for r in results if r.get("status") == "unreachable"]
     manual = [f"- `{r['conf_id']}` — {r.get('url', '')}"
-              for r in results if r["status"] == "needs-manual"]
+              for r in results if r.get("status") == "needs-manual"]
     registered = [f"- `{o['conf_id']}` — {o.get('count', 0)} papers"
-                  for o in outcomes if o["status"] == "registered"]
+                  for o in outcomes if o.get("status") == "registered"]
 
     triggers = {"Pipeline failed": failure, "Held by autoregister": held,
                 "Past their announce month but parsing 0 papers": stale,

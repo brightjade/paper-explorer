@@ -360,7 +360,12 @@ def _read_json(path: Path | None):
 
     if path is None or not path.exists():
         return None
-    return json.loads(path.read_text(encoding="utf-8"))
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        # A partial report from a failed run must not stop the issue decision.
+        logger.warning("Ignoring unreadable JSON %s (%s)", path, exc)
+        return None
 
 
 def cmd_report(args: argparse.Namespace) -> None:
