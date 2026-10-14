@@ -15,7 +15,7 @@ The monthly workflow (`.github/workflows/monthly.yml`) registers mechanical-sour
 - `needs-manual` venues (ACL-family, AAAI),
 - `stale_empty` venues (probable broken selector).
 
-Before any manual crawl or enrich, start from the newest data release (`./setup.sh`), not from a local or remote `data/` -- the release is the source of truth.
+Before any manual crawl or enrich, start from the newest data release (`./setup.sh`), not from any existing `data/` copy -- the release is the source of truth.
 
 ## Phase 1 — Detect, then stop
 
@@ -52,7 +52,7 @@ from ppr.register import register_cvf
 register_cvf("cvpr_2026", "https://openaccess.thecvf.com/CVPR2026?day=all", "openaccess", Path("ppr/scrapers/cvf.py"))
 ```
 
-All three writers append just before the dict's closing brace, so a new entry lands at the end regardless of which commented group it belongs to. Move it into place and switch a hardcoded host to the module's `CVF_BASE_URL` / `ECVA_BASE_URL` constant if one applies — that is what reviewing the diff is for.
+The writers insert each entry into its venue's group and use the module's host constants, so the diff needs reviewing, not hand-moving.
 
 **USENIX** — the slug is `usenixsecurity` plus the two-digit year:
 
