@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ppr import dblp_client
 from ppr.dblp_client import DblpUnavailable
+from ppr.scrapers.dblp import DBLP_CONFERENCES
 
 logger = logging.getLogger(__name__)
 
@@ -13,18 +14,10 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 HITS_PER_PAGE = 1000
 
-# Conferences scraped directly from DBLP (ppr/scrapers/dblp.py).
+# Conferences scraped directly from DBLP: derived from the scraper registry so
+# autoregister, which edits only ppr/scrapers/dblp.py, cannot desync it.
 # Validating these against DBLP would be circular — skip them.
-DBLP_SOURCE_IDS: set[str] = {
-    "icse_2023", "icse_2024", "icse_2025",
-    "fse_2023", "fse_2024", "fse_2025",
-    "ase_2023", "ase_2024", "ase_2025",
-    "issta_2023", "issta_2024", "issta_2025",
-    "icra_2023", "icra_2024", "icra_2025",
-    "iros_2023", "iros_2024", "iros_2025",
-    "rss_2023", "rss_2024",
-    "ijcai_2023", "ijcai_2024", "ijcai_2025",
-}
+DBLP_SOURCE_IDS: frozenset[str] = frozenset(DBLP_CONFERENCES)
 
 # Maps conference ID -> list of DBLP toc keys to query.
 # Multiple keys handle multi-volume proceedings (e.g., ACL long + short + findings).
