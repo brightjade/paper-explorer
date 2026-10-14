@@ -7,7 +7,12 @@ TAG="${1:-latest}"
 echo "Downloading data from release ${TAG}..."
 
 if command -v gh &>/dev/null; then
-    gh release download "$TAG" -R "$REPO" -p "data.zip" --clobber
+    if [ "$TAG" = "latest" ]; then
+        # gh treats "latest" as a literal tag; no tag means the release marked Latest
+        gh release download -R "$REPO" -p "data.zip" --clobber
+    else
+        gh release download "$TAG" -R "$REPO" -p "data.zip" --clobber
+    fi
 else
     if [ "$TAG" = "latest" ]; then
         URL="https://github.com/${REPO}/releases/latest/download/data.zip"
