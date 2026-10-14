@@ -27,13 +27,14 @@ class ReleaseAborted(Exception):
 
 
 def gh(cmd: list[str]) -> str:
-    return subprocess.run(cmd, check=True, capture_output=True, text=True).stdout
+    # stderr stays with the parent so gh's own error reaches the job log.
+    return subprocess.run(cmd, check=True, stdout=subprocess.PIPE, text=True).stdout
 
 
 def data_releases(run: Runner) -> list[str]:
     rows = json.loads(run(["gh", "release", "list", "--limit", "100",
-                           "--json", "tagName,createdAt"]))
-    rows = [r for r in rows if r["tagName"].startswith(PREFIX)]
+                           "--json", "tagName,createdAt,isDraft"]))
+    rows = [r for r in rows if r["tagName"].startswith(PREFIX) and not r.get("isDraft")]
     rows.sort(key=lambda r: r["createdAt"], reverse=True)
     return [r["tagName"] for r in rows]
 
@@ -106,5 +107,6 @@ def publish(data_dir: Path, base_tag: str, notes: str, today: str, run: Runner, 
             run(["gh", "release", "delete", old, "--yes", "--cleanup-tag"])
         except Exception as exc:  # an extra old release is harmless
             logger.warning("Could not delete %s: %s", old, exc)
+            print(f"::warning::Could not delete {old}: {exc}")
     zip_path.unlink(missing_ok=True)
     return tag

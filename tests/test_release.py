@@ -16,7 +16,7 @@ from ppr.release import (
 
 class FakeGh:
     def __init__(self, releases, fail_on=()):
-        self.releases = releases  # list of (tag, createdAt)
+        self.releases = releases  # list of (tag, createdAt[, isDraft])
         self.calls = []
         self.fail_on = fail_on
 
@@ -25,7 +25,8 @@ class FakeGh:
         if any(cmd[:3] == list(f) for f in self.fail_on):
             raise RuntimeError("gh failed")
         if cmd[:3] == ["gh", "release", "list"]:
-            return json.dumps([{"tagName": t, "createdAt": c} for t, c in self.releases])
+            return json.dumps([{"tagName": r[0], "createdAt": r[1], "isDraft": len(r) > 2 and r[2]}
+                                    for r in self.releases])
         return ""
 
     def verbs(self):
@@ -52,6 +53,17 @@ class TestDataReleases:
     def test_ignores_other_tags_and_sorts_by_creation(self):
         gh = FakeGh(list(reversed(RELEASES)))  # listed oldest first on purpose
         assert data_releases(gh) == ["data-2026-10-03", "data-2026-09-03", "data-2026-08-05"]
+
+
+class TestDrafts:
+    def test_draft_data_release_is_ignored(self):
+        gh = FakeGh([*RELEASES, ("data-2026-10-20", "2026-10-20T00:00:00Z", True)])
+        assert data_releases(gh)[0] == "data-2026-10-03"
+
+    def test_draft_newer_than_base_does_not_abort_publish(self, data_dir, tmp_path):
+        gh = FakeGh([*RELEASES, ("data-2026-10-20", "2026-10-20T00:00:00Z", True)])
+        tag = publish(data_dir, "data-2026-10-03", "n", "2026-11-03", gh, zip_path=tmp_path / "d.zip")
+        assert tag == "data-2026-11-03"
 
 
 class TestNextTag:
