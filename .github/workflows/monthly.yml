@@ -57,8 +57,8 @@ jobs:
         id: base
         run: |
           set -euo pipefail
-          tag=$(gh release list --limit 100 --json tagName,createdAt \
-            --jq '[.[] | select(.tagName | startswith("data-"))] | sort_by(.createdAt) | last | .tagName')
+          tag=$(gh release list --limit 100 --json tagName,createdAt,isDraft \
+            --jq '[.[] | select((.tagName | startswith("data-")) and (.isDraft | not))] | sort_by(.createdAt) | last | .tagName')
           if [ -z "$tag" ] || [ "$tag" = "null" ]; then
             echo "No data-* release to start from" >&2; exit 1
           fi
@@ -90,16 +90,18 @@ jobs:
         with: {name: report-enrich, path: enrich.json}
 
       - name: State, citation date, build smoke test
+        id: state
         run: |
           set -euo pipefail
           uv run ppr report state --enrich enrich.json --state data/pipeline_state.json
           date -u +%Y-%m-%d > data/citation_updated.txt
           uv run python -m scripts.build_data
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() && hashFiles('data/pipeline_state.json') != '' }}
+        if: ${{ !cancelled() && steps.state.outcome == 'success' && hashFiles('data/pipeline_state.json') != '' }}
         with: {name: report-state, path: data/pipeline_state.json}
 
       - name: Release
+        id: release
         env:
           BASE_TAG: ${{ steps.base.outputs.tag }}
         run: |
@@ -119,7 +121,8 @@ jobs:
           git push origin HEAD:main || { git pull --rebase origin main && git push origin HEAD:main; }
 
       - name: Deploy
-        if: env.DRY_RUN != 'true'
+        # The release already shipped the data, so a failed push must not skip this.
+        if: ${{ !cancelled() && steps.release.outcome == 'success' && env.DRY_RUN != 'true' }}
         # A push made with GITHUB_TOKEN does not trigger deploy.yml's on: push,
         # and the data changed even in a month that pushed nothing.
         run: gh workflow run deploy.yml --ref main
@@ -141,6 +144,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      contents: read
       issues: write
     steps:
       - uses: actions/checkout@v4
