@@ -1,0 +1,174 @@
+name: Monthly data pipeline
+
+on:
+  schedule:
+    # 07:23 UTC on the 3rd -- an odd minute and a non-1st day, because
+    # top-of-hour and start-of-month schedules are delayed or dropped under
+    # load, and a dropped run is not retried.
+    - cron: "23 7 3 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run steps 1-6 for real; only print what release, push and deploy would do"
+        type: boolean
+        default: false
+
+concurrency:
+  group: data-pipeline
+  cancel-in-progress: false
+
+env:
+  DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    permissions:
+      contents: write
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      OPENREVIEW_USERNAME: ${{ secrets.OPENREVIEW_USERNAME }}
+      OPENREVIEW_PASSWORD: ${{ secrets.OPENREVIEW_PASSWORD }}
+      SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # the push step may need to rebase onto a newer main
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Download the latest data release
+        id: base
+        run: |
+          tag=$(gh release list --limit 100 --json tagName,createdAt \
+            --jq '[.[] | select(.tagName | startswith("data-"))] | sort_by(.createdAt) | last | .tagName')
+          if [ -z "$tag" ] || [ "$tag" = "null" ]; then
+            echo "No data-* release to start from" >&2; exit 1
+          fi
+          gh release download "$tag" -p data.zip --clobber
+          unzip -q -o data.zip && rm data.zip
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Discover
+        run: uv run ppr discover --json > discover.json
+      - uses: actions/upload-artifact@v4
+        with: {name: report-discover, path: discover.json}
+
+      - name: Autoregister
+        run: uv run ppr autoregister discover.json --report register.json --commit
+      - uses: actions/upload-artifact@v4
+        with: {name: report-register, path: register.json}
+
+      - name: Tests
+        run: uv run pytest tests/ -q
+
+      - name: Enrich
+        run: uv run ppr enrich --all --time-budget 4h --report enrich.json
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && hashFiles('enrich.json') != '' }}
+        with: {name: report-enrich, path: enrich.json}
+
+      - name: State, citation date, build smoke test
+        run: |
+          uv run ppr report state --enrich enrich.json --state data/pipeline_state.json
+          date -u +%Y-%m-%d > data/citation_updated.txt
+          uv run python -m scripts.build_data
+      - uses: actions/upload-artifact@v4
+        with: {name: report-state, path: data/pipeline_state.json}
+
+      - name: Release
+        env:
+          BASE_TAG: ${{ steps.base.outputs.tag }}
+        run: |
+          extra=()
+          if [ "$DRY_RUN" = "true" ]; then extra+=(--dry-run); fi
+          uv run ppr release --base-tag "$BASE_TAG" \
+            --register register.json --enrich enrich.json --run-url "$RUN_URL" "${extra[@]}"
+
+      - name: Push registrations
+        if: env.DRY_RUN != 'true'
+        run: |
+          if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
+            echo "Nothing to push"; exit 0
+          fi
+          git push origin HEAD:main || { git pull --rebase origin main && git push origin HEAD:main; }
+
+      - name: Deploy
+        if: env.DRY_RUN != 'true'
+        # A push made with GITHUB_TOKEN does not trigger deploy.yml's on: push,
+        # and the data changed even in a month that pushed nothing.
+        run: gh workflow run deploy.yml --ref main
+
+      - name: Dry-run summary
+        if: env.DRY_RUN == 'true'
+        run: |
+          {
+            echo "## Dry run"
+            echo '```'; cat register.json; echo '```'
+            echo '```'; git log --oneline origin/main..HEAD; echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  notify:
+    needs: pipeline
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/download-artifact@v4
+        continue-on-error: true  # a run that died early uploaded nothing
+        with:
+          pattern: report-*
+          merge-multiple: true
+          path: reports
+
+      - name: Decide the issue action
+        run: |
+          uv run ppr report issue \
+            --discover reports/discover.json --register reports/register.json \
+            --enrich reports/enrich.json --state reports/pipeline_state.json \
+            --pipeline-result "${{ needs.pipeline.result }}" --run-url "$RUN_URL" \
+            --out action.json
+          { echo "## Issue action"; echo '```json'; cat action.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Apply it
+        if: env.DRY_RUN != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const action = JSON.parse(fs.readFileSync('action.json', 'utf8'));
+            const LABEL = 'new-conferences';
+            const repo = { owner: context.repo.owner, repo: context.repo.repo };
+            const open = (await github.rest.issues.listForRepo({ ...repo, state: 'open', labels: LABEL })).data;
+
+            if (action.action === 'notify') {
+              if (open.length) {
+                const issue_number = open[0].number;
+                await github.rest.issues.update({ ...repo, issue_number, title: action.title, body: action.body });
+                // An edit notifies nobody; the comment is what reaches a human.
+                await github.rest.issues.createComment({ ...repo, issue_number, body: action.comment });
+              } else {
+                await github.rest.issues.create({ ...repo, title: action.title, body: action.body, labels: [LABEL] });
+              }
+            } else if (action.action === 'blind') {
+              for (const issue of open) {
+                await github.rest.issues.createComment({ ...repo, issue_number: issue.number, body: action.comment });
+              }
+            } else if (action.action === 'close') {
+              for (const issue of open) {
+                await github.rest.issues.createComment({ ...repo, issue_number: issue.number, body: action.comment });
+                await github.rest.issues.update({ ...repo, issue_number: issue.number, state: 'closed', state_reason: 'completed' });
+              }
+            }
