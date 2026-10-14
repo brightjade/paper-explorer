@@ -272,6 +272,7 @@ import respx
 
 from ppr.enrich import (
     EnrichResult,
+    NO_DEADLINE,
     S2_VENUE_NAMES,
     _run_batch,
     checkpoint_path,
@@ -1430,13 +1431,15 @@ class TestEnrichAll:
         results = await enrich_all(
             ["corl_2024", "empty_2026"], S2Client(min_interval=0.0), tmp_path
         )
-        assert [r.status for r in results] == ["skipped", "nothing-to-do"]
+        assert [(r.conf_id, r.status) for r in results] == [
+            ("empty_2026", "nothing-to-do"), ("corl_2024", "skipped"),
+        ]
 
     @pytest.mark.asyncio
     async def test_one_failure_does_not_stop_the_rest(self, tmp_path, monkeypatch):
         calls = []
 
-        async def fake_enrich_conference(conf_id, client, data_dir, *, full=False):
+        async def fake_enrich_conference(conf_id, client, data_dir, *, full=False, deadline=NO_DEADLINE):
             calls.append(conf_id)
             if conf_id == "boom_2026":
                 raise ValueError("kaboom")
@@ -1555,13 +1558,13 @@ class TestFormatEnrichSummary:
         # so only the correct field in the correct slot can match.
         result = EnrichResult(
             "iclr_2026", "enriched", "refresh",
-            total=23, refreshed=11, cold=5, resumed=4, unbound=3,
+            total=23, refreshed=11, cold=5, resumed=4, unbound=3, deferred=2,
             reason="a note",
         )
         out = format_enrich_summary([result])
         expected_row = (
             f"{'iclr_2026':<24} {'enriched':<14} {'refresh':<11} "
-            f"{23:>7} {11:>8} {5:>7} {4:>8} {3:>8}  a note"
+            f"{23:>7} {11:>8} {5:>7} {4:>8} {3:>8} {2:>9}  a note"
         )
         assert expected_row in out
 
@@ -1569,7 +1572,7 @@ class TestFormatEnrichSummary:
 def _enrich_args(**kw) -> argparse.Namespace:
     base = dict(
         conferences=["a_2026"], all=False, full=False,
-        api_key="",
+        api_key="", time_budget=None, report=None,
     )
     base.update(kw)
     return argparse.Namespace(**base)
@@ -1603,3 +1606,144 @@ class TestCmdEnrichExitCode:
             ],
         )
         cmd_enrich(_enrich_args())
+
+
+from ppr.enrich import Deadline, order_newest_first, parse_duration, results_to_json
+
+
+def _passed():
+    """A deadline that has already passed."""
+    return Deadline(0, clock=lambda: 100.0)
+
+
+class TestDeadline:
+    def test_none_never_passes(self):
+        assert NO_DEADLINE.passed() is False
+
+    def test_passes_at_the_budget(self):
+        now = iter([0.0, 9.9, 10.0])
+        d = Deadline(10, clock=lambda: next(now))
+        assert d.passed() is False
+        assert d.passed() is True
+
+
+class TestParseDuration:
+    @pytest.mark.parametrize("text,seconds", [("90s", 90), ("30m", 1800), ("4h", 14400)])
+    def test_units(self, text, seconds):
+        assert parse_duration(text) == seconds
+
+    @pytest.mark.parametrize("text", ["4", "4d", "h", "-1h", "1.5h"])
+    def test_rejects_anything_else(self, text):
+        with pytest.raises(argparse.ArgumentTypeError):
+            parse_duration(text)
+
+
+class TestOrderNewestFirst:
+    def test_year_desc_then_id(self):
+        assert order_newest_first(["acl_2024", "wacv_2026", "cvpr_2026", "iclr_2025"]) == [
+            "cvpr_2026", "wacv_2026", "iclr_2025", "acl_2024",
+        ]
+
+
+class TestTimeBudget:
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_past_deadline_defers_title_matching_and_keeps_prior_state(self, tmp_path):
+        _conf(
+            tmp_path, "icml_2026",
+            [_paper(title="Old"), _paper(title="New")],
+            [_paper(title="Old", match_status="not_found")],
+        )
+        respx.get(BULK_URL).mock(return_value=httpx.Response(200, json={"data": []}))
+        match = respx.get(MATCH_URL).mock(return_value=httpx.Response(200, json={"data": []}))
+        result = await enrich_conference(
+            "icml_2026", S2Client(min_interval=0.0), tmp_path, deadline=_passed()
+        )
+        assert result.status == "enriched"
+        assert result.deferred == 2
+        assert match.call_count == 0
+        out = {p.title: p for p in read_papers(tmp_path / "icml_2026" / "papers_enriched.jsonl")}
+        assert out["Old"].match_status == "not_found"
+        assert out["New"].match_status == ""  # never looked up, so not "not_found"
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_deadline_mid_loop_defers_only_the_rest(self, tmp_path):
+        _conf(tmp_path, "icml_2026", [_paper(title="A"), _paper(title="B")])
+        respx.get(BULK_URL).mock(return_value=httpx.Response(200, json={"data": []}))
+        match = respx.get(MATCH_URL).mock(return_value=httpx.Response(200, json={"data": []}))
+        ticks = iter([0.0, 5.0, 15.0])
+        result = await enrich_conference(
+            "icml_2026", S2Client(min_interval=0.0), tmp_path,
+            deadline=Deadline(10, clock=lambda: next(ticks)),
+        )
+        assert match.call_count == 1
+        assert result.deferred == 1
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_refresh_still_runs_after_the_deadline(self, tmp_path):
+        _conf(
+            tmp_path, "iclr_2025",
+            [_paper(title="A")],
+            [_paper(title="A", external_ids={"CorpusId": 1}, citation_count=1)],
+        )
+        respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[
+            {"title": "A", "citationCount": 99, "externalIds": {"CorpusId": 1},
+             "authors": [{"name": "X"}]},
+        ]))
+        result = await enrich_conference(
+            "iclr_2025", S2Client(min_interval=0.0), tmp_path, deadline=_passed()
+        )
+        assert (result.status, result.deferred) == ("enriched", 0)
+        out = read_papers(tmp_path / "iclr_2025" / "papers_enriched.jsonl")
+        assert out[0].citation_count == 99
+
+    @pytest.mark.asyncio
+    async def test_enrich_all_forwards_the_deadline_in_newest_first_order(self, tmp_path, monkeypatch):
+        seen = []
+
+        async def fake(conf_id, client, data_dir, *, full=False, deadline=NO_DEADLINE):
+            seen.append((conf_id, deadline))
+            return EnrichResult(conf_id, "enriched")
+
+        monkeypatch.setattr("ppr.enrich.enrich_conference", fake)
+        d = _passed()
+        await enrich_all(["acl_2024", "icml_2026"], S2Client(min_interval=0.0), tmp_path, deadline=d)
+        assert seen == [("icml_2026", d), ("acl_2024", d)]
+
+
+class TestDeferredReporting:
+    def test_summary_has_a_deferred_column_and_footer(self):
+        out = format_enrich_summary([
+            EnrichResult("icml_2026", "enriched", "title-cold", total=10, cold=10, deferred=7),
+        ])
+        assert "Deferred" in out
+        assert "7 papers deferred to the next run" in out
+
+    def test_no_footer_when_nothing_deferred(self):
+        out = format_enrich_summary([EnrichResult("a_2026", "enriched", total=1)])
+        assert "deferred to the next run" not in out
+
+    def test_json_report(self):
+        row = json.loads(results_to_json([EnrichResult("a_2026", "enriched", deferred=3)]))["results"][0]
+        assert (row["conf_id"], row["deferred"]) == ("a_2026", 3)
+
+
+class TestCmdEnrichReport:
+    def test_report_is_written_even_when_a_conference_failed(self, tmp_path, monkeypatch):
+        async def fake_enrich_all(*args, **kwargs):
+            return [EnrichResult("a_2026", "failed", reason="kaboom")]
+
+        monkeypatch.setattr("ppr.cli.enrich_all", fake_enrich_all)
+        report = tmp_path / "enrich.json"
+        with pytest.raises(SystemExit):
+            cmd_enrich(_enrich_args(report=report))
+        assert json.loads(report.read_text())["results"][0]["status"] == "failed"
+
+    def test_deferral_alone_exits_zero(self, monkeypatch):
+        async def fake_enrich_all(*args, **kwargs):
+            return [EnrichResult("a_2026", "enriched", deferred=50)]
+
+        monkeypatch.setattr("ppr.cli.enrich_all", fake_enrich_all)
+        cmd_enrich(_enrich_args())  # no SystemExit

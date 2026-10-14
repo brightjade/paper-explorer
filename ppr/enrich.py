@@ -1,10 +1,13 @@
 """Per-conference enrichment: path selection, merging, guards, atomic writes."""
 
+import argparse
 import json
 import logging
 import os
+import re
+import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TextIO
 
@@ -329,6 +332,46 @@ S2_VENUE_NAMES: dict[str, str] = {
 }
 
 
+class Deadline:
+    """When per-title matching must stop. A `None` budget never passes.
+
+    Only the `/search/match` loop consults it. That loop runs at ~0.3 req/s and
+    is the one part of a run whose length the data, not the code, decides --
+    an unindexed 6,000-paper venue alone is ~5.5 hours, past GitHub's job
+    limit. Everything else finishes in about half an hour and always runs.
+    """
+
+    def __init__(self, budget_seconds: float | None, clock: Callable[[], float] = time.monotonic):
+        self._clock = clock
+        self._at = None if budget_seconds is None else clock() + budget_seconds
+
+    def passed(self) -> bool:
+        return self._at is not None and self._clock() >= self._at
+
+
+NO_DEADLINE = Deadline(None)
+
+_DURATION = re.compile(r"(\d+)([smh])")
+_UNIT_SECONDS = {"s": 1, "m": 60, "h": 3600}
+
+
+def parse_duration(text: str) -> int:
+    match = _DURATION.fullmatch(text)
+    if not match:
+        raise argparse.ArgumentTypeError(f"expected <int>s, <int>m or <int>h, got {text!r}")
+    return int(match.group(1)) * _UNIT_SECONDS[match.group(2)]
+
+
+def order_newest_first(conf_ids: list[str]) -> list[str]:
+    """Newest year first, so a short budget goes where Semantic Scholar is
+    still indexing. Old years' leftovers are mostly papers S2 will never have,
+    and bulk prefetch still runs for them every month."""
+    def year(conf_id: str) -> int:
+        tail = conf_id.rpartition("_")[2]
+        return int(tail) if tail.isdigit() else 0
+    return sorted(conf_ids, key=lambda c: (-year(c), c))
+
+
 @dataclass
 class EnrichResult:
     conf_id: str
@@ -339,6 +382,7 @@ class EnrichResult:
     cold: int = 0
     resumed: int = 0
     unbound: int = 0
+    deferred: int = 0  # papers left unmatched when the time budget ran out; a subset of cold
     reason: str = ""
 
 
@@ -464,14 +508,16 @@ async def _run_title_cold(
     papers: list[Paper],
     conf_id: str,
     record: Record = _no_record,
-) -> int:
+    deadline: Deadline = NO_DEADLINE,
+) -> tuple[int, int]:
     """Prefetch the venue in bulk, then match the remainder one at a time.
 
-    Returns the count of papers accepted on fuzzy evidence, for the caller to
-    fold into one per-conference log alongside the refresh path's own count.
+    Returns (fuzzy, deferred): the count of papers accepted on fuzzy evidence,
+    for the caller to fold into one per-conference log alongside the refresh
+    path's own count, and the count the deadline left unattempted.
     """
     if not papers:
-        return 0
+        return 0, 0
 
     prefix, _, year_str = conf_id.rpartition("_")
     venue = S2_VENUE_NAMES.get(prefix)
@@ -507,7 +553,15 @@ async def _run_title_cold(
         )
     # Checkpointed one paper at a time: this loop is the slow path, a second or
     # more per paper, so per-paper granularity is what makes resume worth having.
-    for paper in tqdm(misses, desc=f"Matching {conf_id}", unit="paper"):
+    deferred = 0
+    for i, paper in enumerate(tqdm(misses, desc=f"Matching {conf_id}", unit="paper")):
+        if deadline.passed():
+            # Left exactly as routed: carried-over values, or none for a new
+            # paper. Not "not_found" -- nobody asked. Retry-by-default picks
+            # them up on the next run.
+            deferred = len(misses) - i
+            logger.info("%s: time budget spent, %d papers deferred", conf_id, deferred)
+            break
         entry = await client.match_title(http, paper.title)
         # /search/match answers an unindexed paper with its nearest fuzzy
         # neighbour rather than with nothing, so an unchecked data[0] is how a
@@ -525,7 +579,7 @@ async def _run_title_cold(
             paper.match_status = verdict
         record([paper])
 
-    return sum(1 for p in papers if p.match_status == MATCHED_FUZZY)
+    return sum(1 for p in papers if p.match_status == MATCHED_FUZZY), deferred
 
 
 async def enrich_conference(
@@ -534,6 +588,7 @@ async def enrich_conference(
     data_dir: Path,
     *,
     full: bool = False,
+    deadline: Deadline = NO_DEADLINE,
 ) -> EnrichResult:
     """Enrich a single conference, choosing the cheapest workable path.
 
@@ -599,6 +654,7 @@ async def enrich_conference(
     # future early return in here must still report zero, not raise
     # UnboundLocalError on the read below.
     unbound: list[Paper] = []
+    deferred = 0
     with checkpoint:
         async with httpx.AsyncClient(timeout=60.0) as http:
             unbound, refresh_fuzzy = await _run_batch(
@@ -615,8 +671,9 @@ async def enrich_conference(
                 client, http, doi_cold, doi_id_of,
                 mode="set", record=checkpoint.record,
             )
-            title_cold_fuzzy = await _run_title_cold(
-                client, http, title_cold, conf_id, record=checkpoint.record
+            title_cold_fuzzy, deferred = await _run_title_cold(
+                client, http, title_cold, conf_id,
+                record=checkpoint.record, deadline=deadline,
             )
 
     # One combined line per conference — refresh is where most fuzzy verdicts
@@ -654,6 +711,7 @@ async def enrich_conference(
         cold=len(doi_cold) + len(title_cold),
         resumed=resumed,
         unbound=len(unbound),
+        deferred=deferred,
     )
 
 
@@ -663,10 +721,11 @@ async def enrich_all(
     data_dir: Path,
     *,
     full: bool = False,
+    deadline: Deadline = NO_DEADLINE,
 ) -> list[EnrichResult]:
     """Enrich each conference in turn. One failure never stops the rest."""
     results = []
-    for conf_id in conf_ids:
+    for conf_id in order_newest_first(conf_ids):
         logger.info("Enriching %s...", conf_id)
         try:
             results.append(
@@ -675,6 +734,7 @@ async def enrich_all(
                     client,
                     data_dir,
                     full=full,
+                    deadline=deadline,
                 )
             )
         except Exception as exc:  # keep going; the summary reports the failure
@@ -697,14 +757,14 @@ def format_enrich_summary(results: list[EnrichResult]) -> str:
     lines = [
         "",
         f"{'Conference':<24} {'Status':<14} {'Path':<11} "
-        f"{'Total':>7} {'Refresh':>8} {'Cold':>7} {'Resumed':>8} {'Unbound':>8}  Note",
-        "-" * 112,
+        f"{'Total':>7} {'Refresh':>8} {'Cold':>7} {'Resumed':>8} {'Unbound':>8} {'Deferred':>9}  Note",
+        "-" * 122,
     ]
     for r in results:
         lines.append(
             f"{r.conf_id:<24} {r.status:<14} {r.path:<11} "
             f"{r.total:>7} {r.refreshed:>8} {r.cold:>7} {r.resumed:>8} "
-            f"{r.unbound:>8}  {r.reason}"
+            f"{r.unbound:>8} {r.deferred:>9}  {r.reason}"
         )
     skipped = sum(1 for r in results if r.status == "skipped")
     enriched = sum(1 for r in results if r.status == "enriched")
@@ -717,4 +777,11 @@ def format_enrich_summary(results: list[EnrichResult]) -> str:
     if failed:
         names = ", ".join(r.conf_id for r in results if r.status == "failed")
         lines.append(f"FAILED: {names}")
+    deferred = sum(r.deferred for r in results)
+    if deferred:
+        lines.append(f"Time budget ran out: {deferred} papers deferred to the next run.")
     return "\n".join(lines)
+
+
+def results_to_json(results: list[EnrichResult]) -> str:
+    return json.dumps({"results": [asdict(r) for r in results]}, indent=2)

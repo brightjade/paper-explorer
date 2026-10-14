@@ -11,7 +11,14 @@ load_dotenv()
 from ppr.scrapers import SCRAPERS
 from ppr.api_client import OpenReviewAPIClient, create_openreview_client, create_openreview_v1_client
 from ppr.config import CrawlConfig
-from ppr.enrich import enrich_all, format_enrich_summary
+from ppr.enrich import (
+    NO_DEADLINE,
+    Deadline,
+    enrich_all,
+    format_enrich_summary,
+    parse_duration,
+    results_to_json,
+)
 from ppr.models import Paper, write_papers
 from ppr.s2_client import S2Client
 from ppr.venues import REGISTRY_STEM
@@ -95,6 +102,14 @@ def build_parser() -> argparse.ArgumentParser:
     enrich_parser.add_argument(
         "--api-key", default=os.environ.get("SEMANTIC_SCHOLAR_API_KEY", ""),
         help="Semantic Scholar API key (optional, increases rate limits).",
+    )
+    enrich_parser.add_argument(
+        "--time-budget", type=parse_duration, default=None,
+        help="Stop per-title matching after this long (e.g. 4h); the rest is retried next run.",
+    )
+    enrich_parser.add_argument(
+        "--report", type=Path, default=None,
+        help="Write per-conference results as JSON (written even when a conference fails).",
     )
 
     # validate
@@ -195,6 +210,7 @@ def cmd_enrich(args: argparse.Namespace) -> None:
             "No conferences given. Pass conference IDs or use --all."
         )
 
+    deadline = Deadline(args.time_budget) if args.time_budget else NO_DEADLINE
     client = S2Client(api_key=args.api_key or None)
     results = asyncio.run(
         enrich_all(
@@ -202,9 +218,13 @@ def cmd_enrich(args: argparse.Namespace) -> None:
             client,
             DATA_DIR,
             full=args.full,
+            deadline=deadline,
         )
     )
     print(format_enrich_summary(results))
+    if args.report:
+        # Before the exit below: the notify job needs this most when it failed.
+        args.report.write_text(results_to_json(results), encoding="utf-8")
 
     # `ppr enrich --all` feeds ./build.sh and a data release, so a crashed
     # conference must not read as success to the calling shell. Guard skips are
