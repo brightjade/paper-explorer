@@ -4,6 +4,8 @@ import logging
 import re
 from pathlib import Path
 
+from ppr.scrapers.cvf import CVF_BASE_URL, ECVA_BASE_URL
+
 logger = logging.getLogger(__name__)
 
 
@@ -11,8 +13,28 @@ class RegistrationError(Exception):
     """The registration could not be written safely."""
 
 
+def _group_end(text: str, dict_start: int, closing: int, conf_id: str) -> int:
+    """Start of the line after the last entry sharing `conf_id`'s venue prefix.
+
+    These dicts are grouped by venue under comment headers. Appending at the
+    closing brace left every new entry in the wrong group, and moving it was a
+    manual step a scheduled job cannot take. Falls back to the closing brace
+    when the venue has no entries yet.
+    """
+    marker = f'"{conf_id.rpartition("_")[0]}_'
+    body_start = text.index("\n", dict_start) + 1
+    insert_at = closing
+    pos = body_start
+    while pos < closing:
+        end = text.index("\n", pos)
+        if text[pos:end].lstrip().startswith(marker):
+            insert_at = end + 1
+        pos = end + 1
+    return insert_at
+
+
 def _insert_into_dict(path: Path, dict_name: str, conf_id: str, line: str) -> None:
-    """Insert `line` just before the closing brace of `dict_name` in `path`.
+    """Insert `line` into `dict_name` in `path`, inside its venue's group.
 
     Editing the literal in place keeps the surrounding comments and grouping
     intact, which matters because these dicts are organised by venue family and
@@ -41,18 +63,32 @@ def _insert_into_dict(path: Path, dict_name: str, conf_id: str, line: str) -> No
     if f'"{conf_id}"' in text[match.start():closing]:
         raise RegistrationError(f"{conf_id} is already registered in {dict_name}")
 
-    path.write_text(text[:closing] + f"    {line}\n" + text[closing:], encoding="utf-8")
+    at = _group_end(text, match.start(), closing, conf_id)
+    path.write_text(text[:at] + f"    {line}\n" + text[at:], encoding="utf-8")
     logger.info("Registered %s in %s", conf_id, path.name)
 
 
-def register_dblp(conf_id: str, toc_key: str, path: Path) -> None:
-    _insert_into_dict(
-        path, "DBLP_CONFERENCES", conf_id, f'"{conf_id}": {{"key": "{toc_key}"}},'
-    )
+# Hosts the CVF registry names through module constants rather than literals.
+_URL_CONSTANTS = {CVF_BASE_URL: "CVF_BASE_URL", ECVA_BASE_URL: "ECVA_BASE_URL"}
+
+
+def _url_literal(url: str) -> str:
+    for base, constant in _URL_CONSTANTS.items():
+        if url.startswith(base + "/"):
+            return f'f"{{{constant}}}{url[len(base):]}"'
+    return f'"{url}"'
+
+
+def register_dblp(conf_id: str, toc_key: str, path: Path, number: str | None = None) -> None:
+    entry = f'"{conf_id}": {{"key": "{toc_key}"'
+    if number:
+        # PACMSE volumes hold FSE and ISSTA together; the scraper filters on it.
+        entry += f', "number": "{number}"'
+    _insert_into_dict(path, "DBLP_CONFERENCES", conf_id, entry + "},")
 
 
 def register_cvf(conf_id: str, url: str, parser: str, path: Path, year: int | None = None) -> None:
-    entry = f'"{conf_id}": {{"url": "{url}", "parser": "{parser}"'
+    entry = f'"{conf_id}": {{"url": {_url_literal(url)}, "parser": "{parser}"'
     if year is not None:
         entry += f', "year": {year}'
     _insert_into_dict(path, "CVF_CONFERENCES", conf_id, entry + "},")

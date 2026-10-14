@@ -419,7 +419,10 @@ class TestCvfScrapersDict:
             "wacv_2023", "wacv_2024", "wacv_2025", "wacv_2026",
             "eccv_2024",
         }
-        assert expected == set(CVF_CONFERENCES.keys())
+        # A subset, not equality: the monthly pipeline registers new
+        # conference-years on its own, and an equality check would fail every
+        # one of them. Dropping an existing registration still fails here.
+        assert expected <= set(CVF_CONFERENCES.keys())
 
     def test_scrapers_are_callable(self):
         for conf_id, scraper in SCRAPERS.items():

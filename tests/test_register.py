@@ -76,12 +76,79 @@ class TestRegisterCvf:
     def test_inserts_entry(self, tmp_path):
         p = _module(tmp_path, "cvf.py", CVF_SRC)
         register_cvf("cvpr_2026", "https://openaccess.thecvf.com/CVPR2026?day=all", "openaccess", p)
-        assert '"cvpr_2026": {"url": "https://openaccess.thecvf.com/CVPR2026?day=all", "parser": "openaccess"},' in p.read_text()
+        assert (
+            '"cvpr_2026": {"url": f"{CVF_BASE_URL}/CVPR2026?day=all", "parser": "openaccess"},'
+            in p.read_text()
+        )
+
+    def test_ecva_url_uses_its_constant(self, tmp_path):
+        p = _module(tmp_path, "cvf.py", CVF_SRC)
+        register_cvf("eccv_2026", "https://www.ecva.net/papers.php", "ecva", p, year=2026)
+        assert (
+            '"eccv_2026": {"url": f"{ECVA_BASE_URL}/papers.php", "parser": "ecva", "year": 2026},'
+            in p.read_text()
+        )
+
+    def test_foreign_host_stays_a_plain_string(self, tmp_path):
+        p = _module(tmp_path, "cvf.py", CVF_SRC)
+        register_cvf("wacv_2027", "https://wacv.thecvf.com/Conferences/2027/AcceptedPapers",
+                     "accepted", p)
+        assert '"url": "https://wacv.thecvf.com/Conferences/2027/AcceptedPapers"' in p.read_text()
 
     def test_includes_year_for_the_ecva_parser(self, tmp_path):
         p = _module(tmp_path, "cvf.py", CVF_SRC)
         register_cvf("eccv_2026", "https://www.ecva.net/papers.php", "ecva", p, year=2026)
         assert '"year": 2026' in p.read_text()
+
+
+DBLP_GROUPED_SRC = '''DBLP_CONFERENCES = {
+    # ICSE
+    "icse_2024": {"key": "db/conf/icse/icse2024.bht"},
+    "icse_2025": {"key": "db/conf/icse/icse2025.bht"},
+    # FSE
+    "fse_2025": {"key": "db/journals/pacmse/pacmse2.bht", "number": "FSE"},
+}
+'''
+
+
+class TestGroupedInsertion:
+    def test_lands_after_its_own_venue_group(self, tmp_path):
+        p = _module(tmp_path, "dblp.py", DBLP_GROUPED_SRC)
+        register_dblp("icse_2026", "db/conf/icse/icse2026.bht", p)
+        lines = p.read_text().splitlines()
+        i = next(n for n, l in enumerate(lines) if "icse_2026" in l)
+        assert "icse_2025" in lines[i - 1]
+        assert lines[i + 1].strip() == "# FSE"
+
+    def test_unknown_prefix_goes_before_the_closing_brace(self, tmp_path):
+        p = _module(tmp_path, "dblp.py", DBLP_GROUPED_SRC)
+        register_dblp("ase_2026", "db/conf/kbse/ase2026.bht", p)
+        lines = p.read_text().splitlines()
+        assert "ase_2026" in lines[-2]
+        assert lines[-1] == "}"
+
+    def test_prefix_is_not_a_substring_match(self, tmp_path):
+        # "fse_" must not match an "issta_..." line that merely mentions FSE.
+        src = '''DBLP_CONFERENCES = {
+    "fse_2025": {"key": "a"},
+    "issta_2025": {"key": "a", "number": "FSE_like"},
+}
+'''
+        p = _module(tmp_path, "dblp.py", src)
+        register_dblp("fse_2026", "b", p)
+        lines = p.read_text().splitlines()
+        assert "fse_2026" in lines[2]
+        assert "issta_2025" in lines[3]
+
+
+class TestRegisterDblpNumber:
+    def test_writes_the_number_filter(self, tmp_path):
+        p = _module(tmp_path, "dblp.py", DBLP_SRC)
+        register_dblp("fse_2026", "db/journals/pacmse/pacmse3.bht", p, number="FSE")
+        assert (
+            '"fse_2026": {"key": "db/journals/pacmse/pacmse3.bht", "number": "FSE"},'
+            in p.read_text()
+        )
 
 
 class TestRegisterUsenix:

@@ -244,7 +244,10 @@ class TestScrapersDict:
             # AI
             "ijcai_2023", "ijcai_2024", "ijcai_2025",
         }
-        assert expected == set(DBLP_CONFERENCES.keys())
+        # A subset, not equality: the monthly pipeline registers new
+        # conference-years on its own, and an equality check would fail every
+        # one of them. Dropping an existing registration still fails here.
+        assert expected <= set(DBLP_CONFERENCES.keys())
 
     def test_scrapers_are_callable(self):
         for conf_id, scraper in SCRAPERS.items():
