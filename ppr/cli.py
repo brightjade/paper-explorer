@@ -210,7 +210,7 @@ def cmd_enrich(args: argparse.Namespace) -> None:
             "No conferences given. Pass conference IDs or use --all."
         )
 
-    deadline = Deadline(args.time_budget) if args.time_budget else NO_DEADLINE
+    deadline = Deadline(args.time_budget) if args.time_budget is not None else NO_DEADLINE
     client = S2Client(api_key=args.api_key or None)
     results = asyncio.run(
         enrich_all(

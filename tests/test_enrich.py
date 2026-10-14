@@ -1651,19 +1651,26 @@ class TestTimeBudget:
     async def test_past_deadline_defers_title_matching_and_keeps_prior_state(self, tmp_path):
         _conf(
             tmp_path, "icml_2026",
-            [_paper(title="Old"), _paper(title="New")],
-            [_paper(title="Old", match_status="not_found")],
+            [_paper(title="Old"), _paper(title="New"), _paper(title="Hit")],
+            [_paper(title="Old", match_status="not_found", tldr="kept")],
         )
-        respx.get(BULK_URL).mock(return_value=httpx.Response(200, json={"data": []}))
+        # Bulk prefetch is not per-title matching: it must still run, and its
+        # hit must still be applied, after the deadline has passed.
+        bulk = respx.get(BULK_URL).mock(return_value=httpx.Response(200, json={"data": [
+            {"title": "Hit", "citationCount": 7, "externalIds": {"CorpusId": 5}},
+        ]}))
         match = respx.get(MATCH_URL).mock(return_value=httpx.Response(200, json={"data": []}))
         result = await enrich_conference(
             "icml_2026", S2Client(min_interval=0.0), tmp_path, deadline=_passed()
         )
         assert result.status == "enriched"
         assert result.deferred == 2
+        assert bulk.called
         assert match.call_count == 0
         out = {p.title: p for p in read_papers(tmp_path / "icml_2026" / "papers_enriched.jsonl")}
+        assert out["Hit"].citation_count == 7
         assert out["Old"].match_status == "not_found"
+        assert out["Old"].tldr == "kept"  # carried over, not wiped by the deferral
         assert out["New"].match_status == ""  # never looked up, so not "not_found"
 
     @respx.mock
@@ -1747,3 +1754,24 @@ class TestCmdEnrichReport:
 
         monkeypatch.setattr("ppr.cli.enrich_all", fake_enrich_all)
         cmd_enrich(_enrich_args())  # no SystemExit
+
+
+class TestCmdEnrichDeadlineWiring:
+    def _captured(self, monkeypatch, argv):
+        seen = {}
+
+        async def fake_enrich_all(*args, **kwargs):
+            seen.update(kwargs)
+            return [EnrichResult("a_2026", "enriched")]
+
+        monkeypatch.setattr("ppr.cli.enrich_all", fake_enrich_all)
+        cmd_enrich(build_parser().parse_args(argv))
+        return seen["deadline"]
+
+    def test_zero_budget_is_a_spent_deadline_not_no_deadline(self, monkeypatch):
+        deadline = self._captured(monkeypatch, ["enrich", "a_2026", "--time-budget", "0s"])
+        assert deadline is not NO_DEADLINE
+        assert deadline.passed() is True
+
+    def test_no_budget_means_no_deadline(self, monkeypatch):
+        assert self._captured(monkeypatch, ["enrich", "a_2026"]) is NO_DEADLINE
