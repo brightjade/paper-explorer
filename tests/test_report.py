@@ -89,6 +89,15 @@ class TestDecideIssue:
         assert "autoregister" in a["body"]
         assert RUN in a["body"]
 
+    def test_failed_enrich_row_names_the_conference_and_the_stage(self):
+        e = {"results": [{"conf_id": "x_2026", "status": "failed", "reason": "S2 down"},
+                         {"conf_id": "y_2026", "status": "enriched"}]}
+        a = _decide(enrich=e, pipeline_result="failure")
+        assert a["action"] == "notify"
+        assert "during enrich." in a["body"]
+        assert "`x_2026` — S2 down" in a["body"]
+        assert "y_2026" not in a["body"]
+
     def test_nothing_at_all_means_it_died_before_discover(self):
         a = _decide(discover=None, register=None, enrich=None, state=None, pipeline_result="cancelled")
         assert a["action"] == "notify"

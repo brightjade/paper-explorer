@@ -34,6 +34,8 @@ def _last_stage(discover, register, enrich) -> str:
         return "autoregister"
     if enrich is None:
         return "tests or enrich"
+    if any(r.get("status") == "failed" for r in enrich.get("results", [])):
+        return "enrich"
     return "state, build, release, push or deploy"
 
 
@@ -48,10 +50,13 @@ def decide_issue(*, discover: dict | None, register: dict | None, enrich: dict |
     enrich_rows = (enrich or {}).get("results", [])
     streak = (state or {}).get("deferred_streak", {})
 
+    enrich_failed = [f"- Enrich failed for: `{r.get('conf_id', '?')}` — {r.get('reason', '')}"
+                     for r in enrich_rows if r.get("status") == "failed"]
     failure = (
         [f"- The pipeline job ended `{pipeline_result}` during {_last_stage(discover, register, enrich)}. {run_url}"]
         if pipeline_result in ("failure", "cancelled") else []
     )
+    failure += enrich_failed if failure else []
     held = [f"- `{o['conf_id']}` — {o.get('reason', '')} — {o.get('url', '')}"
             for o in outcomes if o.get("status") == "held"]
     stale = [f"- `{c}`" for c in (discover or {}).get("stale_empty", [])]
