@@ -124,6 +124,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_auth_args(discover_parser)
 
+    # autoregister
+    autoregister_parser = subparsers.add_parser(
+        "autoregister", help="Register, crawl and check live venues from a discover --json report"
+    )
+    autoregister_parser.add_argument("discover_json", type=Path)
+    autoregister_parser.add_argument("--report", type=Path, required=True,
+                                     help="Where to write the per-venue outcomes as JSON.")
+    autoregister_parser.add_argument("--commit", action="store_true",
+                                     help="Commit each registered venue (used by the monthly workflow).")
+    _add_auth_args(autoregister_parser)
+
     return parser
 
 
@@ -282,6 +293,35 @@ def cmd_discover(args: argparse.Namespace) -> None:
             )
 
 
+def cmd_autoregister(args: argparse.Namespace) -> None:
+    import json
+
+    from ppr import autoregister as ar
+    from ppr.validate import validate_conference
+    from ppr.venues import load_registry
+
+    rows = json.loads(args.discover_json.read_text(encoding="utf-8"))["results"]
+    root = CONFIGS_DIR.parent
+    client = None
+
+    def openreview():
+        nonlocal client
+        if client is None:  # one login, and only if an OpenReview venue needs it
+            client = create_openreview_client(username=args.username, password=args.password)
+        return client
+
+    outcomes = ar.autoregister(
+        rows, load_registry(), ar.Workspace(root),
+        crawl=ar.default_crawl(openreview),
+        validate=lambda conf_id: validate_conference(conf_id).status,
+        commit=ar.git_commit(root) if args.commit else ar.no_commit,
+        openreview=openreview,
+    )
+    args.report.write_text(ar.outcomes_to_json(outcomes), encoding="utf-8")
+    for o in outcomes:
+        print(f"{o.conf_id:<24} {o.status:<11} {o.count:>6}/{o.expected:<6} {o.reason}")
+
+
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
@@ -291,6 +331,7 @@ def main() -> None:
         "enrich": cmd_enrich,
         "validate": cmd_validate,
         "discover": cmd_discover,
+        "autoregister": cmd_autoregister,
     }
 
     if args.command in commands:

@@ -321,3 +321,74 @@ class TestGitCommit:
         git_commit(repo)([f], "msg")
         assert _git(repo, "show", "--name-only", "--format=", "HEAD").split() == ["a.txt"]
         assert _git(repo, "diff", "--cached", "--name-only").split() == ["other.txt"]
+
+
+class TestCli:
+    def _run(self, tmp_path, monkeypatch, fake, extra=()):
+        from ppr import cli
+
+        discover = tmp_path / "discover.json"
+        discover.write_text(json.dumps({"results": [ICSE], "live_count": 1, "stale_empty": []}))
+        report = tmp_path / "register.json"
+        monkeypatch.setattr("ppr.autoregister.autoregister", fake)
+        args = cli.build_parser().parse_args(
+            ["autoregister", str(discover), "--report", str(report), *extra]
+        )
+        cli.cmd_autoregister(args)
+        return report
+
+    def test_reads_discover_json_and_writes_the_report(self, tmp_path, monkeypatch):
+        seen = {}
+
+        def fake_autoregister(rows, registry, ws, **kw):
+            seen["rows"] = rows
+            seen["commit"] = kw["commit"]
+            return [Outcome("icse_2026", "registered", count=245)]
+
+        report = self._run(tmp_path, monkeypatch, fake_autoregister)
+        assert seen["rows"] == [ICSE]
+        assert json.loads(report.read_text())["outcomes"][0]["status"] == "registered"
+        from ppr.autoregister import no_commit
+        assert seen["commit"] is no_commit  # --commit not given
+
+    def test_commit_flag_selects_git_commit(self, tmp_path, monkeypatch):
+        seen = {}
+
+        def fake(rows, registry, ws, **kw):
+            seen["commit"] = kw["commit"]
+            return []
+
+        self._run(tmp_path, monkeypatch, fake, extra=["--commit"])
+        from ppr.autoregister import no_commit
+        assert seen["commit"] is not no_commit
+
+    def test_openreview_logs_in_lazily_and_once(self, tmp_path, monkeypatch):
+        logins = []
+        monkeypatch.setattr(
+            "ppr.cli.create_openreview_client",
+            lambda **kw: logins.append(kw) or object(),
+        )
+        seen = {}
+
+        def fake(rows, registry, ws, **kw):
+            seen["logins_before"] = len(logins)
+            a, b = kw["openreview"](), kw["openreview"]()
+            assert a is b
+            return []
+
+        self._run(tmp_path, monkeypatch, fake)
+        assert seen["logins_before"] == 0
+        assert len(logins) == 1
+
+    def test_validate_returns_the_status_string(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(
+            "ppr.validate.validate_conference", lambda cid: MagicMock(status="PASS")
+        )
+        got = {}
+
+        def fake(rows, registry, ws, **kw):
+            got["v"] = kw["validate"]("icse_2026")
+            return []
+
+        self._run(tmp_path, monkeypatch, fake)
+        assert got["v"] == "PASS"
