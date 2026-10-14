@@ -111,7 +111,7 @@ NeurIPS also includes `datasets_oral`, `datasets_spotlight`, `datasets_poster` t
 | ACL | main, findings, industry | main, findings, industry | main, findings | main, findings, industry |
 | EMNLP | | main, findings, industry | main, findings, industry | main, findings, industry |
 | NAACL | | main, findings, industry | main, findings, industry | |
-| COLM | | main | main | |
+| COLM | main | main | main | |
 | EACL | main, findings, industry | | main, findings | main, findings |
 | COLING | | main, industry | main | |
 

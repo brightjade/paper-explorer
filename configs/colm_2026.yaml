@@ -1,0 +1,6 @@
+conference:
+  name: "COLM"
+  year: 2026
+  venue_id: "colmweb.org/COLM/2026/Conference"
+  selections:
+    main: "COLM 2026"
