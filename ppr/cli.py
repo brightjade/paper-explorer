@@ -163,6 +163,15 @@ def build_parser() -> argparse.ArgumentParser:
     issue_parser.add_argument("--run-url", required=True)
     issue_parser.add_argument("--out", type=Path, required=True)
 
+    # release
+    release_parser = subparsers.add_parser("release", help="Publish data/ as a GitHub Release")
+    release_parser.add_argument("--base-tag", required=True,
+                                help="The data release this run started from.")
+    release_parser.add_argument("--register", type=Path, default=None)
+    release_parser.add_argument("--enrich", type=Path, default=None)
+    release_parser.add_argument("--run-url", default="(manual)")
+    release_parser.add_argument("--dry-run", action="store_true")
+
     return parser
 
 
@@ -389,6 +398,18 @@ def cmd_report(args: argparse.Namespace) -> None:
     args.out.write_text(json.dumps(action, indent=2), encoding="utf-8")
 
 
+def cmd_release(args: argparse.Namespace) -> None:
+    from datetime import date
+
+    from ppr.release import gh, publish, render_notes
+
+    notes = render_notes(args.base_tag, _read_json(args.register), _read_json(args.enrich),
+                         DATA_DIR, args.run_url)
+    tag = publish(DATA_DIR, args.base_tag, notes, date.today().isoformat(), gh,
+                  zip_path=DATA_DIR.parent / "data.zip", dry_run=args.dry_run)
+    print(tag)
+
+
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
@@ -400,6 +421,7 @@ def main() -> None:
         "discover": cmd_discover,
         "autoregister": cmd_autoregister,
         "report": cmd_report,
+        "release": cmd_release,
     }
 
     if args.command in commands:
