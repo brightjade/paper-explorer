@@ -101,6 +101,7 @@ async function run({ action, openIssues = [] }) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'monthly-wf-'));
   const cwd = process.cwd();
   const logs = [];
+  const failures = [];
   const gh = makeGithub(openIssues);
   try {
     process.chdir(dir);
@@ -108,14 +109,14 @@ async function run({ action, openIssues = [] }) {
     await new AsyncFunction('github', 'context', 'core', 'require', SRC)(
       gh.api,
       { repo: { owner: 'o', repo: 'r' } },
-      { info: (m) => logs.push(m) },
+      { info: (m) => logs.push(m), setFailed: (m) => failures.push(m) },
       require
     );
   } finally {
     process.chdir(cwd);
     fs.rmSync(dir, { recursive: true, force: true });
   }
-  return { calls: gh.calls, logs };
+  return { calls: gh.calls, logs, failures };
 }
 
 /** The recorded REST calls minus the listForRepo lookup, as `name(issue)` pairs. */
@@ -189,6 +190,15 @@ const CASES = [
     input: { action: CLOSE, openIssues: [] },
     check(r) {
       assert.deepStrictEqual(writes(r), []);
+    },
+  },
+  {
+    name: 'an unknown action fails the step and touches no issue',
+    why: 'a silent no-op on an unrecognised action would hide a broken report',
+    input: { action: { action: 'bogus' }, openIssues: [openIssue(3)] },
+    check(r) {
+      assert.deepStrictEqual(r.calls.map((c) => c.name), ['listForRepo']);
+      assert.deepStrictEqual(r.failures, ['Unknown issue action: bogus']);
     },
   },
   {

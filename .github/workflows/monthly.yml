@@ -37,24 +37,37 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # the push step may need to rebase onto a newer main
+
+      - name: Refuse to publish from a branch other than main
+        if: env.DRY_RUN != 'true' && github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::Only dry runs may start from ${GITHUB_REF}; publishing runs must start from main." >&2
+          exit 1
+
       - uses: astral-sh/setup-uv@v6
-      - run: uv sync
+      - run: uv sync --locked
 
       - name: Configure git identity
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Download the latest data release
         id: base
         run: |
+          set -euo pipefail
           tag=$(gh release list --limit 100 --json tagName,createdAt \
             --jq '[.[] | select(.tagName | startswith("data-"))] | sort_by(.createdAt) | last | .tagName')
           if [ -z "$tag" ] || [ "$tag" = "null" ]; then
             echo "No data-* release to start from" >&2; exit 1
           fi
           gh release download "$tag" -p data.zip --clobber
-          unzip -q -o data.zip && rm data.zip
+          unzip -q -o data.zip
+          rm data.zip
+          if ! compgen -G "data/*/papers.jsonl" > /dev/null; then
+            echo "::error::data.zip extracted no conference data" >&2; exit 1
+          fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Discover
@@ -78,16 +91,19 @@ jobs:
 
       - name: State, citation date, build smoke test
         run: |
+          set -euo pipefail
           uv run ppr report state --enrich enrich.json --state data/pipeline_state.json
           date -u +%Y-%m-%d > data/citation_updated.txt
           uv run python -m scripts.build_data
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && hashFiles('data/pipeline_state.json') != '' }}
         with: {name: report-state, path: data/pipeline_state.json}
 
       - name: Release
         env:
           BASE_TAG: ${{ steps.base.outputs.tag }}
         run: |
+          set -euo pipefail
           extra=()
           if [ "$DRY_RUN" = "true" ]; then extra+=(--dry-run); fi
           uv run ppr release --base-tag "$BASE_TAG" \
@@ -96,6 +112,7 @@ jobs:
       - name: Push registrations
         if: env.DRY_RUN != 'true'
         run: |
+          set -euo pipefail
           if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
             echo "Nothing to push"; exit 0
           fi
@@ -110,10 +127,12 @@ jobs:
       - name: Dry-run summary
         if: env.DRY_RUN == 'true'
         run: |
+          set -euo pipefail
           {
             echo "## Dry run"
             echo '```'; cat register.json; echo '```'
             echo '```'; git log --oneline origin/main..HEAD; echo '```'
+            echo "Would dispatch deploy.yml on main"
           } >> "$GITHUB_STEP_SUMMARY"
 
   notify:
@@ -171,4 +190,6 @@ jobs:
                 await github.rest.issues.createComment({ ...repo, issue_number: issue.number, body: action.comment });
                 await github.rest.issues.update({ ...repo, issue_number: issue.number, state: 'closed', state_reason: 'completed' });
               }
+            } else {
+              core.setFailed(`Unknown issue action: ${action.action}`);
             }
