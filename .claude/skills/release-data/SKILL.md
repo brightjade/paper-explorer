@@ -5,7 +5,7 @@ description: Zip the data/ directory and upload it as a GitHub Release asset. Us
 
 # Release Data
 
-Packages the current `data/` directory into `data.zip` and uploads it to a GitHub Release so users can download it via `setup.sh`.
+Publishes the current `data/` directory as a GitHub Release (via `ppr release`, which zips, creates the release, and prunes old ones) so users can download it via `setup.sh`.
 
 ## Steps
 
@@ -26,6 +26,8 @@ Packages the current `data/` directory into `data.zip` and uploads it to a GitHu
    uv run ppr release --base-tag "$base"
    ```
 
+   If `$base` is empty there is no data release to build on: stop and tell the user.
+
    This creates the new release first and only then prunes to the newest 3. Never delete releases by hand before creating one: a failure in between leaves the site with no data.
 
 4. **Confirm** -- report the release URL to the user.
@@ -33,5 +35,5 @@ Packages the current `data/` directory into `data.zip` and uploads it to a GitHu
 ## Important
 
 - Never commit `data.zip` to git. It is in `.gitignore`.
-- Always use `--latest` when creating a release so `setup.sh` (which defaults to `latest`) picks it up.
-- If the user specifies a custom tag, use that instead of the date-based default.
+- Tags are `data-YYYY-MM-DD` (a `-2`, `-3` suffix if that date is taken); `ppr release` derives them and has no custom-tag option.
+- `ppr release` marks the new release Latest itself, so `setup.sh` (which defaults to `latest`) picks it up. Never create or delete data releases by hand.

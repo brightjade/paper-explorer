@@ -13,7 +13,7 @@ uv run ppr enrich iclr_2025 neurips_2025        # Enrich with Semantic Scholar m
 uv run ppr enrich --all                        # Refresh citations for every conference
 uv run ppr validate iclr_2025                  # Validate paper count against DBLP
 ./build.sh                                     # Build static JSON for web app
-uv run ppr autoregister discover.json --report register.json   # Register live venues by rule (no commit)
+uv run ppr autoregister discover.json --report register.json   # Register live venues by rule (--commit commits each venue)
 uv run ppr enrich --all --time-budget 4h --report enrich.json  # Enrich within a time budget
 uv run ppr release --base-tag data-YYYY-MM-DD --dry-run         # Plan a data release
 uv run pytest tests/                           # Run all tests
