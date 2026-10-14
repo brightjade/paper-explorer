@@ -1,11 +1,21 @@
 ---
 name: check-new-conferences
-description: Check whether tracked conferences have published new accepted-paper lists and add the ones that have. Use when the user asks to "check for new conferences", "any new papers", "update conferences", mentions a discover issue, or asks whether a specific venue is out yet.
+description: Handle the venues the monthly pipeline hands back (held, needs-manual, stale_empty), and check whether tracked conferences have published new accepted-paper lists. Use when the user asks to "check for new conferences", "any new papers", "update conferences", mentions a discover issue, or asks whether a specific venue is out yet.
 ---
 
 # Check New Conferences
 
 Finds conference-years whose accepted-paper list is up but not yet in this repo, registers the ones whose source is mechanical, and runs the pipeline.
+
+## When to use this now
+
+The monthly workflow (`.github/workflows/monthly.yml`) registers mechanical-source venues on its own. Use this skill for what it hands back:
+
+- venues it **held** (the tracking issue names the reason),
+- `needs-manual` venues (ACL-family, AAAI),
+- `stale_empty` venues (probable broken selector).
+
+Before any manual crawl or enrich, start from the newest data release (`./setup.sh`), not from a local or remote `data/` -- the release is the source of truth.
 
 ## Phase 1 — Detect, then stop
 
@@ -118,7 +128,7 @@ date +%Y-%m-%d > data/citation_updated.txt
 
 Read the `ppr enrich --all` summary, do not just check its exit code: a conference skipped by a data-loss guard exits 0 by design. Any `skipped` or `failed` row must be reported before continuing. Report the `Unbound` column too — it counts bindings that verification severed. A handful per conference is the system working; a conference unbinding a large share of its papers means the venue's Semantic Scholar records moved and needs a look.
 
-Then invoke the `release-data` skill, and only afterwards `git push`.
+Then invoke the `release-data` skill (which runs `ppr release`), and only afterwards `git push`.
 
 **The order is load-bearing.** `.github/workflows/deploy.yml` builds the site from the *latest release's* `data.zip` when `main` is pushed. Pushing before releasing deploys the new code against stale data.
 
