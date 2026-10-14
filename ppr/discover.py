@@ -2,7 +2,7 @@
 
 import json
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import requests
@@ -90,12 +90,21 @@ class ProbeResult:
     count: int
     url: str
     note: str = ""
+    # What the probe actually matched, in the shape ppr/autoregister.py hands
+    # to the registry writers. Recorded here because only the probe knows which
+    # toc candidate hit or which parser counted the page; rebuilding that later
+    # from the venue template is the guesswork registration must not do.
+    registration: dict = field(default_factory=dict)
 
 
-def _result(venue: Venue, year: int, status: str, count: int, url: str, note: str = "") -> ProbeResult:
+def _result(
+    venue: Venue, year: int, status: str, count: int, url: str, note: str = "",
+    registration: dict | None = None,
+) -> ProbeResult:
     return ProbeResult(
         conf_id=f"{venue.prefix}_{year}", prefix=venue.prefix, year=year,
         status=status, count=count, url=url, note=note,
+        registration=registration or {},
     )
 
 
@@ -150,7 +159,11 @@ def _probe_cvf(venue: Venue, year: int) -> ProbeResult:
             )
 
     count = len(scope.select("dt.ptitle"))
-    return _result(venue, year, _classify_page(count), count, url)
+    registration = (
+        {"url": url, "parser": "ecva", "year": year} if marker
+        else {"url": url, "parser": "openaccess"}
+    )
+    return _result(venue, year, _classify_page(count), count, url, registration=registration)
 
 
 def _probe_usenix(venue: Venue, year: int) -> ProbeResult:
@@ -167,7 +180,7 @@ def _probe_usenix(venue: Venue, year: int) -> ProbeResult:
         return _result(venue, year, "unreachable", 0, url, f"HTTP {response.status_code}")
 
     count = len(BeautifulSoup(response.text, "html.parser").select("article.node-paper"))
-    return _result(venue, year, _classify_page(count), count, url)
+    return _result(venue, year, _classify_page(count), count, url, registration={"slug": slug})
 
 
 def _dblp_toc_candidates(venue: Venue, year: int) -> list[dict]:
@@ -248,7 +261,8 @@ def _probe_dblp_key(venue: Venue, year: int, key: str, number: str | None = None
         return _result(venue, year, "unreachable", 0, url, "unparseable response")
 
     status = "live" if total > 0 else "not-yet"
-    return _result(venue, year, status, total, url)
+    registration = {"key": key, "number": number} if number else {"key": key}
+    return _result(venue, year, status, total, url, registration=registration)
 
 
 def _probe_openreview(venue: Venue, year: int, client) -> ProbeResult:
@@ -266,7 +280,7 @@ def _probe_openreview(venue: Venue, year: int, client) -> ProbeResult:
         return _result(venue, year, "unreachable", 0, url, f"{type(exc).__name__}")
 
     status = "live" if notes else "not-yet"
-    return _result(venue, year, status, len(notes), url)
+    return _result(venue, year, status, len(notes), url, registration={"venue_id": venue_id})
 
 
 def probe(venue: Venue, year: int, *, openreview_client=None) -> ProbeResult:
@@ -385,6 +399,7 @@ def results_to_json(results: list[ProbeResult], stale: list[ProbeResult] | None 
                 {
                     "conf_id": r.conf_id, "prefix": r.prefix, "year": r.year,
                     "status": r.status, "count": r.count, "url": r.url, "note": r.note,
+                    "registration": r.registration,
                 }
                 for r in results
             ],

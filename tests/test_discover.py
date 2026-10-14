@@ -518,7 +518,7 @@ class TestOutputFormats:
         assert row == {
             "conf_id": "usenix_security_2026", "prefix": "usenix_security",
             "year": 2026, "status": "live", "count": 381,
-            "url": "https://x.test", "note": "n",
+            "url": "https://x.test", "note": "n", "registration": {},
         }
         assert payload["live_count"] == 1
 
@@ -584,3 +584,66 @@ class TestCliWiring:
         args = build_parser().parse_args(["discover", "--json", "--venue", "cvpr", "--venue", "iclr"])
         assert args.json is True
         assert args.venue == ["cvpr", "iclr"]
+
+
+class TestProbeRegistration:
+    """Each probe records what it matched, so autoregister never reconstructs it."""
+
+    def test_cvf_openaccess(self):
+        with patch("ppr.discover.requests.get", return_value=_response(200, CVF_PAPER * 60)):
+            r = probe(_venue(), 2027)
+        assert r.registration == {"url": "https://x.test/CVPR2027", "parser": "openaccess"}
+
+    def test_ecva_carries_parser_and_year(self):
+        v = _venue(prefix="eccv", name="ECCV", cadence="biennial-even",
+                   probe={"url": "https://www.ecva.net/papers.php", "marker": "ECCV {year}"})
+        html = (
+            'ECCV 2026<button class="accordion">ECCV 2026 Papers</button>'
+            '<div class="accordion-content">' + CVF_PAPER * 60 + "</div>"
+        )
+        with patch("ppr.discover.requests.get", return_value=_response(200, html)):
+            r = probe(v, 2026)
+        assert r.status == "live"
+        assert r.registration == {
+            "url": "https://www.ecva.net/papers.php", "parser": "ecva", "year": 2026,
+        }
+
+    def test_usenix_slug(self):
+        v = _venue(prefix="usenix_security", name="USENIX Security", source="usenix",
+                   probe={"slug": "usenixsecurity{yy}"})
+        with patch("ppr.discover.requests.get", return_value=_response(200, USENIX_PAPER * 381)):
+            r = probe(v, 2027)
+        assert r.registration == {"slug": "usenixsecurity27"}
+
+    def test_dblp_plain_key(self, no_sleep):
+        ok = _response(200); ok.json = lambda: {"result": {"hits": {"@total": "245"}}}
+        v = _venue(prefix="icse", name="ICSE", source="dblp",
+                   probe={"toc": "db/conf/icse/icse{year}.bht"})
+        with patch("ppr.dblp_client.requests.get", return_value=ok):
+            r = probe(v, 2026)
+        assert r.registration == {"key": "db/conf/icse/icse2026.bht"}
+
+    def test_dblp_pacmse_key_carries_number(self, no_sleep):
+        v = _venue(prefix="fse", name="FSE", source="dblp", probe={"toc": [
+            {"key": "db/journals/pacmse/pacmse{pacmse_vol}.bht", "number": "FSE"},
+        ]})
+        shared = _response(200)
+        shared.json = lambda: {"result": {"hits": {
+            "@total": "2", "hit": [{"info": {"number": "FSE"}}] * 2,
+        }}}
+        with patch("ppr.dblp_client.requests.get", return_value=shared):
+            r = probe(v, 2026)
+        assert r.registration == {"key": "db/journals/pacmse/pacmse3.bht", "number": "FSE"}
+
+    def test_openreview_venue_id(self):
+        v = _venue(prefix="colm", name="COLM", source="openreview",
+                   probe={"venue_id": "colmweb.org/COLM/{year}/Conference"})
+        client = MagicMock()
+        client.get_all_notes.return_value = [MagicMock()] * 856
+        r = probe(v, 2026, openreview_client=client)
+        assert r.registration == {"venue_id": "colmweb.org/COLM/2026/Conference"}
+
+    def test_unreachable_has_no_registration(self):
+        with patch("ppr.discover.requests.get", side_effect=requests.ConnectionError()):
+            r = probe(_venue(), 2027)
+        assert r.registration == {}
