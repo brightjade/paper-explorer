@@ -286,8 +286,7 @@ def git_commit(root: Path) -> Callable[[list[Path], str], None]:
             subprocess.run(["git", "add", "--", *paths], cwd=root, check=True)
             # Scoped to our paths so anything else staged is never swept in.
             subprocess.run(
-                ["git", "commit", "-m", message, "-m",
-                 "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>", "--", *paths],
+                ["git", "commit", "-m", message, "--", *paths],
                 cwd=root, check=True,
             )
         except subprocess.CalledProcessError:

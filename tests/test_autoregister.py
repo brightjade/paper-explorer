@@ -312,6 +312,12 @@ class TestGitCommit:
             git_commit(repo)([f], "msg")
         assert _git(repo, "diff", "--cached", "--name-only") == ""
 
+    def test_commit_carries_no_claude_trailer(self, repo):
+        f = repo / "a.txt"
+        f.write_text("a")
+        git_commit(repo)([f], "msg")
+        assert "Co-Authored-By" not in _git(repo, "log", "-1", "--format=%B")
+
     def test_unrelated_staged_file_is_not_swept_in(self, repo):
         other = repo / "other.txt"
         other.write_text("o")
