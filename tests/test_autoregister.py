@@ -24,6 +24,7 @@ README = """### NLP
 DBLP_SRC = 'DBLP_CONFERENCES = {\n    "icse_2025": {"key": "db/conf/icse/icse2025.bht"},\n}\n'
 CVF_SRC = 'CVF_CONFERENCES = {\n}\n'
 USENIX_SRC = 'USENIX_CONFERENCES = {\n}\n'
+RESEARCHR_SRC = 'RESEARCHR_CONFERENCES = {\n}\n'
 
 
 @pytest.fixture
@@ -35,6 +36,7 @@ def ws(tmp_path):
     (scrapers / "dblp.py").write_text(DBLP_SRC)
     (scrapers / "cvf.py").write_text(CVF_SRC)
     (scrapers / "usenix.py").write_text(USENIX_SRC)
+    (scrapers / "researchr.py").write_text(RESEARCHR_SRC)
     (tmp_path / "README.md").write_text(README)
     return Workspace(tmp_path)
 
@@ -46,6 +48,7 @@ def _venue(prefix, source, name, **kw):
 
 REGISTRY = {
     "icse": _venue("icse", "dblp", "ICSE"),
+    "fse": _venue("fse", "researchr", "FSE"),
     "colm": _venue("colm", "openreview", "COLM"),
     "neurips": _venue("neurips", "openreview", "NeurIPS", extra_tracks=(
         {"venue_id": "NeurIPS.cc/{year}/Datasets_and_Benchmarks_Track", "prefix": "datasets"},
@@ -398,3 +401,13 @@ class TestCli:
 
         self._run(tmp_path, monkeypatch, fake)
         assert got["v"] == "PASS"
+
+
+class TestResearchrVenue:
+    def test_registers_with_url_and_track(self, ws):
+        url = "https://conf.researchr.org/track/fse-2026/fse-2026-research-papers"
+        row = _row("fse_2026", 211, {"url": url, "track": "Research Papers"})
+        outcomes, commits = _run([row], ws, counts={"fse_2026": 211})
+        assert outcomes[0].status == "registered"
+        assert f'"fse_2026": {{"url": "{url}", "track": "Research Papers"}},' in ws.researchr_module.read_text()
+        assert str(ws.researchr_module) in commits[0][0]

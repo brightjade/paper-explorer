@@ -1,5 +1,6 @@
 """Write registration entries for sources whose setup is mechanical."""
 
+import json
 import logging
 import re
 from pathlib import Path
@@ -96,6 +97,12 @@ def register_cvf(conf_id: str, url: str, parser: str, path: Path, year: int | No
 
 def register_usenix(conf_id: str, slug: str, path: Path) -> None:
     _insert_into_dict(path, "USENIX_CONFERENCES", conf_id, f'"{conf_id}": "{slug}",')
+
+
+def register_researchr(conf_id: str, url: str, track: str, path: Path) -> None:
+    # json.dumps writes a double-quoted literal Python reads back unchanged.
+    entry = f'"{conf_id}": {{"url": {json.dumps(url)}, "track": {json.dumps(track)}}},'
+    _insert_into_dict(path, "RESEARCHR_CONFERENCES", conf_id, entry)
 
 
 # Words that appear in OpenReview venue strings and name a track.

@@ -1,6 +1,6 @@
 # Registry of tracked conference venues, used by `ppr discover`.
 #
-# source:   openreview | dblp | cvf | usenix | acl | aaai | bespoke
+# source:   openreview | dblp | researchr | crossref | roboticsproceedings | cvf | usenix | acl | aaai | bespoke
 #           acl/aaai/bespoke need a hand-written scraper per year, so discovery
 #           reports them as needs-manual rather than auto-registering them.
 # cadence:  annual | biennial-odd | biennial-even
@@ -40,37 +40,36 @@ venues:
     announce_month: 9
     probe: {venue_id: "robot-learning.org/CoRL/{year}/Conference"}
 
-  # --- DBLP ---
+  # --- researchr (SE research tracks) ---
+  # Track slugs drift between years, so the probe tries these in order and
+  # records the one that matched. announce_month is when the accepted list
+  # usually goes up on researchr, not when DBLP indexes the proceedings.
   icse:
     name: ICSE
-    source: dblp
+    source: researchr
     cadence: annual
-    announce_month: 12
-    probe: {toc: "db/conf/icse/icse{year}.bht"}
+    announce_month: 1
+    probe: {conf: icse, track_slugs: &se_track_slugs [research-track, research-papers, technical-track, technical-papers, papers, research]}
   fse:
     name: FSE
-    source: dblp
+    source: researchr
     cadence: annual
-    announce_month: 12
-    probe:
-      toc:
-        - "db/conf/sigsoft/fse{year}.bht"
-        - {key: "db/journals/pacmse/pacmse{pacmse_vol}.bht", number: "FSE"}
+    announce_month: 4
+    probe: {conf: fse, track_slugs: *se_track_slugs}
   ase:
     name: ASE
-    source: dblp
+    source: researchr
     cadence: annual
-    announce_month: 9
-    probe: {toc: "db/conf/kbse/ase{year}.bht"}
+    announce_month: 8
+    probe: {conf: ase, track_slugs: *se_track_slugs}
   issta:
     name: ISSTA
-    source: dblp
+    source: researchr
     cadence: annual
     announce_month: 5
-    probe:
-      toc:
-        - "db/conf/issta/issta{year}.bht"
-        - {key: "db/journals/pacmse/pacmse{pacmse_vol}.bht", number: "ISSTA"}
+    probe: {conf: issta, track_slugs: *se_track_slugs}
+
+  # --- DBLP ---
   icra:
     name: ICRA
     source: dblp

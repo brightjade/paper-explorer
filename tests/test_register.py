@@ -8,6 +8,7 @@ from ppr.register import (
     openreview_selections,
     register_cvf,
     register_dblp,
+    register_researchr,
     register_usenix,
     render_openreview_config,
     selections_from_notes,
@@ -295,3 +296,36 @@ class TestRenderExtraVenueIds:
     def test_no_extra_ids_renders_no_key(self):
         text = render_openreview_config("CoRL", 2026, "v", {"main": "CoRL 2026"})
         assert "extra_venue_ids" not in text
+
+
+RESEARCHR_SRC = '''RESEARCHR_CONFERENCES = {
+    # ICSE
+    "icse_2025": {"url": "https://conf.researchr.org/track/icse-2025/icse-2025-research-track", "track": "Research Track"},
+    # ASE
+    "ase_2025": {"url": "https://conf.researchr.org/track/ase-2025/ase-2025-papers", "track": "Research Papers"},
+}
+'''
+
+ICSE_2026_URL = "https://conf.researchr.org/track/icse-2026/icse-2026-research-track"
+
+
+class TestRegisterResearchr:
+    def test_inserts_the_entry_in_its_venue_group(self, tmp_path):
+        p = _module(tmp_path, "researchr.py", RESEARCHR_SRC)
+        register_researchr("icse_2026", ICSE_2026_URL, "Research Track", p)
+        text = p.read_text()
+        line = f'"icse_2026": {{"url": "{ICSE_2026_URL}", "track": "Research Track"}},'
+        assert line in text
+        assert text.index('"icse_2025"') < text.index('"icse_2026"') < text.index("# ASE")
+
+    def test_refuses_a_duplicate(self, tmp_path):
+        p = _module(tmp_path, "researchr.py", RESEARCHR_SRC)
+        with pytest.raises(RegistrationError):
+            register_researchr("icse_2025", ICSE_2026_URL, "Research Track", p)
+
+    def test_the_written_module_still_parses(self, tmp_path):
+        p = _module(tmp_path, "researchr.py", RESEARCHR_SRC)
+        register_researchr("icse_2026", ICSE_2026_URL, "Research Track", p)
+        namespace: dict = {}
+        exec(p.read_text(), namespace)
+        assert namespace["RESEARCHR_CONFERENCES"]["icse_2026"]["track"] == "Research Track"

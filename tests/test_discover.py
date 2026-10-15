@@ -182,6 +182,68 @@ class TestUsenixProbe:
         assert "usenixsecurity26" in g.call_args[0][0]
 
 
+def _rr_page(n, track="Research Track", conf="ICSE 2026"):
+    rows = "".join(
+        f'<tr><td><a href="#" data-event-modal="e{i}">Paper {i}</a>'
+        f'<div class="prog-track">{track}</div><div class="performers">A</div></td></tr>'
+        for i in range(n)
+    )
+    return (f"<html><head><title>{conf} - {track} - {conf}</title></head><body>"
+            f'<div id="event-overview"><table>{rows}</table></div></body></html>')
+
+
+class TestResearchrProbe:
+    @pytest.fixture(autouse=True)
+    def no_researchr_sleep(self, monkeypatch):
+        monkeypatch.setattr("ppr.scrapers.researchr.time.sleep", lambda *_: None)
+
+    def _venue(self):
+        return _venue(prefix="icse", name="ICSE", source="researchr", announce_month=1,
+                      probe={"conf": "icse", "track_slugs": ["research-track", "technical-track"]})
+
+    def test_the_first_existing_slug_with_papers_is_live(self):
+        with patch("ppr.scrapers.researchr.requests.get", return_value=_response(200, _rr_page(321))) as g:
+            r = probe(self._venue(), 2026)
+        assert (r.status, r.count) == ("live", 321)
+        assert g.call_args.args[0] == "https://conf.researchr.org/track/icse-2026/icse-2026-research-track"
+
+    def test_a_404_slug_falls_through_to_the_next(self):
+        with patch("ppr.scrapers.researchr.requests.get",
+                   side_effect=[_response(404), _response(200, _rr_page(207, "Technical Track"))]):
+            r = probe(self._venue(), 2023)
+        assert (r.status, r.count) == ("live", 207)
+        assert r.url.endswith("icse-2023-technical-track")
+
+    def test_every_slug_404_is_not_yet(self):
+        with patch("ppr.scrapers.researchr.requests.get", return_value=_response(404)) as g:
+            assert probe(self._venue(), 2028).status == "not-yet"
+        assert g.call_count == 2
+
+    def test_a_call_for_papers_page_is_empty_not_not_yet(self):
+        """ICSE 2027's research-track page answers 200 in October 2026 with no
+        accepted list. The page that exists decides; later slugs are not tried."""
+        cfp = "<html><head><title>ICSE 2027 - Research Track - ICSE 2027</title></head><body>CFP</body></html>"
+        with patch("ppr.scrapers.researchr.requests.get", return_value=_response(200, cfp)) as g:
+            r = probe(self._venue(), 2027)
+        assert (r.status, r.count) == ("empty", 0)
+        assert g.call_count == 1
+
+    def test_below_the_floor_is_empty(self):
+        with patch("ppr.scrapers.researchr.requests.get",
+                   return_value=_response(200, _rr_page(MIN_LIVE_PAPERS - 1))):
+            assert probe(self._venue(), 2026).status == "empty"
+
+    def test_a_server_error_is_unreachable(self):
+        with patch("ppr.scrapers.researchr.requests.get", return_value=_response(503)):
+            r = probe(self._venue(), 2026)
+        assert r.status == "unreachable"
+        assert "503" in r.note
+
+    def test_network_failure_is_unreachable(self):
+        with patch("ppr.scrapers.researchr.requests.get", side_effect=requests.ConnectionError()):
+            assert probe(self._venue(), 2026).status == "unreachable"
+
+
 class TestDblpProbe:
     """Candidate traversal and status mapping. Transport, retries and pacing
     belong to ppr/dblp_client.py and are tested there."""
@@ -521,3 +583,15 @@ class TestProbeRegistration:
         with patch("ppr.discover.requests.get", side_effect=requests.ConnectionError()):
             r = probe(_venue(), 2027)
         assert r.registration == {}
+
+    def test_researchr_url_and_track(self, monkeypatch):
+        monkeypatch.setattr("ppr.scrapers.researchr.time.sleep", lambda *_: None)
+        v = _venue(prefix="ase", name="ASE", source="researchr",
+                   probe={"conf": "ase", "track_slugs": ["research-track"]})
+        with patch("ppr.scrapers.researchr.requests.get",
+                   return_value=_response(200, _rr_page(263, "Research Papers", "ASE 2026"))):
+            r = probe(v, 2026)
+        assert r.registration == {
+            "url": "https://conf.researchr.org/track/ase-2026/ase-2026-research-track",
+            "track": "Research Papers",
+        }

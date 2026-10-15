@@ -9,6 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from ppr import dblp_client
+from ppr.scrapers import researchr
 from ppr.venues import MANUAL_SOURCES, REGISTRY_STEM, Venue
 
 logger = logging.getLogger(__name__)
@@ -264,6 +265,35 @@ def _probe_openreview(venue: Venue, year: int, client) -> ProbeResult:
     return _result(venue, year, status, len(notes), url, registration={"venue_id": venue_id})
 
 
+def _probe_researchr(venue: Venue, year: int) -> ProbeResult:
+    """Try each candidate track slug; the first page that exists decides.
+
+    Slugs are not year-invariant (ICSE used `technical-track` in 2023 and
+    `research-track` since; ASE went `papers`, `research`, `papers`,
+    `research-track`), so the venue lists candidates and the probe records the
+    one that matched. A 404 means "no such track" and the next slug is tried. A
+    page that exists answers for the year even with no rows yet, because the
+    research track's page goes up with the call for papers: that is `empty`,
+    and `stale_empty` flags it if the announce month passes.
+    """
+    conf = venue.probe["conf"]
+    url = ""
+    for slug in venue.probe["track_slugs"]:
+        url = researchr.track_url(conf, year, slug)
+        try:
+            response = researchr.get(url)
+        except requests.RequestException as exc:
+            return _result(venue, year, "unreachable", 0, url, type(exc).__name__)
+        if response.status_code == 404:
+            continue
+        if response.status_code != 200:
+            return _result(venue, year, "unreachable", 0, url, f"HTTP {response.status_code}")
+        track, rows = researchr.parse_track_page(response.text)
+        return _result(venue, year, _classify_page(len(rows)), len(rows), url,
+                       registration={"url": url, "track": track})
+    return _result(venue, year, "not-yet", 0, url)
+
+
 def probe(venue: Venue, year: int, *, openreview_client=None) -> ProbeResult:
     """Ask one source whether a conference-year's paper list is up.
 
@@ -283,6 +313,8 @@ def probe(venue: Venue, year: int, *, openreview_client=None) -> ProbeResult:
         return _probe_cvf(venue, year)
     if venue.source == "usenix":
         return _probe_usenix(venue, year)
+    if venue.source == "researchr":
+        return _probe_researchr(venue, year)
     if venue.source == "openreview":
         return _probe_openreview(venue, year, openreview_client)
     raise ValueError(f"no probe for source {venue.source!r}")

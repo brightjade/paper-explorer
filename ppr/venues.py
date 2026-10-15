@@ -13,7 +13,7 @@ REGISTRY_PATH = Path(__file__).resolve().parent.parent / "configs" / "venues.yam
 # so the registry itself is never mistaken for a conference config.
 REGISTRY_STEM = REGISTRY_PATH.stem
 
-SOURCES = {"openreview", "dblp", "cvf", "usenix", "acl", "aaai", "bespoke"}
+SOURCES = {"openreview", "dblp", "researchr", "cvf", "usenix", "acl", "aaai", "bespoke"}
 CADENCES = {"annual", "biennial-odd", "biennial-even"}
 
 # Sources whose registration needs a human-written scraper. Discovery reports
