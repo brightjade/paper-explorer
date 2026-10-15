@@ -1,73 +1,29 @@
-# React + TypeScript + Vite
+# Paper Explorer web app
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A static React + TypeScript + Vite site for browsing the dataset: a conference list (`/`), per-conference paper tables (`/conference/:id`), author pages (`/author/:name`) and topic and citation trends (`/trends`).
 
-Currently, two official plugins are available:
+It reads only what `scripts/build_data.py` writes to `web/public/data/` (gitignored): `manifest.json`, `authors.json`, `trends.json`, and per conference a `<conference_id>.json` plus a `<conference_id>.jsonl` copy offered for download.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Local development
 
-## React Compiler
+From the repository root, with `data/` populated:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+./build.sh            # data/ -> web/public/data/
+cd web
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The site is served under `/paper-explorer/` (`base` in `vite.config.ts`, `basename` in `src/App.tsx`), matching its GitHub Pages URL.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Checks and build
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run lint
+npm run build         # tsc -b && vite build -> web/dist/
 ```
+
+## Deployment
+
+`.github/workflows/deploy.yml` builds and deploys the site to GitHub Pages on every push to `main`, and when the monthly pipeline dispatches it after a data release. It always builds from the latest release's `data.zip`, not from a local `data/`.
