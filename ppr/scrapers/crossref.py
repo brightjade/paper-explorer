@@ -82,10 +82,16 @@ def _get(params: dict) -> dict:
     raise CrossrefUnavailable(f"{last_failure} after {MAX_RETRIES} attempts")
 
 
+def _total(message: dict) -> int:
+    try:
+        return int(message["total-results"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise CrossrefUnavailable("unparseable response (no usable total-results)") from exc
+
+
 def count(prefix: str, container: str) -> int:
     """How many records Crossref holds for this proceedings title."""
-    message = _get({"filter": work_filter(prefix, container), "rows": 0})
-    return int(message["total-results"])
+    return _total(_get({"filter": work_filter(prefix, container), "rows": 0}))
 
 
 def fetch_items(prefix: str, container: str) -> list[dict]:
@@ -97,11 +103,14 @@ def fetch_items(prefix: str, container: str) -> list[dict]:
         message = _get({"filter": work_filter(prefix, container), "rows": ROWS,
                         "cursor": cursor, "select": "DOI,title,author"})
         batch = message.get("items") or []
-        total = int(message["total-results"])
+        total = _total(message)
         items.extend(batch)
         if not batch or len(items) >= total:
             break
-        cursor = message["next-cursor"]
+        try:
+            cursor = message["next-cursor"]
+        except KeyError as exc:
+            raise CrossrefUnavailable("unparseable response (no next-cursor)") from exc
     if len(items) != total:
         raise CrossrefUnavailable(f"cursor ended at {len(items)} of {total} records")
     return items

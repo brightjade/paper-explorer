@@ -110,6 +110,12 @@ class TestSelect:
                 select("q")
         assert "truncated" in str(exc.value)
 
+    def test_a_non_numeric_total_raises_unavailable(self, slept):
+        odd = _response(bindings=COUNT_ROWS, meta={"result-size-total": "many"})
+        with patch("ppr.dblp_client.requests.post", return_value=odd):
+            with pytest.raises(DblpUnavailable, match="result-size-total"):
+                select("q")
+
     def test_a_complete_result_with_meta_passes(self, slept):
         full = _response(bindings=COUNT_ROWS, meta={"result-size-total": 1})
         with patch("ppr.dblp_client.requests.post", return_value=full):

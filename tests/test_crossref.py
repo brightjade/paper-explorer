@@ -89,6 +89,12 @@ class TestCount:
                 count("10.1109", ICRA_2025)
         assert g.call_count == 1
 
+    @pytest.mark.parametrize("message", [{"items": []}, {"total-results": None}, {"total-results": "many"}])
+    def test_an_unexpected_shape_raises_unavailable(self, message):
+        with patch("ppr.scrapers.crossref.requests.get", return_value=_resp(message)):
+            with pytest.raises(CrossrefUnavailable, match="unparseable response"):
+                count("10.1109", ICRA_2025)
+
 
 class TestFetchItems:
     def test_follows_the_cursor_until_every_item_is_in(self):
@@ -111,6 +117,17 @@ class TestFetchItems:
         ]
         with patch("ppr.scrapers.crossref.requests.get", side_effect=pages):
             with pytest.raises(CrossrefUnavailable, match="1 of 5"):
+                fetch_items("10.1109", ICRA_2025)
+
+    def test_a_page_without_a_next_cursor_raises_unavailable(self):
+        page = _resp({"total-results": 5, "items": [_item("10.1/a", "A")]})
+        with patch("ppr.scrapers.crossref.requests.get", return_value=page):
+            with pytest.raises(CrossrefUnavailable, match="unparseable response"):
+                fetch_items("10.1109", ICRA_2025)
+
+    def test_a_page_without_total_results_raises_unavailable(self):
+        with patch("ppr.scrapers.crossref.requests.get", return_value=_resp({"items": []})):
+            with pytest.raises(CrossrefUnavailable, match="unparseable response"):
                 fetch_items("10.1109", ICRA_2025)
 
     def test_nothing_published_is_an_empty_list(self):

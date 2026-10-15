@@ -113,8 +113,13 @@ def select(query: str) -> list[dict]:
             ) from exc
 
         total = (payload.get("meta") or {}).get("result-size-total")
-        if total is not None and int(total) != len(bindings):
-            raise DblpUnavailable(f"truncated result ({len(bindings)} of {total} rows)")
+        if total is not None:
+            try:
+                complete = int(total) == len(bindings)
+            except (TypeError, ValueError) as exc:
+                raise DblpUnavailable(f"unparseable result-size-total {total!r}") from exc
+            if not complete:
+                raise DblpUnavailable(f"truncated result ({len(bindings)} of {total} rows)")
         return bindings
 
     raise DblpUnavailable(f"{last_failure} after {MAX_RETRIES} attempts")
