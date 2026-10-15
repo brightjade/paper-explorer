@@ -197,7 +197,7 @@ def _dblp_toc_candidates(venue: Venue, year: int) -> list[dict]:
     FSE and ISSTA can even share the *same* volume -- pacmse2 holds both FSE
     2025 and ISSTA 2025 -- distinguished only by each entry's `number` field.
     A candidate can carry a `number` filter for exactly this case; the plain
-    string form is shorthand for "no filter, trust `@total`".
+    string form is shorthand for "no filter, trust the SPARQL count".
     """
     toc = venue.probe["toc"]
     templates = list(toc) if isinstance(toc, list) else [toc]

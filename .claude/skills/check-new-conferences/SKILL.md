@@ -68,6 +68,8 @@ from ppr.register import register_researchr
 register_researchr("icse_2027", "https://conf.researchr.org/track/icse-2027/icse-2027-research-track", "Research Track", Path("ppr/scrapers/researchr.py"))
 ```
 
+A researchr entry has no DOIs until DBLP indexes the year. Once DBLP has a toc for a registered researchr year, add it to the entry as `"dblp": {"key": "db/conf/<conf>/<conf><year>.bht"}` (a PACMSE volume also takes `"number": "FSE"` or `"ISSTA"`), then re-crawl the venue with the monthly workflow's `recrawl` input, which backfills the DOIs. That re-crawl fails if fewer than 80% of the research-track papers match DBLP.
+
 **Crossref** (ICRA/IROS):
 
 ```python

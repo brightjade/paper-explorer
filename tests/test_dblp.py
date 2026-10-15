@@ -1,7 +1,5 @@
 from unittest.mock import patch
 
-import pytest
-
 from ppr.scrapers.dblp import DBLP_CONFERENCES, SCRAPERS, _scrape_dblp
 
 
