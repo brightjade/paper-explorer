@@ -229,36 +229,17 @@ def _probe_dblp(venue: Venue, year: int) -> ProbeResult:
 
 
 def _probe_dblp_key(venue: Venue, year: int, key: str, number: str | None = None) -> ProbeResult:
-    """Query one toc key's hit count.
+    """Count one toc key's papers through DBLP's SPARQL endpoint.
 
-    When `number` is set, the key names a shared PACMSE volume: `@total`
-    covers every venue in that volume, so hits are fetched in bulk (`h=1000`
-    -- a volume holds a few hundred entries at most) and counted only where
-    the entry's `number` field matches, the same way `ppr/scrapers/dblp.py`'s
-    `_fetch_dblp` does (including its treatment of a missing field as a
-    non-match via `.get`).
+    When `number` is set, the key names a shared PACMSE volume and only the
+    entries filed under that venue's issue are counted -- the same filter the
+    DBLP scraper crawls with.
     """
     url = f"https://dblp.org/db/{key.removeprefix('db/').removesuffix('.bht')}.html"
-    hits_per_page = 1000 if number else 1
-
     try:
-        payload = dblp_client.query(
-            {"q": f"toc:{key}:", "h": hits_per_page, "f": 0, "format": "json"}
-        )
+        total = dblp_client.toc_count([key], number=number)
     except dblp_client.DblpUnavailable as exc:
         return _result(venue, year, "unreachable", 0, url, str(exc))
-
-    try:
-        hits_data = payload["result"]["hits"]
-        if number:
-            hits = hits_data.get("hit", [])
-            if isinstance(hits, dict):
-                hits = [hits]
-            total = sum(1 for hit in hits if hit.get("info", {}).get("number") == number)
-        else:
-            total = int(hits_data["@total"])
-    except (KeyError, TypeError, ValueError, AttributeError):
-        return _result(venue, year, "unreachable", 0, url, "unparseable response")
 
     status = "live" if total > 0 else "not-yet"
     registration = {"key": key, "number": number} if number else {"key": key}

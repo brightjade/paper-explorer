@@ -12,8 +12,6 @@ logger = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
-HITS_PER_PAGE = 1000
-
 # Conferences scraped directly from DBLP: derived from the scraper registry so
 # autoregister, which edits only ppr/scrapers/dblp.py, cannot desync it.
 # Validating these against DBLP would be circular — skip them.
@@ -116,9 +114,7 @@ DBLP_VALIDATION_KEYS: dict[str, list[str]] = {
     "wacv_2024": ["db/conf/wacv/wacv2024.bht"],
     "wacv_2025": ["db/conf/wacv/wacv2025.bht"],
     # iccv_2025, wacv_2026: not yet indexed (pre-publication)
-    # eccv_2024: 89 volumes on DBLP — at DBLP's stated 4s crawl delay that is
-    # ~6 minutes of queries. Slow, but the alternative is being throttled out
-    # partway and reporting the shortfall as a count mismatch.
+    # eccv_2024: 89 volumes, counted in one SPARQL query.
     "eccv_2024": [f"db/conf/eccv/eccv2024-{i}.bht" for i in range(1, 90)],
     # rss_2025: not yet indexed
 }
@@ -127,49 +123,11 @@ DBLP_VALIDATION_KEYS: dict[str, list[str]] = {
 def fetch_dblp_count(keys: list[str]) -> int:
     """Count non-Editorship papers across one or more DBLP toc keys.
 
-    Makes one paginated API call per key and sums the paper counts. Pacing and
-    retries belong to `ppr/dblp_client.py`, shared with the discovery sweep;
-    `DblpUnavailable` propagates rather than being absorbed into a total.
+    One SPARQL query however many keys there are. Pacing and retries belong to
+    `ppr/dblp_client.py`, shared with discovery; `DblpUnavailable` propagates
+    rather than being absorbed into a total.
     """
-    return sum(_count_one_key(key) for key in keys)
-
-
-def _count_one_key(key: str) -> int:
-    """Count non-Editorship papers for a single DBLP toc key.
-
-    Raises `DblpUnavailable` if DBLP could not be made to answer. Returning a
-    partial count there -- as this did before -- reports throttling as data:
-    the caller compares it against the scraped count and announces a mismatch
-    that never existed. A count is only ever returned when it is complete.
-    """
-    offset = 0
-    count = 0
-
-    while True:
-        logger.debug("DBLP API: key=%s offset=%d", key, offset)
-        data = dblp_client.query({
-            "q": f"toc:{key}:",
-            "h": HITS_PER_PAGE,
-            "f": offset,
-            "format": "json",
-        })
-
-        hits_data = data["result"]["hits"]
-        api_total = int(hits_data["@total"])
-
-        if api_total == 0:
-            break
-
-        for hit in hits_data.get("hit", []):
-            if hit["info"].get("type") != "Editorship":
-                count += 1
-
-        offset += HITS_PER_PAGE
-        if offset >= api_total:
-            break
-
-    logger.debug("DBLP count for %s: %d papers", key, count)
-    return count
+    return dblp_client.toc_count(keys)
 
 
 @dataclass

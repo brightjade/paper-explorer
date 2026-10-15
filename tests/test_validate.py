@@ -23,119 +23,26 @@ def paced_client(monkeypatch):
     monkeypatch.setattr(dblp_client, "_last_request", 0.0)
 
 
-def _make_dblp_response(total: int, hits: list[dict] | None = None) -> dict:
-    """Build a minimal DBLP API response."""
-    if hits is None:
-        hits = [
-            {"info": {"title": f"Paper {i}.", "type": "Conference and Workshop Papers"}}
-            for i in range(min(total, 1000))
-        ]
-    return {
-        "result": {
-            "hits": {
-                "@total": str(total),
-                "@sent": str(len(hits)),
-                "@first": "0",
-                "hit": hits,
-            }
-        }
-    }
-
-
-def _resp(payload: dict, status: int = 200) -> MagicMock:
-    r = MagicMock()
-    r.status_code = status
-    r.headers = {}
-    r.json.return_value = payload
-    return r
-
-
 class TestFetchDblpCount:
-    @patch("ppr.dblp_client.requests.get")
-    def test_single_key_counts_papers(self, mock_get):
-        mock_get.return_value = _resp(_make_dblp_response(150))
+    def test_counts_every_key_in_one_query(self):
+        with patch("ppr.validate.dblp_client.toc_count", return_value=2387) as c:
+            assert fetch_dblp_count(["a.bht", "b.bht"]) == 2387
+        c.assert_called_once_with(["a.bht", "b.bht"])
 
-        count = fetch_dblp_count(["db/conf/iclr/iclr2023.bht"])
-        assert count == 150
+    def test_goes_through_the_shared_client(self):
+        import ppr.validate as validate_module
 
-    @patch("ppr.dblp_client.requests.get")
-    def test_multiple_keys_sums_counts(self, mock_get):
-        mock_get.side_effect = [
-            _resp(_make_dblp_response(100)),
-            _resp(_make_dblp_response(50)),
-        ]
-
-        count = fetch_dblp_count(["key1.bht", "key2.bht"])
-        assert count == 150
-
-    @patch("ppr.dblp_client.requests.get")
-    def test_zero_total_returns_zero(self, mock_get):
-        mock_get.return_value = _resp(
-            {"result": {"hits": {"@total": "0", "@sent": "0", "@first": "0"}}}
-        )
-
-        count = fetch_dblp_count(["db/conf/colm/colm2024.bht"])
-        assert count == 0
-
-    @patch("ppr.dblp_client.requests.get")
-    def test_paginates_when_more_than_1000(self, mock_get):
-        page1_hits = [
-            {"info": {"title": f"P{i}.", "type": "Conference and Workshop Papers"}}
-            for i in range(1000)
-        ]
-        page2_hits = [
-            {"info": {"title": f"Q{i}.", "type": "Conference and Workshop Papers"}}
-            for i in range(200)
-        ]
-        mock_get.side_effect = [
-            _resp(_make_dblp_response(1200, page1_hits)),
-            _resp(_make_dblp_response(1200, page2_hits)),
-        ]
-
-        count = fetch_dblp_count(["db/conf/cvpr/cvpr2023.bht"])
-        assert count == 1200
-        assert mock_get.call_count == 2
-
-    @patch("ppr.dblp_client.requests.get")
-    def test_subtracts_editorship_entries(self, mock_get):
-        hits = [
-            {"info": {"title": "Proceedings", "type": "Editorship"}},
-            {"info": {"title": "Paper 1.", "type": "Conference and Workshop Papers"}},
-            {"info": {"title": "Paper 2.", "type": "Conference and Workshop Papers"}},
-        ]
-        mock_get.return_value = _resp(_make_dblp_response(3, hits))
-
-        count = fetch_dblp_count(["db/conf/iclr/iclr2023.bht"])
-        assert count == 2
-
-    @patch("ppr.dblp_client.requests.get")
-    def test_goes_through_the_shared_client_with_its_pacing(self, mock_get):
-        """One implementation of how to talk to DBLP: validation must not carry
-        its own interval, or the two subsystems would pace independently
-        against one host that throttles on total volume."""
-        mock_get.return_value = _resp(_make_dblp_response(10))
-        fetch_dblp_count(["db/conf/iclr/iclr2023.bht"])
-        assert mock_get.call_args.kwargs["headers"] is dblp_client.HEADERS
-        assert mock_get.call_args.args[0] == dblp_client.API_URL
+        assert validate_module.dblp_client is dblp_client
 
 
 class TestThrottlingIsNotACount:
-    @patch("ppr.dblp_client.requests.get")
-    def test_a_throttled_key_raises_instead_of_returning_a_partial_count(self, mock_get):
-        """Returning the papers counted so far -- as this did on any
-        RequestException, 429 included -- hands a short number to the caller,
-        which compares it and announces a mismatch that never existed."""
-        page1_hits = [
-            {"info": {"title": f"P{i}.", "type": "Conference and Workshop Papers"}}
-            for i in range(1000)
-        ]
-        mock_get.side_effect = [
-            _resp(_make_dblp_response(1200, page1_hits)),
-            *[_resp({}, status=429)] * dblp_client.MAX_RETRIES,
-        ]
-
-        with pytest.raises(DblpUnavailable):
-            fetch_dblp_count(["db/conf/cvpr/cvpr2023.bht"])
+    def test_unavailable_propagates_instead_of_a_partial_count(self):
+        """A short number handed to the caller is compared and announced as a
+        mismatch that never existed."""
+        with patch("ppr.validate.dblp_client.toc_count",
+                   side_effect=DblpUnavailable("HTTP 429 after 5 attempts")):
+            with pytest.raises(DblpUnavailable):
+                fetch_dblp_count(["db/conf/cvpr/cvpr2023.bht"])
 
     def test_validate_reports_error_not_a_count_mismatch(self, tmp_path, monkeypatch):
         """`ppr validate` is what the skill tells the operator to run right

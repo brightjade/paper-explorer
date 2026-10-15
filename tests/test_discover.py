@@ -58,7 +58,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from ppr.dblp_client import MIN_INTERVAL as DBLP_MIN_INTERVAL
+from ppr.dblp_client import DblpUnavailable
 from ppr.discover import (
     MIN_LIVE_PAPERS,
     ProbeResult,
@@ -90,12 +90,6 @@ def _response(status=200, text="", headers=None):
 
 CVF_PAPER = '<dt class="ptitle"><a href="/p.html">A Paper</a></dt>'
 USENIX_PAPER = '<article class="node-paper"><h2>A Paper</h2></article>'
-
-
-@pytest.fixture
-def no_sleep(monkeypatch):
-    """DBLP pacing and backoff live in ppr/dblp_client.py; no test waits for real."""
-    monkeypatch.setattr("ppr.dblp_client.time.sleep", lambda *_: None)
 
 
 class TestLiveFloor:
@@ -189,177 +183,62 @@ class TestUsenixProbe:
 
 
 class TestDblpProbe:
-    def _venue(self):
+    """Candidate traversal and status mapping. Transport, retries and pacing
+    belong to ppr/dblp_client.py and are tested there."""
+
+    FSE = dict(prefix="fse", name="FSE", source="dblp", probe={"toc": [
+        "db/conf/sigsoft/fse{year}.bht",
+        {"key": "db/journals/pacmse/pacmse{pacmse_vol}.bht", "number": "FSE"},
+    ]})
+
+    def _icse(self):
         return _venue(prefix="icse", name="ICSE", source="dblp",
                       probe={"toc": "db/conf/icse/icse{year}.bht"})
 
-    def test_falls_through_toc_candidates_until_one_has_hits(self, no_sleep):
+    def test_hits_means_live(self):
+        with patch("ppr.discover.dblp_client.toc_count", return_value=245) as c:
+            out = probe(self._icse(), 2026)
+        assert (out.status, out.count) == ("live", 245)
+        assert c.call_args.args[0] == ["db/conf/icse/icse2026.bht"]
+
+    def test_zero_hits_is_not_yet(self):
+        with patch("ppr.discover.dblp_client.toc_count", return_value=0):
+            assert probe(self._icse(), 2026).status == "not-yet"
+
+    def test_falls_through_toc_candidates_until_one_has_hits(self):
         """FSE moved to shared PACMSE volumes; the old conf key is dead for 2024+."""
-        v = _venue(prefix="fse", name="FSE", source="dblp", probe={"toc": [
-            "db/conf/sigsoft/fse{year}.bht",
-            "db/journals/pacmse/pacmse{pacmse_vol}.bht",
-        ]})
-        miss = _response(200); miss.json = lambda: {"result": {"hits": {"@total": "0"}}}
-        hit = _response(200); hit.json = lambda: {"result": {"hits": {"@total": "132"}}}
-        with patch("ppr.dblp_client.requests.get", side_effect=[miss, hit]) as g:
-            out = probe(v, 2026)
+        with patch("ppr.discover.dblp_client.toc_count", side_effect=[0, 132]) as c:
+            out = probe(_venue(**self.FSE), 2026)
         assert (out.status, out.count) == ("live", 132)
         # pacmse1 is 2024, so 2026 must resolve to volume 3 -- not the year.
-        assert "pacmse3" in g.call_args_list[1].kwargs["params"]["q"]
+        assert c.call_args_list[1].args[0] == ["db/journals/pacmse/pacmse3.bht"]
+        assert c.call_args_list[1].kwargs["number"] == "FSE"
 
-    def test_stops_at_the_first_candidate_with_hits(self, no_sleep):
-        v = _venue(prefix="fse", name="FSE", source="dblp", probe={"toc": [
-            "db/conf/sigsoft/fse{year}.bht",
-            "db/journals/pacmse/pacmse{pacmse_vol}.bht",
-        ]})
-        hit = _response(200); hit.json = lambda: {"result": {"hits": {"@total": "206"}}}
-        with patch("ppr.dblp_client.requests.get", return_value=hit) as g:
-            out = probe(v, 2023)
+    def test_stops_at_the_first_candidate_with_hits(self):
+        with patch("ppr.discover.dblp_client.toc_count", return_value=206) as c:
+            out = probe(_venue(**self.FSE), 2023)
         assert out.count == 206
-        assert g.call_count == 1
+        assert c.call_count == 1
 
-    def test_all_candidates_empty_is_not_yet(self, no_sleep):
-        v = _venue(prefix="fse", name="FSE", source="dblp", probe={"toc": [
-            "db/conf/sigsoft/fse{year}.bht",
-            "db/journals/pacmse/pacmse{pacmse_vol}.bht",
-        ]})
-        miss = _response(200); miss.json = lambda: {"result": {"hits": {"@total": "0"}}}
-        with patch("ppr.dblp_client.requests.get", return_value=miss):
-            assert probe(v, 2027).status == "not-yet"
+    def test_all_candidates_empty_is_not_yet(self):
+        with patch("ppr.discover.dblp_client.toc_count", return_value=0):
+            assert probe(_venue(**self.FSE), 2027).status == "not-yet"
 
-    def test_a_plain_string_toc_still_works(self, no_sleep):
-        ok = _response(200); ok.json = lambda: {"result": {"hits": {"@total": "245"}}}
-        with patch("ppr.dblp_client.requests.get", return_value=ok) as g:
-            assert probe(self._venue(), 2026).count == 245
-        assert g.call_count == 1
-
-    def test_hits_means_live(self, no_sleep):
-        payload = {"result": {"hits": {"@total": "245"}}}
-        r = _response(200); r.json = lambda: payload
-        with patch("ppr.dblp_client.requests.get", return_value=r):
-            out = probe(self._venue(), 2026)
-        assert (out.status, out.count) == ("live", 245)
-
-    def test_zero_hits_is_not_yet(self, no_sleep):
-        payload = {"result": {"hits": {"@total": "0"}}}
-        r = _response(200); r.json = lambda: payload
-        with patch("ppr.dblp_client.requests.get", return_value=r):
-            assert probe(self._venue(), 2026).status == "not-yet"
-
-    def test_429_is_retried_then_succeeds(self, no_sleep):
-        ok = _response(200); ok.json = lambda: {"result": {"hits": {"@total": "7"}}}
-        with patch("ppr.dblp_client.requests.get", side_effect=[_response(429), ok]):
-            out = probe(self._venue(), 2026)
-        assert (out.status, out.count) == ("live", 7)
-
-    def test_persistent_429_is_unreachable_not_absent(self, no_sleep):
-        """A throttled sweep must never read as 'nothing new'."""
-        with patch("ppr.dblp_client.requests.get", return_value=_response(429)):
-            out = probe(self._venue(), 2026)
+    def test_unavailable_is_unreachable_with_the_reason(self):
+        with patch("ppr.discover.dblp_client.toc_count",
+                   side_effect=DblpUnavailable("bot challenge (HTTP 202)")):
+            out = probe(self._icse(), 2026)
         assert out.status == "unreachable"
-        assert "429" in out.note
+        assert "bot challenge" in out.note
 
-    @pytest.mark.parametrize("status", [500, 502, 503, 504])
-    def test_5xx_is_retried_like_429(self, no_sleep, status):
-        """Real sweeps on 2026-07-30 hit 500 and 503 under load, not just 429 --
-        both cleared on a plain retry seconds later, so both must be retried
-        here too instead of read as a terminal failure."""
-        ok = _response(200); ok.json = lambda: {"result": {"hits": {"@total": "9"}}}
-        with patch("ppr.dblp_client.requests.get", side_effect=[_response(status), ok]):
-            out = probe(self._venue(), 2026)
-        assert (out.status, out.count) == ("live", 9)
-
-    def test_retry_after_header_is_honored_over_the_backoff_guess(self, monkeypatch):
-        """DBLP's own Retry-After is a real measurement; 2**attempt is a guess
-        that should only apply when the server doesn't say."""
-        slept = []
-        monkeypatch.setattr("ppr.dblp_client.time.sleep", lambda s: slept.append(s))
-        ok = _response(200); ok.json = lambda: {"result": {"hits": {"@total": "3"}}}
-        throttled = _response(429, headers={"Retry-After": "30"})
-        with patch("ppr.dblp_client.requests.get", side_effect=[throttled, ok]):
-            out = probe(self._venue(), 2026)
-        assert (out.status, out.count) == ("live", 3)
-        assert 30.0 in slept
-
-    def test_paces_at_four_seconds(self, monkeypatch):
-        slept = []
-        monkeypatch.setattr("ppr.dblp_client.time.sleep", lambda s: slept.append(s))
-        ok = _response(200); ok.json = lambda: {"result": {"hits": {"@total": "1"}}}
-        with patch("ppr.dblp_client.requests.get", return_value=ok):
-            probe(self._venue(), 2026)
-            probe(self._venue(), 2027)
-        assert slept
-        # The two calls happen back-to-back with no real wait between them, so
-        # the second must sleep close to the full interval -- an implementation
-        # that under-sleeps (e.g. a hardcoded 0.001s) must fail this.
-        assert max(slept) > DBLP_MIN_INTERVAL - 0.05
-        assert max(slept) <= DBLP_MIN_INTERVAL
-
-    def test_unreachable_first_candidate_is_not_papered_over_by_second_candidate(self, no_sleep):
-        """A throttled first candidate must stop the sweep, not fall through.
-
-        Falling through to a second candidate's `not-yet` here would turn a
-        throttled DBLP into a false "nothing new" -- exactly the failure mode
-        ppr/dblp_client.py's retries + backoff exist to avoid.
-        """
-        v = _venue(prefix="fse", name="FSE", source="dblp", probe={"toc": [
-            "db/conf/sigsoft/fse{year}.bht",
-            "db/journals/pacmse/pacmse{pacmse_vol}.bht",
-        ]})
-        with patch("ppr.dblp_client.requests.get", return_value=_response(429)) as g:
-            out = probe(v, 2026)
+    def test_unreachable_first_candidate_is_not_papered_over_by_second_candidate(self):
+        """Falling through to a second candidate's `not-yet` would turn an
+        unanswered DBLP into a false "nothing new"."""
+        with patch("ppr.discover.dblp_client.toc_count",
+                   side_effect=DblpUnavailable("HTTP 429 after 5 attempts")) as c:
+            out = probe(_venue(**self.FSE), 2026)
         assert out.status == "unreachable"
-        # Only the first candidate's key was ever queried.
-        assert all("pacmse" not in c.kwargs["params"]["q"] for c in g.call_args_list)
-
-    def test_number_filter_isolates_shared_pacmse_volume(self, no_sleep):
-        """FSE and ISSTA can share one PACMSE volume; without a number filter,
-        the FSE probe would count ISSTA's papers as its own."""
-        v = _venue(prefix="fse", name="FSE", source="dblp", probe={"toc": [
-            "db/conf/sigsoft/fse{year}.bht",
-            {"key": "db/journals/pacmse/pacmse{pacmse_vol}.bht", "number": "FSE"},
-        ]})
-        miss = _response(200); miss.json = lambda: {"result": {"hits": {"@total": "0"}}}
-        shared = _response(200)
-        shared.json = lambda: {"result": {"hits": {
-            "@total": "300",
-            "hit": (
-                [{"info": {"number": "FSE"}}] * 120
-                + [{"info": {"number": "ISSTA"}}] * 180
-            ),
-        }}}
-        with patch("ppr.dblp_client.requests.get", side_effect=[miss, shared]) as g:
-            out = probe(v, 2026)
-        assert (out.status, out.count) == ("live", 120)
-        assert g.call_args_list[1].kwargs["params"]["h"] == 1000
-
-    def test_number_filter_excludes_hits_missing_the_field(self, no_sleep):
-        """Mirrors ppr/scrapers/dblp.py's `h.get("number") == number`: an entry
-        with no `number` field at all is a non-match, not a crash."""
-        v = _venue(prefix="issta", name="ISSTA", source="dblp", probe={"toc": [
-            {"key": "db/journals/pacmse/pacmse{pacmse_vol}.bht", "number": "ISSTA"},
-        ]})
-        resp = _response(200)
-        resp.json = lambda: {"result": {"hits": {
-            "@total": "2",
-            "hit": [{"info": {}}, {"info": {"number": "ISSTA"}}],
-        }}}
-        with patch("ppr.dblp_client.requests.get", return_value=resp):
-            out = probe(v, 2026)
-        assert out.count == 1
-
-    def test_number_filter_degrades_gracefully_on_malformed_payload(self, no_sleep):
-        """The number-filter path must fail the same way the plain path does --
-        `unreachable`, not an uncaught AttributeError -- on a malformed response."""
-        v = _venue(prefix="issta", name="ISSTA", source="dblp", probe={"toc": [
-            {"key": "db/journals/pacmse/pacmse{pacmse_vol}.bht", "number": "ISSTA"},
-        ]})
-        resp = _response(200)
-        resp.json = lambda: {"result": {"hits": ["not", "a", "dict"]}}
-        with patch("ppr.dblp_client.requests.get", return_value=resp):
-            out = probe(v, 2026)
-        assert out.status == "unreachable"
-        assert out.note == "unparseable response"
+        assert c.call_count == 1
 
 
 class TestOpenreviewProbe:
@@ -615,23 +494,18 @@ class TestProbeRegistration:
             r = probe(v, 2027)
         assert r.registration == {"slug": "usenixsecurity27"}
 
-    def test_dblp_plain_key(self, no_sleep):
-        ok = _response(200); ok.json = lambda: {"result": {"hits": {"@total": "245"}}}
+    def test_dblp_plain_key(self):
         v = _venue(prefix="icse", name="ICSE", source="dblp",
                    probe={"toc": "db/conf/icse/icse{year}.bht"})
-        with patch("ppr.dblp_client.requests.get", return_value=ok):
+        with patch("ppr.discover.dblp_client.toc_count", return_value=245):
             r = probe(v, 2026)
         assert r.registration == {"key": "db/conf/icse/icse2026.bht"}
 
-    def test_dblp_pacmse_key_carries_number(self, no_sleep):
+    def test_dblp_pacmse_key_carries_number(self):
         v = _venue(prefix="fse", name="FSE", source="dblp", probe={"toc": [
             {"key": "db/journals/pacmse/pacmse{pacmse_vol}.bht", "number": "FSE"},
         ]})
-        shared = _response(200)
-        shared.json = lambda: {"result": {"hits": {
-            "@total": "2", "hit": [{"info": {"number": "FSE"}}] * 2,
-        }}}
-        with patch("ppr.dblp_client.requests.get", return_value=shared):
+        with patch("ppr.discover.dblp_client.toc_count", return_value=2):
             r = probe(v, 2026)
         assert r.registration == {"key": "db/journals/pacmse/pacmse3.bht", "number": "FSE"}
 
