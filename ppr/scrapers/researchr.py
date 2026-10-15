@@ -53,6 +53,7 @@ RESEARCHR_CONFERENCES = {
     "fse_2023": {"url": "https://conf.researchr.org/track/fse-2023/fse-2023-research-papers", "track": "Research Papers", "dblp": {"key": "db/conf/sigsoft/fse2023.bht"}},
     "fse_2024": {"url": "https://conf.researchr.org/track/fse-2024/fse-2024-research-papers", "track": "Research Papers", "dblp": {"key": "db/journals/pacmse/pacmse1.bht"}},
     "fse_2025": {"url": "https://conf.researchr.org/track/fse-2025/fse-2025-research-papers", "track": "Research Papers", "dblp": {"key": "db/journals/pacmse/pacmse2.bht", "number": "FSE"}},
+    "fse_2026": {"url": "https://conf.researchr.org/track/fse-2026/fse-2026-research-papers", "track": "Research Papers"},
     # ASE (DBLP's key prefix is 'kbse')
     "ase_2023": {"url": "https://conf.researchr.org/track/ase-2023/ase-2023-papers", "track": "Research Papers", "dblp": {"key": "db/conf/kbse/ase2023.bht"}},
     "ase_2024": {"url": "https://conf.researchr.org/track/ase-2024/ase-2024-research", "track": "Research Papers", "dblp": {"key": "db/conf/kbse/ase2024.bht"}},

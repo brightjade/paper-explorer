@@ -144,7 +144,7 @@ NeurIPS also includes `datasets_oral`, `datasets_spotlight`, `datasets_poster` t
 | Conference | 2026 | 2025 | 2024 | 2023 |
 |---|---|---|---|---|
 | ICSE | | main | main | main |
-| FSE | | main | main | main |
+| FSE | main | main | main | main |
 | ASE | main | main | main | main |
 | ISSTA | | main | main | main |
 
