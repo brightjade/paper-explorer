@@ -36,6 +36,7 @@ ROBOTICSPROCEEDINGS_CONFERENCES = {
     "rss_2023": {"volume": 19},
     "rss_2024": {"volume": 20},
     "rss_2025": {"volume": 21},
+    "rss_2026": {"volume": 22},
 }
 
 

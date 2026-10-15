@@ -131,7 +131,7 @@ NeurIPS also includes `datasets_oral`, `datasets_spotlight`, `datasets_poster` t
 | CoRL | | oral, poster | main | oral, poster |
 | ICRA | main | main | main | main |
 | IROS | | main | main | main |
-| RSS | | main | main | main |
+| RSS | main | main | main | main |
 
 ### Security
 
