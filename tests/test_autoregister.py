@@ -5,7 +5,15 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ppr.autoregister import Outcome, Workspace, autoregister, git_commit, outcomes_to_json
+from ppr.autoregister import (
+    Hold,
+    Outcome,
+    Workspace,
+    autoregister,
+    check_against_prior_year,
+    git_commit,
+    outcomes_to_json,
+)
 from ppr.venues import Venue
 
 README = """### NLP
@@ -173,6 +181,52 @@ class TestCountCheck:
         assert ws.readme.read_text() == README
         assert not (ws.data_dir / "icse_2026").exists()
         assert commits == []
+
+
+def _prior(ws, conf_id, n):
+    path = ws.data_dir / conf_id / "papers.jsonl"
+    path.parent.mkdir(parents=True)
+    path.write_text("".join(json.dumps({"title": f"P{i}"}) + "\n" for i in range(n)) + "\n")
+
+
+class TestPriorYearFloor:
+    def test_a_crawl_under_half_the_prior_year_holds_and_reverts(self, ws):
+        _prior(ws, "icse_2025", 250)
+        row = _row("icse_2026", 100, {"key": "db/conf/icse/icse2026.bht"})
+        outcomes, commits = _run([row], ws, counts={"icse_2026": 100})
+        assert outcomes[0].status == "held"
+        assert "icse_2025" in outcomes[0].reason
+        assert ws.dblp_module.read_text() == DBLP_SRC
+        assert commits == []
+
+    def test_a_crawl_over_half_the_prior_year_registers(self, ws):
+        _prior(ws, "icse_2025", 250)
+        row = _row("icse_2026", 200, {"key": "db/conf/icse/icse2026.bht"})
+        outcomes, _ = _run([row], ws, counts={"icse_2026": 200})
+        assert outcomes[0].status == "registered"
+
+    def test_only_the_edition_two_years_back_is_compared(self, ws):
+        _prior(ws, "icse_2024", 250)
+        row = _row("icse_2026", 100, {"key": "db/conf/icse/icse2026.bht"})
+        outcomes, _ = _run([row], ws, counts={"icse_2026": 100})
+        assert outcomes[0].status == "held"
+        assert "icse_2024" in outcomes[0].reason
+
+    def test_boundary_is_inclusive_at_half(self, ws):
+        _prior(ws, "icse_2025", 250)
+        check_against_prior_year("icse_2026", 125, ws.data_dir)
+        with pytest.raises(Hold, match="icse_2025"):
+            check_against_prior_year("icse_2026", 124, ws.data_dir)
+
+    def test_nearest_edition_wins_over_an_older_one(self, ws):
+        _prior(ws, "icse_2025", 100)
+        _prior(ws, "icse_2024", 1000)
+        check_against_prior_year("icse_2026", 60, ws.data_dir)
+
+    def test_no_prior_edition_or_an_empty_one_passes(self, ws):
+        check_against_prior_year("icse_2026", 1, ws.data_dir)
+        _prior(ws, "icse_2025", 0)
+        check_against_prior_year("icse_2026", 1, ws.data_dir)
 
 
 class TestRevert:

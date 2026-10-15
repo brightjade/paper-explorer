@@ -40,6 +40,14 @@ MECHANICAL_SOURCES = {"openreview", "dblp", "cvf", "usenix", "researchr", "cross
 # paper is -- the signature of a selector or a venue-string mismatch.
 COUNT_TOLERANCE = 0.10
 
+# A list that is still growing -- acceptances posted in cycles, a partial
+# deposit -- would register once and never be revisited, because discover stops
+# probing an id once it is known. Comparing with the nearest earlier edition
+# holds such a venue until it is complete. The floor is this low on purpose: a
+# scope change between years (SE moving to research tracks only: ASE 2026 263
+# vs ASE 2025 389, ratio 0.68 under the old scope) must still pass.
+PRIOR_YEAR_FLOOR = 0.5
+
 
 class Hold(Exception):
     """This venue cannot be registered by rule; a human has to look."""
@@ -151,6 +159,25 @@ def check_count(crawled: int, expected: int) -> None:
         )
 
 
+def check_against_prior_year(conf_id: str, crawled: int, data_dir: Path) -> None:
+    """Hold a crawl that is under half the nearest earlier edition's size."""
+    prefix, _, year = conf_id.rpartition("_")
+    # Biennial venues skip a year, so year-2 is a candidate too.
+    for prior_year in (int(year) - 1, int(year) - 2):
+        prior_id = f"{prefix}_{prior_year}"
+        path = data_dir / prior_id / "papers.jsonl"
+        if not path.exists():
+            continue
+        with open(path, encoding="utf-8") as f:
+            prior = sum(1 for line in f if line.strip())
+        if prior and crawled < PRIOR_YEAR_FLOOR * prior:
+            raise Hold(
+                f"crawled {crawled} papers, under {PRIOR_YEAR_FLOOR:.0%} of "
+                f"{prior_id}'s {prior} -- probably a partial list; it is retried next month"
+            )
+        return
+
+
 def _checked_selections(notes: list, venue_id: str) -> dict[str, str]:
     selections = selections_from_notes(notes, venue_id)
     for key, value in selections.items():
@@ -228,6 +255,7 @@ def register_one(row: dict, venue: Venue, ws: Workspace, *, crawl: Crawl,
         snap.dir(ws.data_dir / conf_id)
         count = crawl(conf_id, venue, ws)
         check_count(count, expected)
+        check_against_prior_year(conf_id, count, ws.data_dir)
         if venue.source != "dblp":
             status = validate(conf_id)
             if status == "FAIL":
