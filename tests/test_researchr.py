@@ -231,3 +231,37 @@ class TestRegistry:
         from ppr.scrapers import SCRAPERS
 
         assert set(RESEARCHR_CONFERENCES) <= set(SCRAPERS)
+
+
+class TestShippedRegistry:
+    """The 2023-2025 entries were written from a live probe on 2026-10-14."""
+
+    EXPECTED = {
+        "icse_2023": ("icse-2023-technical-track", "Technical Track", "db/conf/icse/icse2023.bht", None),
+        "icse_2024": ("icse-2024-research-track", "Research Track", "db/conf/icse/icse2024.bht", None),
+        "icse_2025": ("icse-2025-research-track", "Research Track", "db/conf/icse/icse2025.bht", None),
+        "fse_2023": ("fse-2023-research-papers", "Research Papers", "db/conf/sigsoft/fse2023.bht", None),
+        "fse_2024": ("fse-2024-research-papers", "Research Papers", "db/journals/pacmse/pacmse1.bht", None),
+        "fse_2025": ("fse-2025-research-papers", "Research Papers", "db/journals/pacmse/pacmse2.bht", "FSE"),
+        "ase_2023": ("ase-2023-papers", "Research Papers", "db/conf/kbse/ase2023.bht", None),
+        "ase_2024": ("ase-2024-research", "Research Papers", "db/conf/kbse/ase2024.bht", None),
+        "ase_2025": ("ase-2025-papers", "Research Papers", "db/conf/kbse/ase2025.bht", None),
+        "issta_2023": ("issta-2023-technical-papers", "Technical Papers", "db/conf/issta/issta2023.bht", None),
+        "issta_2024": ("issta-2024-papers", "Technical Papers", "db/conf/issta/issta2024.bht", None),
+        "issta_2025": ("issta-2025-papers", "Research Papers", "db/journals/pacmse/pacmse2.bht", "ISSTA"),
+    }
+
+    @pytest.mark.parametrize("conf_id", sorted(EXPECTED))
+    def test_entry(self, conf_id):
+        slug, track, key, number = self.EXPECTED[conf_id]
+        conf = RESEARCHR_CONFERENCES[conf_id]
+        venue, year = conf_id.rsplit("_", 1)
+        assert conf["url"] == f"https://conf.researchr.org/track/{venue}-{year}/{slug}"
+        assert conf["track"] == track
+        assert conf["dblp"]["key"] == key
+        assert conf["dblp"].get("number") == number
+
+    def test_se_years_left_dblp(self):
+        from ppr.scrapers.dblp import DBLP_CONFERENCES
+
+        assert not set(self.EXPECTED) & set(DBLP_CONFERENCES)

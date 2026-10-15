@@ -14,22 +14,6 @@ from ppr.models import Paper
 logger = logging.getLogger(__name__)
 
 DBLP_CONFERENCES = {
-    # ICSE (traditional proceedings)
-    "icse_2023": {"key": "db/conf/icse/icse2023.bht"},
-    "icse_2024": {"key": "db/conf/icse/icse2024.bht"},
-    "icse_2025": {"key": "db/conf/icse/icse2025.bht"},
-    # FSE (traditional 2023, PACMSE 2024+)
-    "fse_2023": {"key": "db/conf/sigsoft/fse2023.bht"},
-    "fse_2024": {"key": "db/journals/pacmse/pacmse1.bht"},
-    "fse_2025": {"key": "db/journals/pacmse/pacmse2.bht", "number": "FSE"},
-    # ASE (traditional proceedings, DBLP key prefix is 'kbse')
-    "ase_2023": {"key": "db/conf/kbse/ase2023.bht"},
-    "ase_2024": {"key": "db/conf/kbse/ase2024.bht"},
-    "ase_2025": {"key": "db/conf/kbse/ase2025.bht"},
-    # ISSTA (traditional 2023-2024, PACMSE 2025+)
-    "issta_2023": {"key": "db/conf/issta/issta2023.bht"},
-    "issta_2024": {"key": "db/conf/issta/issta2024.bht"},
-    "issta_2025": {"key": "db/journals/pacmse/pacmse2.bht", "number": "ISSTA"},
     # Robotics
     "icra_2023": {"key": "db/conf/icra/icra2023.bht"},
     "icra_2024": {"key": "db/conf/icra/icra2024.bht"},

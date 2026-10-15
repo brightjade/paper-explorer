@@ -132,7 +132,7 @@ class TestValidateConference:
 
     def test_skip_dblp_sourced_conference(self, tmp_path, monkeypatch):
         monkeypatch.setattr("ppr.validate.DATA_DIR", tmp_path)
-        result = validate_conference("icse_2024")
+        result = validate_conference("icra_2024")
         assert result.status == "SKIP"
 
     def test_no_data_when_not_in_dblp(self, tmp_path, monkeypatch):

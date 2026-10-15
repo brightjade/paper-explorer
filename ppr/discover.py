@@ -68,7 +68,7 @@ def missing_years(
 
 # A page-scraping probe must clear this to count as live. Above the 9 links
 # CVPR 2026's stub page yields, far below the smallest proceedings tracked
-# (ISSTA 2025, 110 papers). DBLP and OpenReview report exact record counts,
+# (ISSTA 2025's research track, 107 papers). DBLP and OpenReview report exact record counts,
 # so any count above zero is real for them.
 MIN_LIVE_PAPERS = 50
 
