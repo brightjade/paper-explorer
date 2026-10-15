@@ -15,7 +15,9 @@ The monthly workflow (`.github/workflows/monthly.yml`) registers mechanical-sour
 - `needs-manual` venues (ACL-family, AAAI),
 - `stale_empty` venues (probable broken selector).
 
-Before any manual crawl or enrich, start from the newest data release (`./setup.sh`), not from any existing `data/` copy -- the release is the source of truth.
+Before any manual crawl or enrich, bring `data/` to the newest data release with `uv run python -m scripts.sync_data` -- the release is the source of truth, and the tag it records is what `release-data` later builds on. If it refuses, `data/` holds local work: find out what it is before passing `--force`, which discards it.
+
+A held venue whose cause is fixed (a scraper repaired, a registry entry corrected) can go back through the same rules locally: `uv run ppr discover --json > discover.json && uv run ppr autoregister discover.json --report register.json`. Without `--commit` it writes the registration, crawl and README cell to the working tree and commits nothing.
 
 ## Phase 1 — Detect, then stop
 
@@ -101,7 +103,7 @@ Path("configs/iclr_2027.yaml").write_text(render_openreview_config("ICLR", 2027,
 
 `configs/corl_2024.yaml` followed the 2023/2025 pattern, matched nothing, and wrote an empty file that went unnoticed for months. ICML 2026 proved the point again: it tags papers `"ICML 2026 regular"` / `"ICML 2026 spotlight"` where 2025 used `oral` / `spotlightposter` / `poster`.
 
-**Review the generated selection names before crawling.** `openreview_selections` derives a key from each venue string, falling back to a slug when no track word matches — ICML 2026's "regular" became `icml_2026_regular`. That name lands on every paper and shows up in the web app's track breakdown, so rename it to the project's vocabulary: `main` for a base track (61k papers already use it), then `oral`, `poster`, `spotlight`, `findings`, `industry`.
+**Review the generated selection names before crawling.** `openreview_selections` derives a key from each venue string: a single venue string becomes `main`, a track word (`oral`, `spotlight`, `poster`, `findings`, `industry`) names its track, and `regular` maps to `main` (ICML 2026's base track). Anything else falls back to a slug of the whole venue string, such as `iclr_2027_highlight`; autoregister holds those venues for exactly this reason. That name would land on every paper and show up in the web app's track breakdown, so rename it to the project's vocabulary (`TRACK_VOCABULARY` in `ppr/register.py`): `main` for a base track (61k papers already use it), then `oral`, `poster`, `spotlight`, `findings`, `industry`.
 
 Then crawl and check:
 
@@ -115,7 +117,7 @@ The crawled count should be close to the probe's count. If it is far off, stop a
 
 One exception: a venue with extra track venue IDs (`extra_venue_ids` in its config, e.g. NeurIPS Datasets & Benchmarks) is crawled across several venue IDs while the probe queries only one, so the crawl legitimately comes back *higher*. Check the extra tracks' counts add up rather than treating the gap as a fault.
 
-Also update the conference table in `README.md`, and run `uv run pytest tests/` — several scraper tests pin the exact set of registered conference IDs (`tests/test_cvf.py::TestCvfScrapersDict::test_expected_conference_ids` is one), so they fail by design when you add a venue. Add the new ID to the expected set; a failure there is the test doing its job, not a regression.
+Also fill the conference's cell in `README.md` (`ppr.readme_table.update_readme(Path("README.md"), "ICLR", 2027, "oral, poster")` does what autoregister does), and run `uv run pytest tests/`. A new ID needs no test edit: the per-scraper `test_expected_conference_ids` tests check a subset, and `tests/test_registry_seams.py` checks that a registration in every source keeps the suite green.
 
 ## Phase 2b — Decide whether to enrich now or later
 

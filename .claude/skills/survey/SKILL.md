@@ -51,7 +51,7 @@ Do not proceed until you know the research idea, target conferences, and year ra
 For each conference in scope, check whether `data/<venue>_<year>/papers_enriched.jsonl` exists.
 
 - If enriched data is **missing** for some conferences, warn the user with a clear list of which conferences lack enriched data.
-- **Do not proceed** until the user acknowledges the warning and tells you to continue (either with the available data or after they run `uv run ppr enrich` for the missing conferences).
+- **Do not proceed** until the user acknowledges the warning and tells you to continue (either with the available data, or after they refresh `data/` from the newest data release with `uv run python -m scripts.sync_data` -- the monthly pipeline enriches every conference -- or run `uv run ppr enrich` for the missing conferences).
 - If enriched data exists for none of the requested conferences, stop and tell the user.
 
 ### Step 3: Search for relevant papers
