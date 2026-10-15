@@ -49,6 +49,7 @@ RESEARCHR_CONFERENCES = {
     "icse_2023": {"url": "https://conf.researchr.org/track/icse-2023/icse-2023-technical-track", "track": "Technical Track", "dblp": {"key": "db/conf/icse/icse2023.bht"}},
     "icse_2024": {"url": "https://conf.researchr.org/track/icse-2024/icse-2024-research-track", "track": "Research Track", "dblp": {"key": "db/conf/icse/icse2024.bht"}},
     "icse_2025": {"url": "https://conf.researchr.org/track/icse-2025/icse-2025-research-track", "track": "Research Track", "dblp": {"key": "db/conf/icse/icse2025.bht"}},
+    "icse_2026": {"url": "https://conf.researchr.org/track/icse-2026/icse-2026-research-track", "track": "Research Track"},
     # FSE (PACMSE from 2024; pacmse2 is shared with ISSTA 2025)
     "fse_2023": {"url": "https://conf.researchr.org/track/fse-2023/fse-2023-research-papers", "track": "Research Papers", "dblp": {"key": "db/conf/sigsoft/fse2023.bht"}},
     "fse_2024": {"url": "https://conf.researchr.org/track/fse-2024/fse-2024-research-papers", "track": "Research Papers", "dblp": {"key": "db/journals/pacmse/pacmse1.bht"}},
