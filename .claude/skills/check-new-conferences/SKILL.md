@@ -42,7 +42,7 @@ Only for `live` venues. One venue at a time.
 ```python
 from pathlib import Path
 from ppr.register import register_dblp
-register_dblp("icse_2026", "db/conf/icse/icse2026.bht", Path("ppr/scrapers/dblp.py"))
+register_dblp("ijcai_2027", "db/conf/ijcai/ijcai2027.bht", Path("ppr/scrapers/dblp.py"))
 ```
 
 **CVF** — `parser` is `openaccess` for `openaccess.thecvf.com`, `accepted` for a conference AcceptedPapers page, `ecva` for ECCV (pass `year=`).
@@ -59,6 +59,27 @@ The writers insert each entry into its venue's group and use the module's host c
 ```python
 from ppr.register import register_usenix
 register_usenix("usenix_security_2026", "usenixsecurity26", Path("ppr/scrapers/usenix.py"))
+```
+
+**researchr** (ICSE/FSE/ASE/ISSTA) — use the `url` and `track` from the probe's `registration`; never guess a slug:
+
+```python
+from ppr.register import register_researchr
+register_researchr("icse_2027", "https://conf.researchr.org/track/icse-2027/icse-2027-research-track", "Research Track", Path("ppr/scrapers/researchr.py"))
+```
+
+**Crossref** (ICRA/IROS):
+
+```python
+from ppr.register import register_crossref
+register_crossref("iros_2026", "10.1109", "2026 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)", Path("ppr/scrapers/crossref.py"))
+```
+
+**roboticsproceedings** (RSS) — the volume is the year minus 2004:
+
+```python
+from ppr.register import register_roboticsproceedings
+register_roboticsproceedings("rss_2027", 23, Path("ppr/scrapers/roboticsproceedings.py"))
 ```
 
 **OpenReview** — never write `selections` by following another year's pattern. Read them from the API. Load `.env` first: only `ppr/cli.py` calls `load_dotenv()`, so a standalone script otherwise dies with "No OpenReview credentials provided".

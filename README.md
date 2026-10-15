@@ -6,7 +6,7 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/brightjade/paper-explorer)](https://github.com/brightjade/paper-explorer/commits/main)
 [![Sponsor](https://img.shields.io/badge/sponsor-brightjade-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/brightjade)
 
-Retrieve accepted paper metadata from ML/DL/NLP/CV/Robotics/Security/SE conferences. Uses the OpenReview API, web scraping, CVF Open Access, and the DBLP API.
+Retrieve accepted paper metadata from ML/DL/NLP/CV/Robotics/Security/SE conferences. Uses the OpenReview API, web scraping, CVF Open Access, conf.researchr.org, Crossref, roboticsproceedings.org, and DBLP's SPARQL endpoint.
 
 ## Getting Started
 
@@ -139,7 +139,7 @@ NeurIPS also includes `datasets_oral`, `datasets_spotlight`, `datasets_poster` t
 |---|---|---|---|---|
 | USENIX Security | main | main | main | main |
 
-### Software Engineering (DBLP)
+### Software Engineering (researchr research tracks)
 
 | Conference | 2025 | 2024 | 2023 |
 |---|---|---|---|
