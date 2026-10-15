@@ -405,6 +405,22 @@ class TestDiscoverSweep:
         assert by_status["iclr"] == "unreachable"
         assert by_status["icse"] == "live"
 
+    def test_one_probe_raising_does_not_abort_the_sweep(self):
+        """A parser bug or an odd 200 in one venue must not cost the others
+        their run -- every later pipeline step reads this sweep's output."""
+        reg = {
+            "icse": Venue("icse", "ICSE", "crossref", "annual", {"prefix": "p"}, 12),
+            "usenix": Venue("usenix", "USENIX", "usenix", "annual", {"url": "u{year}"}, 5),
+        }
+        with patch("ppr.discover._probe_crossref", side_effect=KeyError("total-results")), \
+             patch("ppr.discover._probe_usenix", return_value=_pr("usenix_2026", "live", 300)):
+            out = discover(reg, {"icse_2025", "usenix_2025"}, 2025)
+        by_prefix = {r.prefix: r for r in out if r.year == 2026}
+        assert set(by_prefix) == {"icse", "usenix"}
+        assert by_prefix["icse"].status == "unreachable"
+        assert "probe raised KeyError" in by_prefix["icse"].note
+        assert by_prefix["usenix"].status == "live"
+
 
 class TestStaleEmpty:
     def test_flags_empty_past_the_announce_month(self):

@@ -373,7 +373,14 @@ def discover(
     for prefix, venue in sorted(registry.items()):
         for year in missing_years(prefix, venue.cadence, known_ids, today_year):
             logger.info("Probing %s %s...", venue.name, year)
-            results.append(probe(venue, year, openreview_client=openreview_client))
+            try:
+                results.append(probe(venue, year, openreview_client=openreview_client))
+            except Exception as exc:  # one venue's crash must not cost the others their run
+                logger.exception("Probe of %s %s raised", venue.name, year)
+                results.append(_result(
+                    venue, year, "unreachable", 0, "",
+                    f"probe raised {type(exc).__name__}: {exc}",
+                ))
     return results
 
 
