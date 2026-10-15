@@ -10,7 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from ppr import dblp_client
-from ppr.scrapers import crossref, researchr
+from ppr.scrapers import crossref, researchr, roboticsproceedings
 from ppr.venues import MANUAL_SOURCES, REGISTRY_STEM, Venue
 
 logger = logging.getLogger(__name__)
@@ -314,6 +314,23 @@ def _probe_crossref(venue: Venue, year: int) -> ProbeResult:
                    registration={"prefix": prefix, "container": container})
 
 
+def _probe_roboticsproceedings(venue: Venue, year: int) -> ProbeResult:
+    """Count the papers in the year's proceedings volume (2026 is rss22)."""
+    volume = year - venue.probe["volume_offset"]
+    url = roboticsproceedings.index_url(volume)
+    try:
+        response = requests.get(url, headers=roboticsproceedings.HEADERS, timeout=60)
+    except requests.RequestException as exc:
+        return _result(venue, year, "unreachable", 0, url, f"{type(exc).__name__}")
+    if response.status_code == 404:
+        return _result(venue, year, "not-yet", 0, url)
+    if response.status_code != 200:
+        return _result(venue, year, "unreachable", 0, url, f"HTTP {response.status_code}")
+    count = len(roboticsproceedings.parse_index(response.text, year, volume))
+    return _result(venue, year, _classify_page(count), count, url,
+                   registration={"volume": volume})
+
+
 def probe(venue: Venue, year: int, *, openreview_client=None) -> ProbeResult:
     """Ask one source whether a conference-year's paper list is up.
 
@@ -337,6 +354,8 @@ def probe(venue: Venue, year: int, *, openreview_client=None) -> ProbeResult:
         return _probe_researchr(venue, year)
     if venue.source == "crossref":
         return _probe_crossref(venue, year)
+    if venue.source == "roboticsproceedings":
+        return _probe_roboticsproceedings(venue, year)
     if venue.source == "openreview":
         return _probe_openreview(venue, year, openreview_client)
     raise ValueError(f"no probe for source {venue.source!r}")

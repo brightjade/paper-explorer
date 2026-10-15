@@ -632,3 +632,33 @@ class TestCrossrefProbe:
             r = probe(self._venue(), 2026)
         assert r.status == "unreachable"
         assert "503" in r.note
+
+
+def _rp_index(n):
+    rows = "".join(f'<tr><td><a href="p{i:03d}.html">Paper {i}</a><br><i>A, B</i></td></tr>'
+                   for i in range(1, n + 1))
+    return f"<html><body><table>{rows}</table></body></html>"
+
+
+class TestRoboticsProceedingsProbe:
+    def _venue(self):
+        return _venue(prefix="rss", name="RSS", source="roboticsproceedings", probe={"volume_offset": 2004})
+
+    def test_a_published_volume_is_live_with_its_volume(self):
+        with patch("ppr.discover.requests.get", return_value=_response(200, _rp_index(210))) as g:
+            r = probe(self._venue(), 2026)
+        assert (r.status, r.count) == ("live", 210)
+        assert g.call_args.args[0] == "https://roboticsproceedings.org/rss22/index.html"
+        assert r.registration == {"volume": 22}
+
+    def test_an_unpublished_volume_is_not_yet(self):
+        with patch("ppr.discover.requests.get", return_value=_response(404, "Not Found")):
+            assert probe(self._venue(), 2027).status == "not-yet"
+
+    def test_a_short_index_is_empty(self):
+        with patch("ppr.discover.requests.get", return_value=_response(200, _rp_index(3))):
+            assert probe(self._venue(), 2026).status == "empty"
+
+    def test_a_server_error_is_unreachable(self):
+        with patch("ppr.discover.requests.get", return_value=_response(500)):
+            assert probe(self._venue(), 2026).status == "unreachable"

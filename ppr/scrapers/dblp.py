@@ -37,8 +37,6 @@ DBLP_CONFERENCES = {
     "iros_2023": {"key": "db/conf/iros/iros2023.bht"},
     "iros_2024": {"key": "db/conf/iros/iros2024.bht"},
     "iros_2025": {"key": "db/conf/iros/iros2025.bht"},
-    "rss_2023": {"key": "db/conf/rss/rss2023.bht"},
-    "rss_2024": {"key": "db/conf/rss/rss2024.bht"},
     # AI
     "ijcai_2023": {"key": "db/conf/ijcai/ijcai2023.bht"},
     "ijcai_2024": {"key": "db/conf/ijcai/ijcai2024.bht"},

@@ -26,6 +26,7 @@ CVF_SRC = 'CVF_CONFERENCES = {\n}\n'
 USENIX_SRC = 'USENIX_CONFERENCES = {\n}\n'
 RESEARCHR_SRC = 'RESEARCHR_CONFERENCES = {\n}\n'
 CROSSREF_SRC = 'CROSSREF_CONFERENCES = {\n}\n'
+RP_SRC = 'ROBOTICSPROCEEDINGS_CONFERENCES = {\n}\n'
 
 
 @pytest.fixture
@@ -39,6 +40,7 @@ def ws(tmp_path):
     (scrapers / "usenix.py").write_text(USENIX_SRC)
     (scrapers / "researchr.py").write_text(RESEARCHR_SRC)
     (scrapers / "crossref.py").write_text(CROSSREF_SRC)
+    (scrapers / "roboticsproceedings.py").write_text(RP_SRC)
     (tmp_path / "README.md").write_text(README)
     return Workspace(tmp_path)
 
@@ -52,6 +54,7 @@ REGISTRY = {
     "icse": _venue("icse", "dblp", "ICSE"),
     "fse": _venue("fse", "researchr", "FSE"),
     "icra": _venue("icra", "crossref", "ICRA"),
+    "rss": _venue("rss", "roboticsproceedings", "RSS"),
     "colm": _venue("colm", "openreview", "COLM"),
     "neurips": _venue("neurips", "openreview", "NeurIPS", extra_tracks=(
         {"venue_id": "NeurIPS.cc/{year}/Datasets_and_Benchmarks_Track", "prefix": "datasets"},
@@ -423,3 +426,10 @@ class TestCrossrefVenue:
         outcomes, _ = _run([row], ws, counts={"icra_2026": 1876})
         assert outcomes[0].status == "registered"
         assert f'"container": "{container}"' in ws.crossref_module.read_text()
+
+
+class TestRoboticsProceedingsVenue:
+    def test_registers_the_volume(self, ws):
+        outcomes, _ = _run([_row("rss_2026", 210, {"volume": 22})], ws, counts={"rss_2026": 210})
+        assert outcomes[0].status == "registered"
+        assert '"rss_2026": {"volume": 22},' in ws.roboticsproceedings_module.read_text()

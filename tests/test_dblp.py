@@ -46,7 +46,6 @@ class TestScrapersDict:
             # Robotics
             "icra_2023", "icra_2024", "icra_2025",
             "iros_2023", "iros_2024", "iros_2025",
-            "rss_2023", "rss_2024",
             # AI
             "ijcai_2023", "ijcai_2024", "ijcai_2025",
         }

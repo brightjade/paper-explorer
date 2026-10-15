@@ -110,6 +110,11 @@ def register_crossref(conf_id: str, prefix: str, container: str, path: Path) -> 
     _insert_into_dict(path, "CROSSREF_CONFERENCES", conf_id, entry)
 
 
+def register_roboticsproceedings(conf_id: str, volume: int, path: Path) -> None:
+    _insert_into_dict(path, "ROBOTICSPROCEEDINGS_CONFERENCES", conf_id,
+                      f'"{conf_id}": {{"volume": {int(volume)}}},')
+
+
 # Words that appear in OpenReview venue strings and name a track.
 _TRACK_WORDS = ("oral", "spotlight", "poster", "findings", "industry")
 

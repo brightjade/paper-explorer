@@ -5,7 +5,7 @@ from ppr.scrapers.dblp import SCRAPERS as DBLP_SCRAPERS
 from ppr.scrapers.researchr import SCRAPERS as RESEARCHR_SCRAPERS
 from ppr.scrapers.crossref import SCRAPERS as CROSSREF_SCRAPERS
 from ppr.scrapers.cvf import SCRAPERS as CVF_SCRAPERS
-from ppr.scrapers.rss import SCRAPERS as RSS_SCRAPERS
+from ppr.scrapers.roboticsproceedings import SCRAPERS as ROBOTICSPROCEEDINGS_SCRAPERS
 from ppr.scrapers.ijcai import SCRAPERS as IJCAI_SCRAPERS
 
 SCRAPERS = {
@@ -16,6 +16,6 @@ SCRAPERS = {
     **RESEARCHR_SCRAPERS,
     **CROSSREF_SCRAPERS,
     **CVF_SCRAPERS,
-    **RSS_SCRAPERS,
+    **ROBOTICSPROCEEDINGS_SCRAPERS,
     **IJCAI_SCRAPERS,
 }

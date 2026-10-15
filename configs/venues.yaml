@@ -86,13 +86,15 @@ venues:
     announce_month: 12
     probe: {prefix: "10.1109", container: "{year} IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)"}
 
-  # --- DBLP ---
+  # --- roboticsproceedings.org (RSS) ---
   rss:
     name: RSS
-    source: dblp
+    source: roboticsproceedings
     cadence: annual
-    announce_month: 4
-    probe: {toc: "db/conf/rss/rss{year}.bht"}
+    announce_month: 7
+    probe: {volume_offset: 2004}
+
+  # --- DBLP ---
   ijcai:
     name: IJCAI
     source: dblp

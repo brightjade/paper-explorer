@@ -10,6 +10,7 @@ from ppr.register import (
     register_crossref,
     register_dblp,
     register_researchr,
+    register_roboticsproceedings,
     register_usenix,
     render_openreview_config,
     selections_from_notes,
@@ -351,3 +352,18 @@ class TestRegisterCrossref:
         namespace: dict = {}
         exec(p.read_text(), namespace)
         assert namespace["CROSSREF_CONFERENCES"]["icra_2026"]["container"] == ICRA_2026
+
+
+RP_SRC = '''ROBOTICSPROCEEDINGS_CONFERENCES = {
+    "rss_2025": {"volume": 21},
+}
+'''
+
+
+class TestRegisterRoboticsProceedings:
+    def test_inserts_the_volume(self, tmp_path):
+        p = _module(tmp_path, "roboticsproceedings.py", RP_SRC)
+        register_roboticsproceedings("rss_2026", 22, p)
+        text = p.read_text()
+        assert '"rss_2026": {"volume": 22},' in text
+        assert text.index('"rss_2025"') < text.index('"rss_2026"')

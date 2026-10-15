@@ -21,6 +21,7 @@ from ppr.register import (
     TRACK_VOCABULARY,
     RegistrationError,
     register_crossref,
+    register_roboticsproceedings,
     register_cvf,
     register_dblp,
     register_researchr,
@@ -32,7 +33,7 @@ from ppr.venues import Venue
 
 logger = logging.getLogger(__name__)
 
-MECHANICAL_SOURCES = {"openreview", "dblp", "cvf", "usenix", "researchr", "crossref"}
+MECHANICAL_SOURCES = {"openreview", "dblp", "cvf", "usenix", "researchr", "crossref", "roboticsproceedings"}
 
 # Crawled vs probed paper count. The probe and the crawler read the same
 # source, so a wider gap means the crawler and the page disagree about what a
@@ -91,6 +92,10 @@ class Workspace:
     @property
     def crossref_module(self) -> Path:
         return self.root / "ppr" / "scrapers" / "crossref.py"
+
+    @property
+    def roboticsproceedings_module(self) -> Path:
+        return self.root / "ppr" / "scrapers" / "roboticsproceedings.py"
 
 
 Crawl = Callable[[str, Venue, Workspace], int]
@@ -200,6 +205,8 @@ def _register(row: dict, venue: Venue, ws: Workspace, snap: _Snapshot,
         register_researchr(conf_id, reg["url"], reg["track"], snap.file(ws.researchr_module))
     elif venue.source == "crossref":
         register_crossref(conf_id, reg["prefix"], reg["container"], snap.file(ws.crossref_module))
+    elif venue.source == "roboticsproceedings":
+        register_roboticsproceedings(conf_id, reg["volume"], snap.file(ws.roboticsproceedings_module))
     else:
         raise Hold(f"no registration writer for source {venue.source!r}")
     return row["count"]
