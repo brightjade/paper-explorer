@@ -12,6 +12,10 @@ on:
         description: "Run steps 1-6 for real; only print what release, push and deploy would do"
         type: boolean
         default: false
+      recrawl:
+        description: "Space-separated conference IDs to re-crawl before enrich (e.g. icse_2025 ase_2024)"
+        type: string
+        default: ""
 
 concurrency:
   group: data-pipeline
@@ -19,6 +23,7 @@ concurrency:
 
 env:
   DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+  RECRAWL: ${{ inputs.recrawl || '' }}
   RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
 jobs:
@@ -80,11 +85,24 @@ jobs:
       - uses: actions/upload-artifact@v4
         with: {name: report-register, path: register.json}
 
+      - name: Recrawl
+        # Dispatch only: a source migration ships through the run that owns the
+        # release. An unknown id makes `ppr crawl` fail before crawling anything.
+        if: env.RECRAWL != ''
+        run: |
+          set -euo pipefail
+          read -ra ids <<< "$RECRAWL"
+          uv run ppr crawl "${ids[@]}"
+
       - name: Tests
         run: uv run pytest tests/ -q
 
       - name: Enrich
-        run: uv run ppr enrich --all --time-budget 4h --report enrich.json
+        run: |
+          set -euo pipefail
+          extra=()
+          if [ -n "$RECRAWL" ]; then read -ra ids <<< "$RECRAWL"; extra+=(--require "${ids[@]}"); fi
+          uv run ppr enrich --all --time-budget 4h --report enrich.json "${extra[@]}"
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() && hashFiles('enrich.json') != '' }}
         with: {name: report-enrich, path: enrich.json}

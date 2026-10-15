@@ -1572,7 +1572,7 @@ class TestFormatEnrichSummary:
 def _enrich_args(**kw) -> argparse.Namespace:
     base = dict(
         conferences=["a_2026"], all=False, full=False,
-        api_key="", time_budget=None, report=None,
+        api_key="", time_budget=None, report=None, require=[],
     )
     base.update(kw)
     return argparse.Namespace(**base)
@@ -1606,6 +1606,34 @@ class TestCmdEnrichExitCode:
             ],
         )
         cmd_enrich(_enrich_args())
+
+    def test_a_required_conference_skipped_by_a_guard_exits_nonzero(self, monkeypatch, capsys):
+        """After a re-crawl, a guard skip leaves the old papers_enriched.jsonl
+        beside the new papers.jsonl; shipping that release is the failure."""
+        self._patch_results(monkeypatch, [EnrichResult("ase_2024", "skipped", reason="guard")])
+        with pytest.raises(SystemExit) as exc:
+            cmd_enrich(_enrich_args(require=["ase_2024"]))
+        assert exc.value.code == 1
+        assert "ase_2024" in capsys.readouterr().out
+
+    def test_a_required_conference_missing_from_the_results_exits_nonzero(self, monkeypatch, capsys):
+        self._patch_results(monkeypatch, [EnrichResult("a_2026", "enriched")])
+        with pytest.raises(SystemExit):
+            cmd_enrich(_enrich_args(require=["ase_2024"]))
+
+    def test_required_conferences_that_enriched_exit_zero(self, monkeypatch, capsys):
+        self._patch_results(monkeypatch, [EnrichResult("ase_2024", "enriched"),
+                                          EnrichResult("ase_2025", "nothing-to-do")])
+        cmd_enrich(_enrich_args(require=["ase_2024", "ase_2025"]))
+
+    def test_skips_outside_the_required_set_still_exit_zero(self, monkeypatch, capsys):
+        self._patch_results(monkeypatch, [EnrichResult("ase_2024", "enriched"),
+                                          EnrichResult("b_2026", "skipped", reason="guard")])
+        cmd_enrich(_enrich_args(require=["ase_2024"]))
+
+    def test_require_parses_a_list(self):
+        args = build_parser().parse_args(["enrich", "--all", "--require", "a_2026", "b_2026"])
+        assert args.require == ["a_2026", "b_2026"]
 
 
 from ppr.enrich import Deadline, order_newest_first, parse_duration, results_to_json

@@ -111,6 +111,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--report", type=Path, default=None,
         help="Write per-conference results as JSON (written even when a conference fails).",
     )
+    enrich_parser.add_argument(
+        "--require", nargs="+", default=[], metavar="CONF_ID",
+        help="Exit non-zero unless each of these ends enriched or nothing-to-do (used after a re-crawl).",
+    )
 
     # validate
     validate_parser = subparsers.add_parser(
@@ -250,9 +254,14 @@ def cmd_enrich(args: argparse.Namespace) -> None:
 
     # `ppr enrich --all` feeds ./build.sh and a data release, so a crashed
     # conference must not read as success to the calling shell. Guard skips are
-    # a correct outcome and stay exit-0.
+    # a correct outcome and stay exit-0 -- except for a conference that was just
+    # re-crawled, where a skip ships the stale enriched file beside the new list.
     failures = [r for r in results if r.status == "failed"]
-    if failures:
+    status = {r.conf_id: r.status for r in results}
+    unmet = [c for c in args.require if status.get(c) not in ("enriched", "nothing-to-do")]
+    for conf_id in unmet:
+        print(f"required conference {conf_id} ended {status.get(conf_id, 'missing')}; failing the run")
+    if failures or unmet:
         raise SystemExit(1)
 
 
