@@ -14,8 +14,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import yaml
-
 from ppr.cli import build_parser
 from ppr.register import (
     register_crossref,

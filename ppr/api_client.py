@@ -65,10 +65,9 @@ class OpenReviewAPIClient:
         self.config = config
         self.client = client
 
-    def fetch_papers(self, selections: dict[str, str] | None = None) -> list[Paper]:
-        """Fetch accepted papers, tagged with their selection type.
-        If selections is None, uses all selections from config."""
-        sel_map = selections or self.config.selections
+    def fetch_papers(self) -> list[Paper]:
+        """Fetch accepted papers, tagged with their configured selection type."""
+        sel_map = self.config.selections
         is_v1 = self.config.api_version == 1
 
         if is_v1:

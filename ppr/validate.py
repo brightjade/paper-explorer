@@ -109,7 +109,6 @@ DBLP_VALIDATION_KEYS: dict[str, list[str]] = {
     "cvpr_2024": ["db/conf/cvpr/cvpr2024.bht"],
     "cvpr_2025": ["db/conf/cvpr/cvpr2025.bht"],
     "iccv_2023": ["db/conf/iccv/iccv2023.bht"],
-    # iccv_2025: not yet indexed
     "wacv_2023": ["db/conf/wacv/wacv2023.bht"],
     "wacv_2024": ["db/conf/wacv/wacv2024.bht"],
     "wacv_2025": ["db/conf/wacv/wacv2025.bht"],

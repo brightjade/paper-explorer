@@ -444,10 +444,6 @@ def _dominant_path(refresh: list, doi_cold: list, title_cold: list) -> str:
 Record = Callable[[list[Paper]], None]
 
 
-def _no_record(papers: list[Paper]) -> None:
-    """Default for callers that do not want progress checkpointed."""
-
-
 async def _run_batch(
     client: S2Client,
     http: httpx.AsyncClient,
@@ -455,8 +451,8 @@ async def _run_batch(
     id_of,
     *,
     mode: str,
+    record: Record,
     crawl_abstracts: dict[str, str] | None = None,
-    record: Record = _no_record,
 ) -> tuple[list[Paper], int]:
     """Look papers up by ID and merge the results in place.
 
@@ -507,7 +503,7 @@ async def _run_title_cold(
     http: httpx.AsyncClient,
     papers: list[Paper],
     conf_id: str,
-    record: Record = _no_record,
+    record: Record,
     deadline: Deadline = NO_DEADLINE,
 ) -> tuple[int, int]:
     """Prefetch the venue in bulk, then match the remainder one at a time.
@@ -677,8 +673,8 @@ async def enrich_conference(
             )
 
     # One combined line per conference — refresh is where most fuzzy verdicts
-    # actually land, so counting only the title-cold path here would miss the
-    # majority of what the spec wants tracked as a trend.
+    # actually land, so counting only the title-cold path here would miss
+    # most of them.
     fuzzy_total = refresh_fuzzy + title_cold_fuzzy
     if fuzzy_total:
         logger.info(

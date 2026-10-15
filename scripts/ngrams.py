@@ -27,7 +27,7 @@ STOPWORDS = frozenset({
     "introduce", "introduces", "demonstrate", "demonstrates", "achieve",
     "achieves", "existing", "previous", "recent", "state", "art",
     "performance", "experiments", "experimental", "evaluate", "evaluation",
-    "compared", "compared", "significantly", "respectively", "without",
+    "compared", "significantly", "respectively", "without",
     "within", "across", "among", "several", "various", "different",
     "effectively", "efficiently", "large", "small", "high", "low",
     "best", "better", "good", "via", "per", "pre", "non",

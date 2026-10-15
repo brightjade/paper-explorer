@@ -34,7 +34,6 @@ MAX_RETRIES = 8
 
 class S2Client:
     def __init__(self, api_key: str | None = None, min_interval: float = 1.0):
-        self.api_key = api_key
         self.headers = {"x-api-key": api_key} if api_key else {}
         self._min_interval = min_interval
         self._last_request_time: float = 0.0
@@ -100,10 +99,7 @@ class S2Client:
             return None
 
     async def get_batch(
-        self,
-        client: httpx.AsyncClient,
-        ids: list[str],
-        fields: str = ENRICHMENT_FIELDS,
+        self, client: httpx.AsyncClient, ids: list[str]
     ) -> list[dict | None]:
         """Look papers up by ID, 500 per request.
 
@@ -118,7 +114,7 @@ class S2Client:
                 client,
                 "POST",
                 BATCH_URL,
-                params={"fields": fields},
+                params={"fields": ENRICHMENT_FIELDS},
                 json={"ids": chunk},
             )
             if response is None or response.status_code != 200:
@@ -150,11 +146,7 @@ class S2Client:
         return results
 
     async def bulk_search(
-        self,
-        client: httpx.AsyncClient,
-        venue: str,
-        year: int,
-        fields: str = BULK_FIELDS,
+        self, client: httpx.AsyncClient, venue: str, year: int
     ) -> list[dict]:
         """Fetch every paper Semantic Scholar indexes for a venue and year.
 
@@ -163,7 +155,7 @@ class S2Client:
         fall back to per-title matching, not that the venue has no papers.
         """
         collected: list[dict] = []
-        params = {"venue": venue, "year": str(year), "fields": fields}
+        params = {"venue": venue, "year": str(year), "fields": BULK_FIELDS}
         while True:
             response = await self._request_with_retry(
                 client, "GET", BULK_URL, params=params

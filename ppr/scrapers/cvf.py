@@ -166,10 +166,9 @@ def _parse_ecva(html: str, year: int | None = None) -> list[Paper]:
     - The second following ``<dd>`` holds links; the first ``<a href>`` whose
       href ends with ``.pdf`` and does not contain ``supp`` is the main PDF.
 
-    PDF hrefs are relative to ``https://www.ecva.net`` and are made absolute
-    with :func:`urllib.parse.urljoin`.
+    PDF hrefs are relative to ``ECVA_BASE_URL`` and are made absolute with
+    :func:`urllib.parse.urljoin`.
     """
-    base_url = "https://www.ecva.net"
     soup = BeautifulSoup(html, "html.parser")
     papers: list[Paper] = []
 
@@ -225,10 +224,10 @@ def _parse_ecva(html: str, year: int | None = None) -> list[Paper]:
                 break
 
         if pdf_href:
-            link = urljoin(base_url + "/", pdf_href)
+            link = urljoin(ECVA_BASE_URL + "/", pdf_href)
         else:
             href = title_a.get("href", "")
-            link = urljoin(base_url + "/", href) if href else ""
+            link = urljoin(ECVA_BASE_URL + "/", href) if href else ""
 
         papers.append(Paper(
             title=title,

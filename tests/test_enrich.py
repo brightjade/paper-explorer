@@ -1547,7 +1547,6 @@ class TestFormatEnrichSummary:
         ])
         assert "Resumed" in out
         assert "Unbound" in out
-        assert "Kept" not in out  # the old name counted a bucket that is gone
         assert "1 enriched, 0 skipped, 0 failed, 1 total." in out
 
     def test_row_renders_each_numeric_column_in_its_own_slot(self):

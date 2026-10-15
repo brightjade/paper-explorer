@@ -194,7 +194,6 @@ def build_trends(all_papers: dict[str, list[dict]]) -> dict:
             q = statistics.quantiles(cites_sorted, n=4)
             q1, median, q3 = q[0], q[1], q[2]
             iqr = q3 - q1
-            lower_fence = q1 - 1.5 * iqr
             upper_fence = q3 + 1.5 * iqr
             outliers = [c for c in cites_sorted if c > upper_fence][:20]
             stats[venue] = {
