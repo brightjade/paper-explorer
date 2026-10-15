@@ -9,6 +9,8 @@ __pycache__/
 docs/superpowers/
 data/
 data.zip
+.data-release.json
+.data-sync-*/
 
 # Web app
 web/node_modules/

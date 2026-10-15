@@ -16,6 +16,7 @@ uv run ppr validate iclr_2025                  # Validate paper count against DB
 uv run ppr autoregister discover.json --report register.json   # Register live venues by rule (--commit commits each venue)
 uv run ppr enrich --all --time-budget 4h --report enrich.json  # Enrich within a time budget
 uv run ppr release --base-tag data-YYYY-MM-DD --dry-run         # Plan a data release
+uv run python -m scripts.sync_data                             # Mirror the newest data release into data/ (refuses over local edits)
 uv run pytest tests/                           # Run all tests
 uv run pytest tests/test_models.py::TestPaper::test_to_dict_full  # Single test
 ```
