@@ -146,7 +146,7 @@ NeurIPS also includes `datasets_oral`, `datasets_spotlight`, `datasets_poster` t
 | ICSE | main | main | main | main |
 | FSE | main | main | main | main |
 | ASE | main | main | main | main |
-| ISSTA | | main | main | main |
+| ISSTA | main | main | main | main |
 
 ## Literature Survey (Claude Code skill)
 

@@ -64,6 +64,7 @@ RESEARCHR_CONFERENCES = {
     "issta_2023": {"url": "https://conf.researchr.org/track/issta-2023/issta-2023-technical-papers", "track": "Technical Papers", "dblp": {"key": "db/conf/issta/issta2023.bht"}},
     "issta_2024": {"url": "https://conf.researchr.org/track/issta-2024/issta-2024-papers", "track": "Technical Papers", "dblp": {"key": "db/conf/issta/issta2024.bht"}},
     "issta_2025": {"url": "https://conf.researchr.org/track/issta-2025/issta-2025-papers", "track": "Research Papers", "dblp": {"key": "db/journals/pacmse/pacmse2.bht", "number": "ISSTA"}},
+    "issta_2026": {"url": "https://conf.researchr.org/track/issta-2026/issta-2026-research-papers", "track": "Research papers"},
 }
 
 
