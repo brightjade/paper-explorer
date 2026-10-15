@@ -80,12 +80,8 @@ def _url_literal(url: str) -> str:
     return f'"{url}"'
 
 
-def register_dblp(conf_id: str, toc_key: str, path: Path, number: str | None = None) -> None:
-    entry = f'"{conf_id}": {{"key": "{toc_key}"'
-    if number:
-        # PACMSE volumes hold FSE and ISSTA together; the scraper filters on it.
-        entry += f', "number": "{number}"'
-    _insert_into_dict(path, "DBLP_CONFERENCES", conf_id, entry + "},")
+def register_dblp(conf_id: str, toc_key: str, path: Path) -> None:
+    _insert_into_dict(path, "DBLP_CONFERENCES", conf_id, f'"{conf_id}": {{"key": "{toc_key}"}},')
 
 
 def register_cvf(conf_id: str, url: str, parser: str, path: Path, year: int | None = None) -> None:

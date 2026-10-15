@@ -1,9 +1,9 @@
 """Register, crawl and check newly published venues without a human.
 
-Every judgment the check-new-conferences skill used to ask a person for is a
-rule here, and a venue the rules cannot settle is *held*: its edits are
-reverted and the reason is reported, so it comes back next month as the same
-unregistered `live` venue. Nothing is guessed.
+Every judgment a registration needs is a rule here, and a venue the rules
+cannot settle is *held*: its edits are reverted and the reason is reported, so
+it comes back next month as the same unregistered `live` venue. Nothing is
+guessed.
 """
 
 import json
@@ -222,7 +222,7 @@ def _register(row: dict, venue: Venue, ws: Workspace, snap: _Snapshot,
     if venue.source == "openreview":
         return _register_openreview(row, venue, ws, snap, openreview)
     if venue.source == "dblp":
-        register_dblp(conf_id, reg["key"], snap.file(ws.dblp_module), number=reg.get("number"))
+        register_dblp(conf_id, reg["key"], snap.file(ws.dblp_module))
     elif venue.source == "cvf":
         register_cvf(conf_id, reg["url"], reg["parser"], snap.file(ws.cvf_module),
                      year=reg.get("year"))

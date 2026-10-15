@@ -9,25 +9,17 @@ class TestScrapeDblp:
                     "authors": ["Al One", "Bea Two"]}]
         with patch("ppr.scrapers.dblp.dblp_client.toc_papers", return_value=records) as t:
             papers = _scrape_dblp("icra_2023")
-        t.assert_called_once_with("db/conf/icra/icra2023.bht", number=None)
+        t.assert_called_once_with("db/conf/icra/icra2023.bht")
         assert [(p.title, p.link, p.authors, p.selection) for p in papers] == [
             ("A Paper", "https://doi.org/10.1/a", ["Al One", "Bea Two"], "main"),
         ]
 
     def test_skips_records_without_a_link(self):
-        """The search-API scraper skipped entries without an `ee`; a paper a
-        reader cannot open is not one we list."""
+        """A paper a reader cannot open is not one we list."""
         records = [{"title": "Kept", "link": "https://doi.org/10.1/a", "authors": ["A"]},
                    {"title": "Dropped", "link": "", "authors": ["B"]}]
         with patch("ppr.scrapers.dblp.dblp_client.toc_papers", return_value=records):
             assert [p.title for p in _scrape_dblp("icra_2023")] == ["Kept"]
-
-    def test_passes_number_for_a_shared_pacmse_volume(self, monkeypatch):
-        monkeypatch.setitem(DBLP_CONFERENCES, "fse_2099",
-                            {"key": "db/journals/pacmse/pacmse9.bht", "number": "FSE"})
-        with patch("ppr.scrapers.dblp.dblp_client.toc_papers", return_value=[]) as t:
-            _scrape_dblp("fse_2099")
-        t.assert_called_once_with("db/journals/pacmse/pacmse9.bht", number="FSE")
 
 
 class TestScrapersDict:

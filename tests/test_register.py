@@ -146,16 +146,6 @@ class TestGroupedInsertion:
         assert "issta_2025" in lines[3]
 
 
-class TestRegisterDblpNumber:
-    def test_writes_the_number_filter(self, tmp_path):
-        p = _module(tmp_path, "dblp.py", DBLP_SRC)
-        register_dblp("fse_2026", "db/journals/pacmse/pacmse3.bht", p, number="FSE")
-        assert (
-            '"fse_2026": {"key": "db/journals/pacmse/pacmse3.bht", "number": "FSE"},'
-            in p.read_text()
-        )
-
-
 class TestRegisterUsenix:
     def test_inserts_entry(self, tmp_path):
         p = _module(tmp_path, "usenix.py", USENIX_SRC)

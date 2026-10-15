@@ -245,13 +245,8 @@ class TestResearchrProbe:
 
 
 class TestDblpProbe:
-    """Candidate traversal and status mapping. Transport, retries and pacing
-    belong to ppr/dblp_client.py and are tested there."""
-
-    FSE = dict(prefix="fse", name="FSE", source="dblp", probe={"toc": [
-        "db/conf/sigsoft/fse{year}.bht",
-        {"key": "db/journals/pacmse/pacmse{pacmse_vol}.bht", "number": "FSE"},
-    ]})
+    """Status mapping. Transport, retries and pacing belong to
+    ppr/dblp_client.py and are tested there."""
 
     def _icse(self):
         return _venue(prefix="icse", name="ICSE", source="dblp",
@@ -267,40 +262,12 @@ class TestDblpProbe:
         with patch("ppr.discover.dblp_client.toc_count", return_value=0):
             assert probe(self._icse(), 2026).status == "not-yet"
 
-    def test_falls_through_toc_candidates_until_one_has_hits(self):
-        """FSE moved to shared PACMSE volumes; the old conf key is dead for 2024+."""
-        with patch("ppr.discover.dblp_client.toc_count", side_effect=[0, 132]) as c:
-            out = probe(_venue(**self.FSE), 2026)
-        assert (out.status, out.count) == ("live", 132)
-        # pacmse1 is 2024, so 2026 must resolve to volume 3 -- not the year.
-        assert c.call_args_list[1].args[0] == ["db/journals/pacmse/pacmse3.bht"]
-        assert c.call_args_list[1].kwargs["number"] == "FSE"
-
-    def test_stops_at_the_first_candidate_with_hits(self):
-        with patch("ppr.discover.dblp_client.toc_count", return_value=206) as c:
-            out = probe(_venue(**self.FSE), 2023)
-        assert out.count == 206
-        assert c.call_count == 1
-
-    def test_all_candidates_empty_is_not_yet(self):
-        with patch("ppr.discover.dblp_client.toc_count", return_value=0):
-            assert probe(_venue(**self.FSE), 2027).status == "not-yet"
-
     def test_unavailable_is_unreachable_with_the_reason(self):
         with patch("ppr.discover.dblp_client.toc_count",
                    side_effect=DblpUnavailable("bot challenge (HTTP 202)")):
             out = probe(self._icse(), 2026)
         assert out.status == "unreachable"
         assert "bot challenge" in out.note
-
-    def test_unreachable_first_candidate_is_not_papered_over_by_second_candidate(self):
-        """Falling through to a second candidate's `not-yet` would turn an
-        unanswered DBLP into a false "nothing new"."""
-        with patch("ppr.discover.dblp_client.toc_count",
-                   side_effect=DblpUnavailable("HTTP 429 after 5 attempts")) as c:
-            out = probe(_venue(**self.FSE), 2026)
-        assert out.status == "unreachable"
-        assert c.call_count == 1
 
 
 class TestOpenreviewProbe:
@@ -499,7 +466,7 @@ class TestVenueFilter:
         return argparse.Namespace(venue=venues, json=False, username=None, password=None)
 
     def test_unknown_prefix_raises_instead_of_sweeping_nothing(self):
-        """A typo'd --venue used to filter the registry down to {}, probe
+        """A typo'd --venue must not filter the registry down to {}, probe
         nothing, and print "no new lists ready to register" -- one character
         producing the exact false negative the status taxonomy exists to
         prevent. It must fail loudly instead."""
@@ -578,14 +545,6 @@ class TestProbeRegistration:
         with patch("ppr.discover.dblp_client.toc_count", return_value=245):
             r = probe(v, 2026)
         assert r.registration == {"key": "db/conf/icse/icse2026.bht"}
-
-    def test_dblp_pacmse_key_carries_number(self):
-        v = _venue(prefix="fse", name="FSE", source="dblp", probe={"toc": [
-            {"key": "db/journals/pacmse/pacmse{pacmse_vol}.bht", "number": "FSE"},
-        ]})
-        with patch("ppr.discover.dblp_client.toc_count", return_value=2):
-            r = probe(v, 2026)
-        assert r.registration == {"key": "db/journals/pacmse/pacmse3.bht", "number": "FSE"}
 
     def test_openreview_venue_id(self):
         v = _venue(prefix="colm", name="COLM", source="openreview",

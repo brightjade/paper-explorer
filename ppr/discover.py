@@ -48,8 +48,7 @@ def missing_years(
     Looks from the venue's earliest known year through next year -- the extra
     year catches a venue that publishes ahead of schedule, as OpenReview venues
     routinely do. A venue with nothing registered yields nothing: there is no
-    baseline to extrapolate from, and an unregistered venue is caught by the
-    registry drift test instead.
+    baseline to extrapolate from, so its first year is registered by hand.
     """
     known = {
         int(cid.rsplit("_", 1)[1])
@@ -94,7 +93,7 @@ class ProbeResult:
     note: str = ""
     # What the probe actually matched, in the shape ppr/autoregister.py hands
     # to the registry writers. Recorded here because only the probe knows which
-    # toc candidate hit or which parser counted the page; rebuilding that later
+    # track slug matched or which parser counted the page; rebuilding that later
     # from the venue template is the guesswork registration must not do.
     registration: dict = field(default_factory=dict)
 
@@ -185,67 +184,17 @@ def _probe_usenix(venue: Venue, year: int) -> ProbeResult:
     return _result(venue, year, _classify_page(count), count, url, registration={"slug": slug})
 
 
-def _dblp_toc_candidates(venue: Venue, year: int) -> list[dict]:
-    """Every toc key worth trying for this venue-year, in order.
-
-    Most venues have one stable key. FSE and ISSTA do not: both migrated to
-    shared PACMSE journal volumes (FSE from 2024, ISSTA from 2025), whose
-    volume number is not the year -- pacmse1 is 2024, pacmse2 is 2025. A single
-    `{year}` template cannot express that, so those venues list several
-    candidates and the probe takes the first that returns hits.
-
-    FSE and ISSTA can even share the *same* volume -- pacmse2 holds both FSE
-    2025 and ISSTA 2025 -- distinguished only by each entry's `number` field.
-    A candidate can carry a `number` filter for exactly this case; the plain
-    string form is shorthand for "no filter, trust the SPARQL count".
-    """
-    toc = venue.probe["toc"]
-    templates = list(toc) if isinstance(toc, list) else [toc]
-
-    candidates = []
-    for template in templates:
-        if isinstance(template, dict):
-            key = template["key"].format(year=year, pacmse_vol=year - 2023)
-            candidates.append({"key": key, "number": template.get("number")})
-        else:
-            key = template.format(year=year, pacmse_vol=year - 2023)
-            candidates.append({"key": key, "number": None})
-    return candidates
-
-
 def _probe_dblp(venue: Venue, year: int) -> ProbeResult:
-    """Try each candidate toc key; the first with hits wins.
-
-    Stopping at anything other than `not-yet` (in particular, `unreachable`)
-    matters as much as stopping at a hit: a candidate throttled into
-    `unreachable` must not be papered over by a later candidate's `not-yet`,
-    or a throttled sweep would misreport as "nothing new".
-    """
-    candidates = _dblp_toc_candidates(venue, year)
-    last = None
-    for candidate in candidates:
-        last = _probe_dblp_key(venue, year, candidate["key"], number=candidate["number"])
-        if last.status != "not-yet":
-            return last
-    return last
-
-
-def _probe_dblp_key(venue: Venue, year: int, key: str, number: str | None = None) -> ProbeResult:
-    """Count one toc key's papers through DBLP's SPARQL endpoint.
-
-    When `number` is set, the key names a shared PACMSE volume and only the
-    entries filed under that venue's issue are counted -- the same filter the
-    DBLP scraper crawls with.
-    """
+    """Count the year's toc page through DBLP's SPARQL endpoint."""
+    key = venue.probe["toc"].format(year=year)
     url = f"https://dblp.org/db/{key.removeprefix('db/').removesuffix('.bht')}.html"
     try:
-        total = dblp_client.toc_count([key], number=number)
+        total = dblp_client.toc_count([key])
     except dblp_client.DblpUnavailable as exc:
         return _result(venue, year, "unreachable", 0, url, str(exc))
 
     status = "live" if total > 0 else "not-yet"
-    registration = {"key": key, "number": number} if number else {"key": key}
-    return _result(venue, year, status, total, url, registration=registration)
+    return _result(venue, year, status, total, url, registration={"key": key})
 
 
 def _probe_openreview(venue: Venue, year: int, client) -> ProbeResult:

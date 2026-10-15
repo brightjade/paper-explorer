@@ -32,11 +32,9 @@ def _scrape_dblp(conf_id: str) -> list[Paper]:
     """Scrape all papers for a conference from DBLP.
 
     The proceedings volume itself is excluded by the client. Records without a
-    document page are skipped, as the search-API scraper skipped entries
-    without an `ee`.
+    document page are skipped: a paper a reader cannot open is not one we list.
     """
-    conf = DBLP_CONFERENCES[conf_id]
-    records = dblp_client.toc_papers(conf["key"], number=conf.get("number"))
+    records = dblp_client.toc_papers(DBLP_CONFERENCES[conf_id]["key"])
     papers = [
         Paper(title=r["title"], link=r["link"], authors=r["authors"], selection="main")
         for r in records
