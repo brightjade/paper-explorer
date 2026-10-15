@@ -57,6 +57,7 @@ RESEARCHR_CONFERENCES = {
     "ase_2023": {"url": "https://conf.researchr.org/track/ase-2023/ase-2023-papers", "track": "Research Papers", "dblp": {"key": "db/conf/kbse/ase2023.bht"}},
     "ase_2024": {"url": "https://conf.researchr.org/track/ase-2024/ase-2024-research", "track": "Research Papers", "dblp": {"key": "db/conf/kbse/ase2024.bht"}},
     "ase_2025": {"url": "https://conf.researchr.org/track/ase-2025/ase-2025-papers", "track": "Research Papers", "dblp": {"key": "db/conf/kbse/ase2025.bht"}},
+    "ase_2026": {"url": "https://conf.researchr.org/track/ase-2026/ase-2026-research-track", "track": "Research Papers"},
     # ISSTA (PACMSE from 2025)
     "issta_2023": {"url": "https://conf.researchr.org/track/issta-2023/issta-2023-technical-papers", "track": "Technical Papers", "dblp": {"key": "db/conf/issta/issta2023.bht"}},
     "issta_2024": {"url": "https://conf.researchr.org/track/issta-2024/issta-2024-papers", "track": "Technical Papers", "dblp": {"key": "db/conf/issta/issta2024.bht"}},
