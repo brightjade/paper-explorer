@@ -18,6 +18,7 @@ import yaml
 
 from ppr.cli import build_parser
 from ppr.register import (
+    register_crossref,
     register_cvf,
     register_dblp,
     register_researchr,
@@ -31,7 +32,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CONSISTENCY_TESTS = [
     "tests/test_validate.py", "tests/test_dblp.py", "tests/test_cvf.py",
     "tests/test_discover.py", "tests/test_venues.py", "tests/test_register.py",
-    "tests/test_researchr.py",
+    "tests/test_researchr.py", "tests/test_crossref.py",
 ]
 
 
@@ -55,6 +56,9 @@ def test_registering_one_venue_per_source_keeps_the_suite_green(tmp_path):
     register_dblp("ijcai_2099", "db/conf/ijcai/ijcai2099.bht", scrapers / "dblp.py")
     register_researchr("icse_2099", "https://conf.researchr.org/track/icse-2099/icse-2099-research-track",
                        "Research Track", scrapers / "researchr.py")
+    register_crossref("iros_2099", "10.1109",
+                      "2099 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)",
+                      scrapers / "crossref.py")
     register_cvf("cvpr_2099", "https://openaccess.thecvf.com/CVPR2099?day=all",
                  "openaccess", scrapers / "cvf.py")
     register_usenix("usenix_security_2099", "usenixsecurity99", scrapers / "usenix.py")

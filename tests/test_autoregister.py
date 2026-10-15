@@ -25,6 +25,7 @@ DBLP_SRC = 'DBLP_CONFERENCES = {\n    "icse_2025": {"key": "db/conf/icse/icse202
 CVF_SRC = 'CVF_CONFERENCES = {\n}\n'
 USENIX_SRC = 'USENIX_CONFERENCES = {\n}\n'
 RESEARCHR_SRC = 'RESEARCHR_CONFERENCES = {\n}\n'
+CROSSREF_SRC = 'CROSSREF_CONFERENCES = {\n}\n'
 
 
 @pytest.fixture
@@ -37,6 +38,7 @@ def ws(tmp_path):
     (scrapers / "cvf.py").write_text(CVF_SRC)
     (scrapers / "usenix.py").write_text(USENIX_SRC)
     (scrapers / "researchr.py").write_text(RESEARCHR_SRC)
+    (scrapers / "crossref.py").write_text(CROSSREF_SRC)
     (tmp_path / "README.md").write_text(README)
     return Workspace(tmp_path)
 
@@ -49,6 +51,7 @@ def _venue(prefix, source, name, **kw):
 REGISTRY = {
     "icse": _venue("icse", "dblp", "ICSE"),
     "fse": _venue("fse", "researchr", "FSE"),
+    "icra": _venue("icra", "crossref", "ICRA"),
     "colm": _venue("colm", "openreview", "COLM"),
     "neurips": _venue("neurips", "openreview", "NeurIPS", extra_tracks=(
         {"venue_id": "NeurIPS.cc/{year}/Datasets_and_Benchmarks_Track", "prefix": "datasets"},
@@ -411,3 +414,12 @@ class TestResearchrVenue:
         assert outcomes[0].status == "registered"
         assert f'"fse_2026": {{"url": "{url}", "track": "Research Papers"}},' in ws.researchr_module.read_text()
         assert str(ws.researchr_module) in commits[0][0]
+
+
+class TestCrossrefVenue:
+    def test_registers_with_prefix_and_container(self, ws):
+        container = "2026 IEEE International Conference on Robotics and Automation (ICRA)"
+        row = _row("icra_2026", 1882, {"prefix": "10.1109", "container": container})
+        outcomes, _ = _run([row], ws, counts={"icra_2026": 1876})
+        assert outcomes[0].status == "registered"
+        assert f'"container": "{container}"' in ws.crossref_module.read_text()

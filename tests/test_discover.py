@@ -595,3 +595,40 @@ class TestProbeRegistration:
             "url": "https://conf.researchr.org/track/ase-2026/ase-2026-research-track",
             "track": "Research Papers",
         }
+
+
+class TestCrossrefProbe:
+    @pytest.fixture(autouse=True)
+    def no_crossref_sleep(self, monkeypatch):
+        monkeypatch.setattr("ppr.scrapers.crossref.time.sleep", lambda *_: None)
+
+    def _venue(self):
+        return _venue(prefix="icra", name="ICRA", source="crossref", probe={
+            "prefix": "10.1109",
+            "container": "{year} IEEE International Conference on Robotics and Automation (ICRA)",
+        })
+
+    def _total(self, n):
+        r = _response(200)
+        r.json = lambda: {"message": {"total-results": n, "items": []}}
+        return r
+
+    def test_records_mean_live_with_the_exact_container(self):
+        with patch("ppr.scrapers.crossref.requests.get", return_value=self._total(1882)) as g:
+            r = probe(self._venue(), 2026)
+        assert (r.status, r.count) == ("live", 1882)
+        assert "container-title:2026 IEEE International Conference" in g.call_args.kwargs["params"]["filter"]
+        assert r.registration == {
+            "prefix": "10.1109",
+            "container": "2026 IEEE International Conference on Robotics and Automation (ICRA)",
+        }
+
+    def test_no_records_is_not_yet(self):
+        with patch("ppr.scrapers.crossref.requests.get", return_value=self._total(0)):
+            assert probe(self._venue(), 2027).status == "not-yet"
+
+    def test_unavailable_is_unreachable(self):
+        with patch("ppr.scrapers.crossref.requests.get", return_value=_response(503)):
+            r = probe(self._venue(), 2026)
+        assert r.status == "unreachable"
+        assert "503" in r.note

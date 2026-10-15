@@ -4,12 +4,13 @@ import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
+from urllib.parse import quote
 
 import requests
 from bs4 import BeautifulSoup
 
 from ppr import dblp_client
-from ppr.scrapers import researchr
+from ppr.scrapers import crossref, researchr
 from ppr.venues import MANUAL_SOURCES, REGISTRY_STEM, Venue
 
 logger = logging.getLogger(__name__)
@@ -294,6 +295,25 @@ def _probe_researchr(venue: Venue, year: int) -> ProbeResult:
     return _result(venue, year, "not-yet", 0, url)
 
 
+def _probe_crossref(venue: Venue, year: int) -> ProbeResult:
+    """Count the records filed under the year's exact proceedings title.
+
+    An exact count, like DBLP's: any record means IEEE has published. The count
+    includes a handful of front-matter records the crawl drops, well inside
+    autoregister's 10% check.
+    """
+    prefix = venue.probe["prefix"]
+    container = venue.probe["container"].format(year=year)
+    url = f"{crossref.API_URL}?filter={quote(crossref.work_filter(prefix, container), safe=':,/')}"
+    try:
+        total = crossref.count(prefix, container)
+    except crossref.CrossrefUnavailable as exc:
+        return _result(venue, year, "unreachable", 0, url, str(exc))
+    status = "live" if total > 0 else "not-yet"
+    return _result(venue, year, status, total, url,
+                   registration={"prefix": prefix, "container": container})
+
+
 def probe(venue: Venue, year: int, *, openreview_client=None) -> ProbeResult:
     """Ask one source whether a conference-year's paper list is up.
 
@@ -315,6 +335,8 @@ def probe(venue: Venue, year: int, *, openreview_client=None) -> ProbeResult:
         return _probe_usenix(venue, year)
     if venue.source == "researchr":
         return _probe_researchr(venue, year)
+    if venue.source == "crossref":
+        return _probe_crossref(venue, year)
     if venue.source == "openreview":
         return _probe_openreview(venue, year, openreview_client)
     raise ValueError(f"no probe for source {venue.source!r}")

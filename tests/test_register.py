@@ -7,6 +7,7 @@ from ppr.register import (
     RegistrationError,
     openreview_selections,
     register_cvf,
+    register_crossref,
     register_dblp,
     register_researchr,
     register_usenix,
@@ -329,3 +330,24 @@ class TestRegisterResearchr:
         namespace: dict = {}
         exec(p.read_text(), namespace)
         assert namespace["RESEARCHR_CONFERENCES"]["icse_2026"]["track"] == "Research Track"
+
+
+CROSSREF_SRC = '''CROSSREF_CONFERENCES = {
+}
+'''
+
+ICRA_2026 = "2026 IEEE International Conference on Robotics and Automation (ICRA)"
+
+
+class TestRegisterCrossref:
+    def test_inserts_prefix_and_container(self, tmp_path):
+        p = _module(tmp_path, "crossref.py", CROSSREF_SRC)
+        register_crossref("icra_2026", "10.1109", ICRA_2026, p)
+        assert f'"icra_2026": {{"prefix": "10.1109", "container": "{ICRA_2026}"}},' in p.read_text()
+
+    def test_the_written_module_still_parses(self, tmp_path):
+        p = _module(tmp_path, "crossref.py", CROSSREF_SRC)
+        register_crossref("icra_2026", "10.1109", ICRA_2026, p)
+        namespace: dict = {}
+        exec(p.read_text(), namespace)
+        assert namespace["CROSSREF_CONFERENCES"]["icra_2026"]["container"] == ICRA_2026
