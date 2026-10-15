@@ -126,12 +126,12 @@ NeurIPS also includes `datasets_oral`, `datasets_spotlight`, `datasets_poster` t
 
 ### Robotics
 
-| Conference | 2025 | 2024 | 2023 |
-|---|---|---|---|
-| CoRL | oral, poster | main | oral, poster |
-| ICRA | main | main | main |
-| IROS | main | main | main |
-| RSS | main | main | main |
+| Conference | 2026 | 2025 | 2024 | 2023 |
+|---|---|---|---|---|
+| CoRL | | oral, poster | main | oral, poster |
+| ICRA | main | main | main | main |
+| IROS | | main | main | main |
+| RSS | | main | main | main |
 
 ### Security
 

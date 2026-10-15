@@ -37,6 +37,7 @@ _MARKUP = re.compile(r"<[^>]+>")
 _last_request = 0.0
 
 CROSSREF_CONFERENCES = {
+    "icra_2026": {"prefix": "10.1109", "container": "2026 IEEE International Conference on Robotics and Automation (ICRA)"},
 }
 
 
