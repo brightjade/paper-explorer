@@ -5,10 +5,6 @@ Every volume lives at `/rss{NN}/index.html` in the same static table: a
 is the edition (2026 is XXII, `rss22`), and each paper's DOI is
 `10.15607/RSS.<year>.<ROMAN>.<NNN>` -- checked against volumes 19-22 -- so one
 request per volume yields DOI links without fetching paper pages.
-
-This replaces the DBLP path for 2023-2024 and the conference-site scraper for
-2025, whose unversioned URL began returning 404 once the site moved 2025's
-list under /2025/.
 """
 
 import logging

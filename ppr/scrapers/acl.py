@@ -1,7 +1,8 @@
-"""Scraper for ACL-family conference websites (EMNLP, ACL, NAACL).
+"""Scraper for ACL-family conferences (EMNLP, ACL, NAACL, EACL, COLING).
 
-These conferences don't publish accepted papers on OpenReview,
-so we scrape their conference websites instead.
+These conferences don't publish accepted papers on OpenReview, so we scrape
+their conference websites, or ACL Anthology volume pages where a year has no
+scrapeable site.
 """
 
 import logging

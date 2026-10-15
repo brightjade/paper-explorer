@@ -4,8 +4,8 @@
  *
  *   node tests/workflow/monthly-workflow.test.js
  *
- * The decision of what to say about a sweep (notify, blind or close) now lives
- * in `ppr/report.py` and is covered by pytest. What remains in the workflow is
+ * The decision of what to say about a sweep (notify, blind or close) lives in
+ * `ppr/report.py` and is covered by pytest. What remains in the workflow is
  * a thin executor, but it still owns the notification guarantees: an edit to a
  * title or body notifies nobody, so an open issue must be updated AND commented
  * on; a blind run may only comment, never close; a close must comment before it

@@ -180,8 +180,8 @@ def _pick_link(links: set[str]) -> str:
 def toc_papers(key: str, number: str | None = None) -> list[dict]:
     """Every paper on a toc page as `{"title", "link", "authors"}`.
 
-    Cleaned exactly as the search-API scraper cleaned its records, so rows built
-    from these are identical to the ones already in `data/`. A paper with several
+    Titles and authors go through `clean_title` and `clean_author`, so rows
+    built from these match the ones already in `data/`. A paper with several
     document pages appears once per page in the result; its link is the DOI when
     it has one, chosen the same way every time.
     """

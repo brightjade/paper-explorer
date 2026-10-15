@@ -1,8 +1,8 @@
 """Publish data/ as a GitHub Release -- the dataset's source of truth.
 
-The old procedure deleted every data-* release before creating the new one, so
-a failure in between left no release at all and the site deployed against
-nothing. Here the new release is created first, and pruning is best-effort.
+The new release is created first and pruning is best-effort: deleting old
+releases before creating the new one would leave no release at all if creation
+failed, and the site would deploy against nothing.
 """
 
 import json

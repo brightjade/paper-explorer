@@ -172,7 +172,7 @@ class TestTocCount:
         assert "FILTER NOT EXISTS { ?pub a dblp:Editorship }" in q
 
     def test_many_keys_are_one_request(self, slept):
-        """ECCV 2024 spans 89 volumes; the search API needed 89 requests."""
+        """ECCV 2024 spans 89 volumes, counted in one query."""
         keys = [f"db/conf/eccv/eccv2024-{i}.bht" for i in range(1, 90)]
         with patch("ppr.dblp_client.requests.post",
                    return_value=_response(bindings=[{"n": {"value": "2387"}}])) as p:

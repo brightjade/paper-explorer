@@ -120,7 +120,7 @@ class TestConfigsDirExcludesRegistry:
     def test_cli_and_discover_agree_on_conference_ids(self):
         """_available_conferences() delegates to known_conference_ids() -- this
         pins that agreement so the two copies of the derivation rule can't drift
-        apart again the way they did before the delegation existed."""
+        apart."""
         from ppr.discover import known_conference_ids
 
         assert set(_available_conferences()) == known_conference_ids()

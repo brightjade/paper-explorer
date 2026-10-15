@@ -40,7 +40,7 @@ class TestTitleKey:
             # Double vs single dash (iclr_2026)
             ("GenCtrl -- A Formal Controllability Toolkit",
              "GenCtrl - A Formal Controllability Toolkit"),
-            # Case and whitespace, the old normalize_title's whole job
+            # Case and whitespace, all that enrich's normalize_title handles
             ("  A   Paper\nTitle ", "a paper title"),
         ],
     )

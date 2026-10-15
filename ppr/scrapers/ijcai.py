@@ -4,8 +4,7 @@ IJCAI 2023-2025 are sourced from DBLP (see ppr/scrapers/dblp.py), but the
 IJCAI 2026 proceedings are not yet indexed on DBLP. The 2026 site lists every
 accepted paper as an <li class="ij-paper"> entry carrying title, authors,
 abstract, and topic keywords -- richer than DBLP -- so 2026 uses this dedicated
-scraper. The split is by year: 2026 comes from this scraper (the conference
-site), 2023-2025 from ppr/scrapers/dblp.py via DBLP.
+scraper.
 """
 
 import logging

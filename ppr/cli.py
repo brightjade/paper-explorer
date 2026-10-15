@@ -69,7 +69,7 @@ def _add_auth_args(parser: argparse.ArgumentParser) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="ppr",
-        description="Crawl accepted papers from OpenReview conferences.",
+        description="Crawl, enrich and publish accepted-paper metadata from tracked conferences.",
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 

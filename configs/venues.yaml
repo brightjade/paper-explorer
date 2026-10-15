@@ -1,4 +1,4 @@
-# Registry of tracked conference venues, used by `ppr discover`.
+# Registry of tracked conference venues, used by `ppr discover` and `ppr autoregister`.
 #
 # source:   openreview | dblp | researchr | crossref | roboticsproceedings | cvf | usenix | acl | aaai | bespoke
 #           acl/aaai/bespoke need a hand-written scraper per year, so discovery

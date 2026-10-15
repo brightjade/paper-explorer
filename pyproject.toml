@@ -1,7 +1,7 @@
 [project]
 name = "ppr"
 version = "0.1.0"
-description = "Crawl accepted papers and citation data from OpenReview conferences"
+description = "Crawl accepted papers and citation data from top AI/ML, CV, robotics, NLP, security and SE conferences"
 authors = [{ name = "Minseok Choi", email = "minseok.choi@kaist.ac.kr" }]
 readme = "README.md"
 requires-python = ">=3.13"
