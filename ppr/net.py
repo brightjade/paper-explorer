@@ -7,7 +7,7 @@
 PROJECT_USER_AGENT = "paper-explorer (+https://github.com/brightjade/paper-explorer)"
 
 # A host's Retry-After is advice, not a contract: five large ones in a row
-# would stall the 340-minute monthly job.
+# would stall the 360-minute monthly job.
 MAX_RETRY_AFTER = 120.0
 
 

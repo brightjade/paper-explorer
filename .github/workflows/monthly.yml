@@ -29,7 +29,7 @@ env:
 jobs:
   pipeline:
     runs-on: ubuntu-latest
-    timeout-minutes: 340
+    timeout-minutes: 360
     permissions:
       contents: write
       actions: write
@@ -102,7 +102,7 @@ jobs:
           set -euo pipefail
           extra=()
           if [ -n "$RECRAWL" ]; then read -ra ids <<< "$RECRAWL"; extra+=(--require "${ids[@]}"); fi
-          uv run ppr enrich --all --time-budget 4h --report enrich.json "${extra[@]}"
+          uv run ppr enrich --all --time-budget 210m --report enrich.json "${extra[@]}"
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() && hashFiles('enrich.json') != '' }}
         with: {name: report-enrich, path: enrich.json}
