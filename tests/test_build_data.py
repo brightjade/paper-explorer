@@ -261,6 +261,14 @@ class TestBuildTrends:
 
 
 class TestBuildAll:
+    def test_ships_no_jsonl_copies(self, sample_outputs, tmp_path):
+        """Downloads are generated in the browser from the per-conference JSON;
+        the copies were half the deploy (222 MB) and would pass 1 GB after the
+        backfill."""
+        out_dir = tmp_path / "web_data"
+        build_all(sample_outputs, out_dir)
+        assert list(out_dir.glob("*.jsonl")) == []
+
     def test_produces_all_files(self, sample_outputs, tmp_path):
         out_dir = tmp_path / "web_data"
         build_all(sample_outputs, out_dir)

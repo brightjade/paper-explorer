@@ -17,6 +17,18 @@ export function Conference() {
   const [sortBy, setSortBy] = useState<SortKey>("citations");
 
   const meta = manifest?.find((c) => c.id === id);
+  const downloadJsonl = () => {
+    if (!papers || !id) return;
+    // Built from the JSON the page already loaded: the same records the old
+    // copied .jsonl held, one per line, without shipping the data twice.
+    const body = papers.map((p) => JSON.stringify(p)).join("\n") + "\n";
+    const url = URL.createObjectURL(new Blob([body], { type: "application/x-ndjson" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${id}.jsonl`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   const filtered = useMemo(() => {
     if (!papers) return [];
@@ -58,10 +70,10 @@ export function Conference() {
         {papers.length.toLocaleString()} papers
         {filtered.length !== papers.length && ` · ${filtered.length.toLocaleString()} shown`}
         {" · "}
-        <a
+        <button
+          type="button"
           className="download-link"
-          href={`${import.meta.env.BASE_URL}data/${id}.jsonl`}
-          download={`${id}.jsonl`}
+          onClick={downloadJsonl}
           title="Download paper data (.jsonl)"
         >
           <svg className="download-icon" viewBox="0 0 16 16" fill="currentColor">
@@ -69,7 +81,7 @@ export function Conference() {
             <path d="M3 13h10v1H3z" />
           </svg>
           Download
-        </a>
+        </button>
       </p>
 
       <div className="conference-controls">

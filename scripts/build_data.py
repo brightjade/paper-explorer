@@ -1,7 +1,6 @@
 """Build static JSON data files from JSONL paper outputs for the web app."""
 
 import json
-import shutil
 import statistics
 import sys
 from collections import Counter, defaultdict
@@ -283,13 +282,6 @@ def build_all(data_dir: Path, out_dir: Path) -> None:
         # Write per-conference JSON file
         with open(out_dir / f"{conf_id}.json", "w") as f:
             json.dump(papers, f, ensure_ascii=False)
-
-        # Copy JSONL file for download
-        enriched = conf_dir / "papers_enriched.jsonl"
-        plain = conf_dir / "papers.jsonl"
-        source_jsonl = enriched if enriched.exists() else plain
-        if source_jsonl.exists():
-            shutil.copy2(source_jsonl, out_dir / f"{conf_id}.jsonl")
 
     # Sort conferences by year desc, then venue name
     conferences.sort(key=lambda m: (-m["year"], m["venue"]))
