@@ -199,3 +199,9 @@ class TestLostSource:
         out = collect_conference("demo_2025", tmp_path)
         assert (out.status, out.count) == ("collected", 2)
         assert {a.via for a in read_awards(awards_path(tmp_path, "demo_2025"))} == {"b"}
+
+
+def test_conference_ids_start_tmlr_at_2022(tmp_path):
+    for d in ("tmlr_2022", "iclr_2022", "iclr_2023"):
+        (tmp_path / d).mkdir()
+    assert conference_ids(tmp_path) == ["iclr_2023", "tmlr_2022"]

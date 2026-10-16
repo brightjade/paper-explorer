@@ -50,9 +50,17 @@ def first_public(paper: dict, year: int, announce_month: int) -> date:
 
     Semantic Scholar's `publication_date` is sometimes the proceedings date of a
     paper that was on arXiv years earlier, and 11% of papers have none, so the
-    arXiv id's month and the conference date bound it from both sides.
+    arXiv id's month and the conference date bound it from both sides. A rolling
+    venue (TMLR) stores each paper's own publication date as `venue_date`, which
+    stands in for the venue-wide conference date when it is a valid ISO date.
     """
     candidates = [date(year, announce_month, 15)]
+    venue_date = paper.get("venue_date")
+    if isinstance(venue_date, str) and ISO_DATE.match(venue_date):
+        try:
+            candidates = [date.fromisoformat(venue_date)]
+        except ValueError:
+            pass
 
     ids = paper.get("external_ids") or {}
     for key, pattern in (("ArXiv", ARXIV_ID), ("DOI", ARXIV_DOI), ("DBLP", DBLP_CORR)):

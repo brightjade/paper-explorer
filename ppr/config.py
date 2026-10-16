@@ -19,6 +19,9 @@ class CrawlConfig:
     # plus `invitation` (decision notes of their own, ICLR 2018) or
     # `reply_suffix` (a direct reply on each submission, ICLR 2019-2020).
     decisions: dict | None = None
+    # v2 only: keep the notes published (`pdate`, UTC) in `year`, for a venue whose
+    # one venueid spans every year (TMLR); records that date as Paper.venue_date.
+    year_from_pdate: bool = False
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "CrawlConfig":
@@ -81,6 +84,12 @@ class CrawlConfig:
                     "Config 'conference.decisions' cannot be combined with extra_venue_ids"
                 )
 
+        year_from_pdate = conference.get("year_from_pdate", False)
+        if not isinstance(year_from_pdate, bool):
+            raise ValueError("Config 'conference.year_from_pdate' must be true or false")
+        if year_from_pdate and api_version == 1:
+            raise ValueError("Config 'conference.year_from_pdate' needs api_version: 2")
+
         return cls(
             name=name,
             year=year,
@@ -91,6 +100,7 @@ class CrawlConfig:
             extra_venue_ids=extra_venue_ids,
             submission_invitation=submission_invitation,
             decisions=decisions,
+            year_from_pdate=year_from_pdate,
         )
 
     def get_save_path(self) -> Path:

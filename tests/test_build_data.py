@@ -397,3 +397,7 @@ class TestAwards:
             assert all("awards" not in p for p in json.loads((out / f"{conf_id}.json").read_text()))
         manifest = json.loads((out / "manifest.json").read_text())
         assert all("test_of_time" not in c for c in manifest["conferences"])
+
+
+def test_tmlr_is_ml():
+    assert category_of("tmlr_2025") == "ML"

@@ -39,7 +39,17 @@ _DEFAULT_RULES = [(re.compile(p, re.I), kind) for p, kind in (
 
 # Venue-specific rules, consulted before the defaults. Tranche 1 needs none;
 # the ACL family (tranche 2) ranks "Outstanding" below "Best".
-PREFIX_RULES: dict[str, list[tuple[re.Pattern, str]]] = {}
+PREFIX_RULES: dict[str, list[tuple[re.Pattern, str | None]]] = {
+    # TMLR certifications; None is a known non-award.
+    "tmlr": [(re.compile(p, re.I), kind) for p, kind in (
+        (r"^outstanding certification$", "award"),
+        (r"^featured certification$", "honorable"),
+        (r"^(j2c|survey|expert|reproducibility) certification$", None),
+    )],
+}
+
+# A venue whose every label is listed, where the defaults would guess at a new one.
+PREFIX_ONLY = frozenset({"tmlr"})
 
 
 def classify(label: str, prefix: str = "") -> str | None:
@@ -51,7 +61,8 @@ def classify(label: str, prefix: str = "") -> str | None:
     text = " ".join(label.split())
     if any(p.search(text) for p in _IGNORED):
         return None
-    for pattern, kind in PREFIX_RULES.get(prefix, []) + _DEFAULT_RULES:
+    defaults = [] if prefix in PREFIX_ONLY else _DEFAULT_RULES
+    for pattern, kind in PREFIX_RULES.get(prefix, []) + defaults:
         if pattern.search(text):
             return kind
     raise UnknownAwardLabel(f"no award rule matches {label!r}")

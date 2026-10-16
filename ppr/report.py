@@ -27,11 +27,13 @@ def update_state(state: dict, enrich_results: list[dict]) -> dict:
     return {**state, "deferred_streak": streak}
 
 
-def _last_stage(discover, register, enrich) -> str:
+def _last_stage(discover, register, rolling, enrich) -> str:
     if discover is None:
         return "setup or discover"
     if register is None:
         return "autoregister"
+    if rolling is None:
+        return "recrawl or rolling recrawl"
     if enrich is None:
         return "tests, awards or enrich"
     if any(r.get("status") == "failed" for r in enrich.get("results", [])):
@@ -45,7 +47,7 @@ def _section(title: str, lines: list[str]) -> str:
 
 def decide_issue(*, discover: dict | None, register: dict | None, enrich: dict | None,
                  state: dict | None, pipeline_result: str, run_url: str, today: str,
-                 awards: dict | None = None) -> dict:
+                 awards: dict | None = None, rolling: dict | None = None) -> dict:
     results = (discover or {}).get("results", [])
     outcomes = (register or {}).get("outcomes", [])
     enrich_rows = (enrich or {}).get("results", [])
@@ -54,7 +56,7 @@ def decide_issue(*, discover: dict | None, register: dict | None, enrich: dict |
     enrich_failed = [f"- Enrich failed for: `{r.get('conf_id', '?')}` — {r.get('reason', '')}"
                      for r in enrich_rows if r.get("status") == "failed"]
     failure = (
-        [f"- The pipeline job ended `{pipeline_result}` during {_last_stage(discover, register, enrich)}. {run_url}"]
+        [f"- The pipeline job ended `{pipeline_result}` during {_last_stage(discover, register, rolling, enrich)}. {run_url}"]
         if pipeline_result in ("failure", "cancelled") else []
     )
     failure += enrich_failed if failure else []
@@ -86,6 +88,11 @@ def decide_issue(*, discover: dict | None, register: dict | None, enrich: dict |
         + "; ".join(r["unmatched"][:3])
         for r in award_rows if r.get("unmatched")
     ]
+    rolling_rows = (rolling or {}).get("results", [])
+    rolling_stuck = [f"- `{r['conf_id']}` — {r['status']}: {r.get('reason', '')}"
+                     for r in rolling_rows if r.get("status") in ("held", "failed")]
+    rolling_done = [f"- `{r['conf_id']}` — {r.get('before', 0)} → {r.get('after', 0)} papers"
+                    for r in rolling_rows if r.get("status") == "recrawled"]
 
     triggers = {"Pipeline failed": failure, "Held by autoregister": held,
                 "Past their announce month but parsing 0 papers": stale,
@@ -93,7 +100,8 @@ def decide_issue(*, discover: dict | None, register: dict | None, enrich: dict |
                 f"Unbound above {UNBOUND_ALERT_RATIO:.0%}": unbound,
                 f"Deferred {DEFERRED_STREAK_ALERT}+ runs in a row": deferred,
                 "Awards held (an unknown label, or a source went quiet)": awards_held,
-                "Awards source failed": awards_failed}
+                "Awards source failed": awards_failed,
+                "Rolling recrawl held or failed (the file on disk was kept)": rolling_stuck}
     fired = {k: v for k, v in triggers.items() if v}
 
     if not fired:
@@ -111,6 +119,7 @@ def decide_issue(*, discover: dict | None, register: dict | None, enrich: dict |
         *(_section(k, v) for k, v in fired.items()),
         _section("Not probed", unreachable),
         _section("Registered this run (context)", registered),
+        _section("Rolling recrawl (context)", rolling_done),
         _section("Awards matching no paper (context)", awards_unmatched),
         _section("Need a hand-written scraper (context)", manual),
         f"Run: {run_url}",

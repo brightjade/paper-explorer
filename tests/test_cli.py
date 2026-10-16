@@ -73,3 +73,21 @@ class TestAwardsCommand:
         monkeypatch.setattr(cli, "DATA_DIR", tmp_path)
         with pytest.raises(SystemExit):
             cli.cmd_awards(cli.build_parser().parse_args(["awards"]))
+
+
+def test_rolling_parses():
+    args = cli.build_parser().parse_args(["rolling", "--report", "r.json"])
+    assert args.command == "rolling" and str(args.report) == "r.json"
+
+
+def test_rolling_with_nothing_due_never_logs_in(tmp_path, monkeypatch):
+    monkeypatch.setattr(cli, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(cli, "CONFIGS_DIR", tmp_path)
+
+    def no_login(**kwargs):
+        raise AssertionError("logged in")
+
+    monkeypatch.setattr(cli, "create_openreview_client", no_login)
+    report = tmp_path / "r.json"
+    cli.cmd_rolling(cli.build_parser().parse_args(["rolling", "--report", str(report)]))
+    assert json.loads(report.read_text(encoding="utf-8")) == {"results": []}

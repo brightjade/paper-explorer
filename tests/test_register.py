@@ -2,6 +2,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from ppr.config import CrawlConfig
+
 from ppr.register import (
     TRACK_VOCABULARY,
     RegistrationError,
@@ -357,3 +359,14 @@ class TestRegisterRoboticsProceedings:
         text = p.read_text()
         assert '"rss_2026": {"volume": 22},' in text
         assert text.index('"rss_2025"') < text.index('"rss_2026"')
+
+
+def test_render_year_from_pdate_round_trips(tmp_path):
+    path = tmp_path / "tmlr_2027.yaml"
+    path.write_text(render_openreview_config("TMLR", 2027, "TMLR",
+                                             {"main": "Accepted by TMLR"}, year_from_pdate=True))
+    assert CrawlConfig.from_yaml(path).year_from_pdate is True
+
+
+def test_render_omits_year_from_pdate_by_default():
+    assert "year_from_pdate" not in render_openreview_config("COLM", 2027, "x", {"main": "COLM 2027"})

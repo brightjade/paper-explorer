@@ -7,7 +7,8 @@ RUN = "https://github.com/o/r/actions/runs/1"
 
 def _decide(**kw):
     base = dict(discover={"results": [], "stale_empty": []}, register={"outcomes": []},
-                enrich={"results": []}, state={}, pipeline_result="success",
+                enrich={"results": []}, rolling={"results": []}, state={},
+                pipeline_result="success",
                 run_url=RUN, today="2026-11-03")
     base.update(kw)
     return decide_issue(**base)
@@ -99,6 +100,11 @@ class TestDecideIssue:
         assert a["action"] == "notify"
         assert "autoregister" in a["body"]
         assert RUN in a["body"]
+
+    def test_a_rolling_step_that_wrote_no_report_is_named(self):
+        a = _decide(rolling=None, enrich=None, pipeline_result="failure")
+        assert a["action"] == "notify"
+        assert "recrawl or rolling recrawl" in a["body"]
 
     def test_failed_enrich_row_names_the_conference_and_the_stage(self):
         e = {"results": [{"conf_id": "x_2026", "status": "failed", "reason": "S2 down"},
@@ -231,3 +237,31 @@ class TestAwardsInTheIssue:
 
     def test_no_awards_report_changes_nothing(self):
         assert _decide()["action"] == "close"
+
+
+class TestRollingRecrawl:
+    @staticmethod
+    def _rolling(*rows):
+        return {"results": list(rows)}
+
+    def test_a_held_rolling_venue_opens_the_issue(self):
+        out = _decide(rolling=self._rolling({
+            "conf_id": "tmlr_2026", "status": "held", "before": 1686, "after": 3,
+            "reason": "1683 of 1686 papers on disk are missing"}))
+        assert out["action"] == "notify" and "tmlr_2026" in out["body"]
+
+    def test_a_failed_rolling_venue_opens_the_issue(self):
+        out = _decide(rolling=self._rolling({
+            "conf_id": "tmlr_2026", "status": "failed", "reason": "HTTPError: 503"}))
+        assert out["action"] == "notify" and "tmlr_2026" in out["body"]
+
+    def test_a_recrawled_rolling_venue_alone_does_not_open_the_issue(self):
+        out = _decide(rolling=self._rolling({
+            "conf_id": "tmlr_2026", "status": "recrawled", "before": 1686, "after": 1720}))
+        assert out["action"] != "notify"
+
+    def test_a_recrawled_venue_shows_as_context_beside_a_trigger(self):
+        out = _decide(register={"outcomes": [{"conf_id": "x_2026", "status": "held", "reason": "r", "url": "u"}]},
+                      rolling=self._rolling({
+                          "conf_id": "tmlr_2026", "status": "recrawled", "before": 1686, "after": 1720}))
+        assert "`tmlr_2026` — 1686 → 1720 papers" in out["body"]

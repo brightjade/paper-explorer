@@ -184,6 +184,7 @@ def render_openreview_config(
     venue_id: str,
     selections: dict[str, str],
     extra_venue_ids: list[str] | None = None,
+    year_from_pdate: bool = False,
 ) -> str:
     """Render a `configs/<id>.yaml` body.
 
@@ -201,6 +202,8 @@ def render_openreview_config(
         f"  year: {year}",
         f'  venue_id: "{venue_id}"',
     ]
+    if year_from_pdate:
+        lines.append("  year_from_pdate: true")
     if extra_venue_ids:
         lines.append("  extra_venue_ids:")
         lines += [f'    - "{vid}"' for vid in extra_venue_ids]

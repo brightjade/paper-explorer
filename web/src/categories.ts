@@ -16,7 +16,7 @@ export type Category = (typeof CATEGORIES)[number];
 // the field usually names them in. A venue not listed here follows the listed
 // ones, alphabetically.
 export const VENUE_ORDER: readonly string[] = [
-  "NeurIPS", "ICML", "ICLR", "AAAI", "IJCAI",
+  "NeurIPS", "ICML", "ICLR", "TMLR", "AAAI", "IJCAI",
   "ACL", "EMNLP", "NAACL", "COLM", "EACL", "COLING",
   "CVPR", "ICCV", "ECCV", "WACV",
   "RSS", "CoRL", "ICRA", "IROS",

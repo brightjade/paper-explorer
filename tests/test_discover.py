@@ -643,3 +643,32 @@ class TestRoboticsProceedingsProbe:
     def test_a_server_error_is_unreachable(self):
         with patch("ppr.discover.requests.get", return_value=_response(500)):
             assert probe(self._venue(), 2026).status == "unreachable"
+
+
+class TestRollingProbe:
+    @staticmethod
+    def _client(dates):
+        from datetime import datetime, timezone
+        notes = []
+        for d in dates:
+            n = MagicMock()
+            n.pdate = int(datetime.fromisoformat(d).replace(tzinfo=timezone.utc).timestamp() * 1000)
+            notes.append(n)
+        undated = MagicMock()
+        undated.pdate = None
+        client = MagicMock()
+        client.get_all_notes.return_value = notes + [undated]
+        return client
+
+    def test_a_rolling_probe_counts_only_that_years_papers(self):
+        from ppr.venues import load_registry
+        venue = load_registry()["tmlr"]
+        client = self._client(["2025-05-01", "2026-01-10", "2026-09-30"])
+        live = probe(venue, 2026, openreview_client=client)
+        assert (live.status, live.count) == ("live", 2)
+        assert probe(venue, 2027, openreview_client=client).status == "not-yet"
+
+    def test_tmlr_probes_next_year_only(self):
+        from ppr.discover import missing_years
+        known = {f"tmlr_{y}" for y in range(2022, 2027)}
+        assert missing_years("tmlr", "annual", known, 2026) == [2027]

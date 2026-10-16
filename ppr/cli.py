@@ -128,6 +128,14 @@ def build_parser() -> argparse.ArgumentParser:
     awards_parser.add_argument("--report", type=Path, default=None,
                                help="Write per-conference outcomes as JSON")
 
+    # rolling
+    rolling_parser = subparsers.add_parser(
+        "rolling", help="Recrawl rolling venues (TMLR), keeping every paper already on disk"
+    )
+    rolling_parser.add_argument("--report", type=Path, default=None,
+                                help="Write per-conference outcomes as JSON")
+    _add_auth_args(rolling_parser)
+
     # validate
     validate_parser = subparsers.add_parser(
         "validate", help="Cross-reference paper counts against DBLP (e.g., ppr validate iclr_2025)"
@@ -173,7 +181,7 @@ def build_parser() -> argparse.ArgumentParser:
     state_parser.add_argument("--enrich", type=Path, required=True)
     state_parser.add_argument("--state", type=Path, required=True)
     issue_parser = report_sub.add_parser("issue", help="Decide the tracking-issue action")
-    for name in ("discover", "register", "enrich", "state", "awards"):
+    for name in ("discover", "register", "enrich", "state", "awards", "rolling"):
         issue_parser.add_argument(f"--{name}", type=Path, default=None)
     issue_parser.add_argument("--pipeline-result", required=True)
     issue_parser.add_argument("--run-url", required=True)
@@ -295,6 +303,29 @@ def cmd_awards(args: argparse.Namespace) -> None:
         args.report.write_text(results_to_json(outcomes), encoding="utf-8")
     # Held and failed conferences keep their previous awards.json and go to the
     # monthly issue; they do not fail the run (ppr/awards/collect.py says why).
+
+
+def cmd_rolling(args: argparse.Namespace) -> None:
+    from ppr.rolling import due_ids, format_summary, recrawl_rolling, results_to_json
+    from ppr.venues import load_registry
+
+    conf_ids = due_ids(load_registry(), DATA_DIR, CONFIGS_DIR, date.today())
+    client = None
+
+    def fetch(config: CrawlConfig) -> list[Paper]:
+        # Log in on first use: a month with nothing due never touches the
+        # rate-limited login.
+        nonlocal client
+        if client is None:
+            client = create_openreview_client(username=args.username, password=args.password)
+        return OpenReviewAPIClient(config, client).fetch_papers()
+
+    outcomes = recrawl_rolling(conf_ids, CONFIGS_DIR, DATA_DIR, fetch)
+    print(format_summary(outcomes))
+    if args.report:
+        args.report.write_text(results_to_json(outcomes), encoding="utf-8")
+    # Held and failed venues keep their file and go to the monthly issue; they
+    # do not fail the run (ppr/rolling.py says why).
 
 
 def cmd_validate(args: argparse.Namespace) -> None:
@@ -433,7 +464,7 @@ def cmd_report(args: argparse.Namespace) -> None:
     action = decide_issue(
         discover=_read_json(args.discover), register=_read_json(args.register),
         enrich=_read_json(args.enrich), state=_read_json(args.state),
-        awards=_read_json(args.awards),
+        awards=_read_json(args.awards), rolling=_read_json(args.rolling),
         pipeline_result=args.pipeline_result, run_url=args.run_url,
         today=date.today().isoformat(),
     )
@@ -460,6 +491,7 @@ def main() -> None:
         "crawl": cmd_crawl,
         "enrich": cmd_enrich,
         "awards": cmd_awards,
+        "rolling": cmd_rolling,
         "validate": cmd_validate,
         "discover": cmd_discover,
         "autoregister": cmd_autoregister,

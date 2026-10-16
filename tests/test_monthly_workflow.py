@@ -75,3 +75,19 @@ def test_the_awards_report_is_uploaded_even_after_a_failure():
 def test_notify_reads_the_awards_report():
     decide = next(s for s in _wf()["jobs"]["notify"]["steps"] if s.get("name") == "Decide the issue action")
     assert "--awards reports/awards.json" in decide["run"]
+
+
+def test_rolling_recrawl_runs_after_autoregister_and_before_tests_and_enrich():
+    names = [s.get("name") for s in _steps(_wf())]
+    assert names.index("Autoregister") < names.index("Rolling recrawl") < names.index("Tests") < names.index("Enrich")
+
+
+def test_rolling_recrawl_writes_a_report_that_is_uploaded():
+    assert _named("Rolling recrawl")["run"] == "uv run ppr rolling --report rolling.json"
+    upload = next(s for s in _steps(_wf()) if s.get("with", {}).get("name") == "report-rolling")
+    assert upload["with"]["path"] == "rolling.json" and "!cancelled()" in upload["if"]
+
+
+def test_notify_reads_the_rolling_report():
+    decide = next(s for s in _wf()["jobs"]["notify"]["steps"] if s.get("name") == "Decide the issue action")
+    assert "--rolling reports/rolling.json" in decide["run"]

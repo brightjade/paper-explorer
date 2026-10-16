@@ -316,6 +316,8 @@ class Checkpoint:
 # within the same order of magnitude as our own count for that venue-year. S2
 # resolves an acronym and its expansion to the same venue, so both forms return
 # identical totals; the expansion is preferred where the acronym is ambiguous.
+# TMLR is the exception: only the abbreviated journal name "Trans. Mach. Learn.
+# Res." returns papers; the full name and "TMLR" both return 0.
 S2_VENUE_NAMES: dict[str, str] = {
     "aaai": "AAAI Conference on Artificial Intelligence",
     "acl": "Annual Meeting of the Association for Computational Linguistics",
@@ -329,9 +331,20 @@ S2_VENUE_NAMES: dict[str, str] = {
     "ijcai": "International Joint Conference on Artificial Intelligence",
     "naacl": "NAACL",
     "neurips": "Neural Information Processing Systems",
+    "tmlr": "Trans. Mach. Learn. Res.",
     "usenix_security": "USENIX Security Symposium",
     "wacv": "WACV",
 }
+
+# Year offsets bulk prefetch covers besides the conference's own year. S2 dates
+# a TMLR paper by its arXiv version, which precedes the OpenReview publication
+# year we file it under: S2's 2022 holds 445 TMLR papers against our 216.
+_BULK_YEAR_OFFSETS: dict[str, tuple[int, ...]] = {"tmlr": (-1, 0)}
+
+
+def bulk_years(prefix: str, year: int) -> list[int]:
+    """The S2 years to prefetch for a venue-year, oldest first."""
+    return [year + offset for offset in _BULK_YEAR_OFFSETS.get(prefix, (0,))]
 
 
 class Deadline:
@@ -531,10 +544,11 @@ async def _run_title_cold(
     venue = S2_VENUE_NAMES.get(prefix)
     index: dict[str, dict] = {}
     if venue and year_str.isdigit():
-        for entry in await client.bulk_search(http, venue, int(year_str)):
-            title = entry.get("title")
-            if title:
-                index.setdefault(title_key(title), entry)
+        for bulk_year in bulk_years(prefix, int(year_str)):
+            for entry in await client.bulk_search(http, venue, bulk_year):
+                title = entry.get("title")
+                if title:
+                    index.setdefault(title_key(title), entry)
         logger.info(
             "Bulk prefetch for %s returned %d indexed papers", conf_id, len(index)
         )

@@ -1,5 +1,6 @@
 import json
 import subprocess
+from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
 import pytest
@@ -63,6 +64,7 @@ REGISTRY = {
     "icra": _venue("icra", "crossref", "ICRA"),
     "rss": _venue("rss", "roboticsproceedings", "RSS"),
     "colm": _venue("colm", "openreview", "COLM"),
+    "tmlr": _venue("tmlr", "openreview", "TMLR", rolling=True),
     "neurips": _venue("neurips", "openreview", "NeurIPS", extra_tracks=(
         {"venue_id": "NeurIPS.cc/{year}/Datasets_and_Benchmarks_Track", "prefix": "datasets"},
     )),
@@ -93,11 +95,13 @@ def _crawler(counts):
     return crawl
 
 
-def _notes(*venues):
+def _notes(*venues, year=None):
     notes = []
     for v in venues:
         n = MagicMock()
         n.content = {"venue": {"value": v}}
+        if year:
+            n.pdate = int(datetime(year, 6, 1, tzinfo=timezone.utc).timestamp() * 1000)
         notes.append(n)
     return notes
 
@@ -226,6 +230,23 @@ class TestPriorYearFloor:
         check_against_prior_year("icse_2026", 1, ws.data_dir)
         _prior(ws, "icse_2025", 0)
         check_against_prior_year("icse_2026", 1, ws.data_dir)
+
+
+class TestRollingVenue:
+    def test_a_rolling_venue_skips_the_prior_year_floor(self, ws):
+        _prior(ws, "tmlr_2026", 1686)
+        row = _row("tmlr_2027", 30, {"venue_id": "TMLR"})
+        outcomes, _ = _run([row], ws, counts={"tmlr_2027": 30},
+                           openreview=_openreview({"TMLR": _notes(*["Accepted by TMLR"] * 30, year=2027)}))
+        assert outcomes[0].status == "registered", outcomes[0]
+        assert "year_from_pdate: true" in (ws.configs_dir / "tmlr_2027.yaml").read_text()
+
+    def test_selections_come_from_the_probed_years_notes_only(self, ws):
+        row = _row("tmlr_2027", 30, {"venue_id": "TMLR"})
+        notes = _notes(*["Some old TMLR string"] * 5, year=2026) + _notes(*["Accepted by TMLR"] * 30, year=2027)
+        outcomes, _ = _run([row], ws, counts={"tmlr_2027": 30}, openreview=_openreview({"TMLR": notes}))
+        assert outcomes[0].status == "registered", outcomes[0]
+        assert 'main: "Accepted by TMLR"' in (ws.configs_dir / "tmlr_2027.yaml").read_text()
 
 
 class TestRevert:

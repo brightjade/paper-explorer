@@ -16,6 +16,7 @@ from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from ppr.api_client import note_pdate
 from ppr.readme_table import selection_cell, update_readme
 from ppr.register import (
     TRACK_VOCABULARY,
@@ -190,7 +191,10 @@ def _register_openreview(row: dict, venue: Venue, ws: Workspace, snap: _Snapshot
                          openreview: Callable[[], object]) -> int:
     client = openreview()
     venue_id = row["registration"]["venue_id"]
-    selections = _checked_selections(client.get_all_notes(content={"venueid": venue_id}), venue_id)
+    notes = client.get_all_notes(content={"venueid": venue_id})
+    if venue.rolling:  # one venueid spans every year; derive from the probed year's notes
+        notes = [n for n in notes if (d := note_pdate(n)) is not None and d.year == row["year"]]
+    selections = _checked_selections(notes, venue_id)
     expected = row["count"]
     extra_ids: list[str] = []
     for track in venue.extra_tracks:
@@ -206,7 +210,7 @@ def _register_openreview(row: dict, venue: Venue, ws: Workspace, snap: _Snapshot
     path = snap.file(ws.configs_dir / f"{row['conf_id']}.yaml")
     path.write_text(
         render_openreview_config(venue.name, row["year"], venue_id, selections,
-                                 extra_venue_ids=extra_ids),
+                                 extra_venue_ids=extra_ids, year_from_pdate=venue.rolling),
         encoding="utf-8",
     )
     return expected
@@ -255,7 +259,9 @@ def register_one(row: dict, venue: Venue, ws: Workspace, *, crawl: Crawl,
         snap.dir(ws.data_dir / conf_id)
         count = crawl(conf_id, venue, ws)
         check_count(count, expected)
-        check_against_prior_year(conf_id, count, ws.data_dir)
+        # January's edition of a rolling venue is always a sliver of last year.
+        if not venue.rolling:
+            check_against_prior_year(conf_id, count, ws.data_dir)
         if venue.source != "dblp":
             status = validate(conf_id)
             if status == "FAIL":

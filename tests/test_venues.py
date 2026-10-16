@@ -70,7 +70,7 @@ class TestLoadRegistry:
 class TestShippedRegistry:
     def test_shipped_registry_parses(self):
         reg = load_registry(REGISTRY_PATH)
-        assert len(reg) == 24
+        assert len(reg) == 25
         for prefix, v in reg.items():
             assert v.source in SOURCES
             assert v.cadence in CADENCES
@@ -156,3 +156,29 @@ class TestExtraTracks:
 
     def test_shipped_neurips_declares_datasets_track(self):
         assert load_registry()["neurips"].extra_tracks[0]["prefix"] == "datasets"
+
+
+class TestRolling:
+    def _venue(self, source="openreview", **extra):
+        return {"venues": {"j": {
+            "name": "J", "source": source, "cadence": "annual", "announce_month": 1,
+            "probe": {"venue_id": "J"}, **extra,
+        }}}
+
+    def test_tmlr_is_a_rolling_openreview_venue(self):
+        tmlr = load_registry()["tmlr"]
+        assert tmlr.rolling is True
+        assert tmlr.source == "openreview"
+        assert tmlr.announce_month == 1
+        assert tmlr.probe == {"venue_id": "TMLR"}
+
+    def test_rolling_defaults_to_false(self, tmp_path):
+        assert load_registry(_write(tmp_path, self._venue()))["j"].rolling is False
+
+    def test_rolling_must_be_a_bool(self, tmp_path):
+        with pytest.raises(ValueError, match="rolling"):
+            load_registry(_write(tmp_path, self._venue(rolling="yes")))
+
+    def test_rolling_is_openreview_only(self, tmp_path):
+        with pytest.raises(ValueError, match="rolling"):
+            load_registry(_write(tmp_path, self._venue(source="dblp", rolling=True)))

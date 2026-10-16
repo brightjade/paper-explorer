@@ -10,6 +10,7 @@ from ppr.enrich import (
     check_guards,
     normalize_title,
     read_papers,
+    unbind,
     write_enriched,
 )
 from ppr.models import Paper
@@ -275,6 +276,8 @@ from ppr.enrich import (
     NO_DEADLINE,
     S2_VENUE_NAMES,
     _run_batch,
+    _run_title_cold,
+    bulk_years,
     checkpoint_path,
     corpus_id_of,
     doi_id_of,
@@ -2131,3 +2134,48 @@ class TestCmdEnrichArchiveWiring:
         # Review focus 3: --full re-runs every cold path; batch-only would
         # leave non-DOI archive papers unenriched behind the coverage guard.
         assert self._kwargs(monkeypatch, ["enrich", "--all", "--full"])["today"] is None
+
+
+def test_enrichment_never_touches_venue_date():
+    paper = _paper(venue_date="2025-02-03")
+    apply_enrichment(paper, FULL_ENTRY)
+    assert paper.venue_date == "2025-02-03"
+    unbind(paper, "")
+    assert paper.venue_date == "2025-02-03"
+    raw = _paper(venue_date="2025-02-03")
+    carry_over(raw, _paper(venue_date="1999-01-01", citation_count=3))
+    assert raw.venue_date == "2025-02-03"
+
+
+def test_bulk_years():
+    assert bulk_years("tmlr", 2025) == [2024, 2025]
+    assert bulk_years("iclr", 2025) == [2025]
+
+
+class _FakeS2:
+    """Records bulk and per-title calls; bulk answers only for given (venue, year)."""
+
+    def __init__(self, hits):
+        self.hits = hits
+        self.bulk_calls = []
+        self.match_calls = []
+
+    async def bulk_search(self, http, venue, year):
+        self.bulk_calls.append((venue, year))
+        return self.hits.get((venue, year), [])
+
+    async def match_title(self, http, title):
+        self.match_calls.append(title)
+        return None
+
+
+@pytest.mark.asyncio
+async def test_tmlr_prefetch_finds_a_paper_s2_dates_a_year_earlier():
+    venue = "Trans. Mach. Learn. Res."
+    fake = _FakeS2({(venue, 2024): [{"title": "Foo", "citationCount": 7}]})
+    paper = _paper(title="Foo")
+    await _run_title_cold(fake, None, [paper], "tmlr_2025", lambda ps: None)
+    assert paper.match_status == "matched"
+    assert paper.citation_count == 7
+    assert fake.bulk_calls == [(venue, 2024), (venue, 2025)]
+    assert fake.match_calls == []

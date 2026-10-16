@@ -21,6 +21,7 @@ class Paper:
     reference_count: int | None = None
     tldr: str = ""
     publication_date: str = ""
+    venue_date: str = ""  # the paper's own date at the venue (YYYY-MM-DD); crawl-owned, enrich never writes it
     fields_of_study: list[str] = field(default_factory=list)
     open_access_pdf: str = ""
     external_ids: dict = field(default_factory=dict)
@@ -48,6 +49,7 @@ class Paper:
             reference_count=data.get("reference_count"),
             tldr=data.get("tldr", ""),
             publication_date=data.get("publication_date", ""),
+            venue_date=data.get("venue_date", ""),
             fields_of_study=data.get("fields_of_study", []),
             open_access_pdf=data.get("open_access_pdf", ""),
             external_ids=data.get("external_ids", {}),

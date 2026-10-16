@@ -10,6 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from ppr import dblp_client
+from ppr.api_client import note_pdate
 from ppr.archive import first_live_year
 from ppr.scrapers import crossref, researchr, roboticsproceedings
 from ppr.venues import MANUAL_SOURCES, REGISTRY_STEM, Venue
@@ -215,6 +216,10 @@ def _probe_openreview(venue: Venue, year: int, client) -> ProbeResult:
         notes = client.get_all_notes(content={"venueid": venue_id})
     except Exception as exc:  # openreview-py raises its own exception types
         return _result(venue, year, "unreachable", 0, url, f"{type(exc).__name__}")
+
+    if venue.rolling:
+        # One venueid spans every year; a paper belongs to the year it was published.
+        notes = [n for n in notes if (d := note_pdate(n)) is not None and d.year == year]
 
     status = "live" if notes else "not-yet"
     return _result(venue, year, status, len(notes), url, registration={"venue_id": venue_id})

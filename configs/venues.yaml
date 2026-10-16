@@ -4,6 +4,8 @@
 #           acl/aaai/bespoke need a hand-written scraper per year, so discovery
 #           reports them as needs-manual rather than auto-registering them.
 # cadence:  annual | biennial-odd | biennial-even
+# rolling:  true (openreview only) for a journal whose papers share one venueid and
+#           arrive all year; the year is each paper's publication date, not the venueid.
 # probe:    source-specific template; {year} is the 4-digit year, {yy} the last two.
 venues:
   # --- OpenReview (requires credentials) ---
@@ -39,6 +41,13 @@ venues:
     cadence: annual
     announce_month: 9
     probe: {venue_id: "robot-learning.org/CoRL/{year}/Conference"}
+  tmlr:
+    name: TMLR
+    source: openreview
+    cadence: annual
+    announce_month: 1
+    rolling: true
+    probe: {venue_id: "TMLR"}
 
   # --- researchr (SE research tracks) ---
   # Track slugs drift between years, so the probe tries these in order and
