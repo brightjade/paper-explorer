@@ -7,6 +7,7 @@ from collections import Counter, defaultdict
 from collections.abc import Iterable
 from pathlib import Path
 
+from ppr.awards.join import attach, load_entries
 from ppr.venues import load_registry
 from scripts.impact import build_top, compute_impact, with_relative_citations
 from scripts.ngrams import build_ngram_data
@@ -305,8 +306,15 @@ def build_all(data_dir: Path, out_dir: Path) -> None:
         papers = load_papers(conf_dir)
         if not papers:
             continue
+        attached = attach(papers, load_entries(conf_dir))
+        papers = attached.papers
+        for entry in attached.unmatched:
+            print(f"warning: {conf_id}: award {entry['label']!r} matches no paper: {entry['title']}")
         all_papers[conf_id] = papers
-        conferences.append(build_manifest_entry(conf_id, papers))
+        manifest_entry = build_manifest_entry(conf_id, papers)
+        if attached.test_of_time:
+            manifest_entry["test_of_time"] = attached.test_of_time
+        conferences.append(manifest_entry)
 
     announce_months = {prefix: v.announce_month for prefix, v in load_registry().items()}
     impacts = compute_impact(all_papers, announce_months)

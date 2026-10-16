@@ -354,3 +354,46 @@ class TestBuildAll:
             "iclr_2025": "ML",
             "acl_2025": "NLP",
         }
+
+
+class TestAwards:
+    @pytest.fixture
+    def with_awards(self, sample_outputs):
+        entries = [
+            {"label": "Best Paper", "kind": "award", "title": "Paper B", "via": "virtual", "source": "s"},
+            {"label": "Award Candidate", "kind": "candidate", "title": "paper b.", "via": "virtual", "source": "s"},
+            {"label": "Test of Time Award", "kind": "test_of_time", "title": "Old Paper",
+             "url": "https://x.test/old", "via": "manual", "source": "s"},
+            {"label": "Outstanding Paper", "kind": "award", "title": "Paper Z", "via": "virtual", "source": "s"},
+        ]
+        (sample_outputs / "iclr_2025" / "awards.json").write_text(
+            json.dumps({"conf_id": "iclr_2025", "awards": entries}), encoding="utf-8")
+        return sample_outputs
+
+    def test_awards_land_on_their_paper(self, with_awards, tmp_path):
+        out = tmp_path / "web"
+        build_all(with_awards, out)
+        papers = {p["title"]: p for p in json.loads((out / "iclr_2025.json").read_text())}
+        assert papers["Paper B"]["awards"] == [{"label": "Best Paper", "kind": "award"},
+                                               {"label": "Award Candidate", "kind": "candidate"}]
+        assert "awards" not in papers["Paper A"]
+
+    def test_test_of_time_goes_to_the_manifest(self, with_awards, tmp_path):
+        out = tmp_path / "web"
+        build_all(with_awards, out)
+        by_id = {c["id"]: c for c in json.loads((out / "manifest.json").read_text())["conferences"]}
+        assert by_id["iclr_2025"]["test_of_time"] == [
+            {"label": "Test of Time Award", "title": "Old Paper", "url": "https://x.test/old"}]
+        assert "test_of_time" not in by_id["acl_2025"]
+
+    def test_unmatched_awards_are_warned_about(self, with_awards, tmp_path, capsys):
+        build_all(with_awards, tmp_path / "web")
+        assert "iclr_2025: award 'Outstanding Paper' matches no paper: Paper Z" in capsys.readouterr().out
+
+    def test_a_conference_without_awards_builds_as_before(self, sample_outputs, tmp_path):
+        out = tmp_path / "web"
+        build_all(sample_outputs, out)
+        for conf_id in ("iclr_2025", "acl_2025"):
+            assert all("awards" not in p for p in json.loads((out / f"{conf_id}.json").read_text()))
+        manifest = json.loads((out / "manifest.json").read_text())
+        assert all("test_of_time" not in c for c in manifest["conferences"])
