@@ -3,15 +3,25 @@
 Records come from DBLP's SPARQL endpoint through `ppr/dblp_client.py`, which
 owns pacing, retries and cleaning (entities, trailing periods, author
 disambiguation suffixes), so this module only maps records to papers.
+
+Two kinds of entry share the dict. Live years are written here one toc key at
+a time, by hand or by autoregister (`register_dblp`), and crawl as `main`. The
+2013-2022 backfill lives in `configs/backfill/dblp.yaml`: each conference-year
+lists its proceedings volumes with the selection their papers get.
 """
 
 import logging
 from functools import partial
+from pathlib import Path
+
+import yaml
 
 from ppr import dblp_client
 from ppr.models import Paper
 
 logger = logging.getLogger(__name__)
+
+BACKFILL_PATH = Path(__file__).resolve().parent.parent.parent / "configs" / "backfill" / "dblp.yaml"
 
 DBLP_CONFERENCES = {
     # Robotics
@@ -28,18 +38,56 @@ DBLP_CONFERENCES = {
 }
 
 
+class EmptyTocError(Exception):
+    """A backfill toc page answered with no listable papers: a registry error."""
+
+
+def load_backfill(path: Path = BACKFILL_PATH) -> dict[str, dict]:
+    """The reviewed 2013-2022 registry: conf_id -> {"tocs": [{"key", "selection"}]}."""
+    if not path.exists():
+        return {}
+    raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    out = {}
+    for conf_id, entry in raw.items():
+        tocs = entry.get("tocs") if isinstance(entry, dict) else None
+        if not tocs:
+            raise ValueError(f"{path}: {conf_id} lists no tocs")
+        out[conf_id] = {"tocs": [{"key": t["key"], "selection": t["selection"]} for t in tocs]}
+    return out
+
+
+def merge_backfill(conferences: dict, backfill: dict) -> None:
+    clash = sorted(conferences.keys() & backfill.keys())
+    if clash:
+        raise ValueError(f"backfill conference ids already registered in dblp.py: {clash}")
+    conferences.update(backfill)
+
+
+merge_backfill(DBLP_CONFERENCES, load_backfill())
+
+
 def _scrape_dblp(conf_id: str) -> list[Paper]:
     """Scrape all papers for a conference from DBLP.
 
     The proceedings volume itself is excluded by the client. Records without a
     document page are skipped: a paper a reader cannot open is not one we list.
+    A backfill toc that yields no paper at all is a registry error -- a wrong
+    key or a volume DBLP reorganised -- and fails the conference rather than
+    writing a short file.
     """
-    records = dblp_client.toc_papers(DBLP_CONFERENCES[conf_id]["key"])
-    papers = [
-        Paper(title=r["title"], link=r["link"], authors=r["authors"], selection="main")
-        for r in records
-        if r["link"]
-    ]
+    entry = DBLP_CONFERENCES[conf_id]
+    tocs = entry.get("tocs") or [{"key": entry["key"], "selection": "main"}]
+    papers = []
+    for toc in tocs:
+        records = dblp_client.toc_papers(toc["key"])
+        found = [
+            Paper(title=r["title"], link=r["link"], authors=r["authors"], selection=toc["selection"])
+            for r in records
+            if r["link"]
+        ]
+        if not found and "tocs" in entry:
+            raise EmptyTocError(f"{conf_id}: DBLP toc {toc['key']} yielded no papers")
+        papers += found
     logger.info("Scraped %d papers for %s", len(papers), conf_id)
     return papers
 

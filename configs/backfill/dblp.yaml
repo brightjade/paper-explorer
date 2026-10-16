@@ -1,0 +1,6 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles, then reviewed by hand. Past proceedings do not change:
+# edit by hand, never regenerate on a schedule.
+{}

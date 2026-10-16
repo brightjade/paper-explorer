@@ -1,6 +1,15 @@
 from unittest.mock import patch
 
-from ppr.scrapers.dblp import DBLP_CONFERENCES, SCRAPERS, _scrape_dblp
+import pytest
+
+from ppr.scrapers.dblp import (
+    DBLP_CONFERENCES,
+    SCRAPERS,
+    EmptyTocError,
+    _scrape_dblp,
+    load_backfill,
+    merge_backfill,
+)
 
 
 class TestScrapeDblp:
@@ -43,3 +52,61 @@ class TestScrapersDict:
     def test_scrapers_are_callable(self):
         for conf_id, scraper in SCRAPERS.items():
             assert callable(scraper), f"{conf_id} scraper is not callable"
+
+
+class TestBackfillEntries:
+    def _entry(self, monkeypatch, tocs):
+        monkeypatch.setitem(DBLP_CONFERENCES, "acl_2021", {"tocs": tocs})
+
+    def test_each_toc_tags_its_own_selection(self, monkeypatch):
+        self._entry(monkeypatch, [{"key": "db/conf/acl/acl2021-1.bht", "selection": "main"},
+                                  {"key": "db/conf/acl/acl2021f.bht", "selection": "findings"}])
+        by_key = {
+            "db/conf/acl/acl2021-1.bht": [{"title": "Long", "link": "https://doi.org/1", "authors": ["A"]}],
+            "db/conf/acl/acl2021f.bht": [{"title": "Find", "link": "https://doi.org/2", "authors": ["B"]}],
+        }
+        with patch("ppr.scrapers.dblp.dblp_client.toc_papers", side_effect=lambda k: by_key[k]):
+            papers = _scrape_dblp("acl_2021")
+        assert [(p.title, p.selection) for p in papers] == [("Long", "main"), ("Find", "findings")]
+
+    def test_a_toc_with_no_records_fails_the_conference(self, monkeypatch):
+        self._entry(monkeypatch, [{"key": "db/conf/acl/acl2021-1.bht", "selection": "main"}])
+        with patch("ppr.scrapers.dblp.dblp_client.toc_papers", return_value=[]):
+            with pytest.raises(EmptyTocError):
+                _scrape_dblp("acl_2021")
+
+    def test_a_toc_whose_records_all_lack_links_fails_too(self, monkeypatch):
+        # Review focus 1: zero papers after the link filter is the same error.
+        self._entry(monkeypatch, [{"key": "db/conf/acl/acl2021-1.bht", "selection": "main"}])
+        with patch("ppr.scrapers.dblp.dblp_client.toc_papers",
+                   return_value=[{"title": "T", "link": "", "authors": ["A"]}]):
+            with pytest.raises(EmptyTocError):
+                _scrape_dblp("acl_2021")
+
+    def test_single_key_entries_still_return_empty(self):
+        with patch("ppr.scrapers.dblp.dblp_client.toc_papers", return_value=[]):
+            assert _scrape_dblp("icra_2023") == []
+
+
+class TestLoadBackfill:
+    def test_missing_file_is_empty(self, tmp_path):
+        assert load_backfill(tmp_path / "none.yaml") == {}
+
+    def test_empty_mapping(self, tmp_path):
+        (tmp_path / "b.yaml").write_text("# header\n{}\n")
+        assert load_backfill(tmp_path / "b.yaml") == {}
+
+    def test_entry_without_tocs_is_refused(self, tmp_path):
+        (tmp_path / "b.yaml").write_text("acl_2021:\n  tocs: []\n")
+        with pytest.raises(ValueError, match="acl_2021"):
+            load_backfill(tmp_path / "b.yaml")
+
+    def test_reads_tocs(self, tmp_path):
+        (tmp_path / "b.yaml").write_text(
+            "acl_2021:\n  tocs:\n    - {key: db/conf/acl/acl2021-1.bht, selection: main}\n")
+        assert load_backfill(tmp_path / "b.yaml") == {
+            "acl_2021": {"tocs": [{"key": "db/conf/acl/acl2021-1.bht", "selection": "main"}]}}
+
+    def test_merge_refuses_an_id_already_in_dblp_py(self):
+        with pytest.raises(ValueError, match="icra_2023"):
+            merge_backfill({"icra_2023": {"key": "x"}}, {"icra_2023": {"tocs": []}})
