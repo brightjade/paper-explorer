@@ -89,3 +89,58 @@ conference: !!python/object:builtins.dict
 """)
         with pytest.raises(Exception):
             CrawlConfig.from_yaml(config_file)
+
+
+def _write(tmp_path, body: str, name="iclr_2019.yaml"):
+    path = tmp_path / name
+    path.write_text(body)
+    return path
+
+
+class TestV1BackfillConfig:
+    BASE = """conference:
+  name: "ICLR"
+  year: 2019
+  venue_id: "ICLR.cc/2019/Conference"
+  api_version: 1
+"""
+
+    def test_reads_decisions_and_submission_invitation(self, tmp_path):
+        cfg = CrawlConfig.from_yaml(_write(tmp_path, self.BASE + """  submission_invitation: "X/-/submission"
+  decisions: {reply_suffix: Meta_Review, field: recommendation}
+  selections: {oral: "Accept (Oral)", poster: "Accept (Poster)"}
+"""))
+        assert cfg.submission_invitation == "X/-/submission"
+        assert cfg.decisions == {"reply_suffix": "Meta_Review", "field": "recommendation"}
+
+    def test_selection_may_list_several_strings(self, tmp_path):
+        cfg = CrawlConfig.from_yaml(_write(tmp_path, self.BASE + """  selections:
+    datasets: ["Round 1", "Round 2"]
+"""))
+        assert cfg.selections == {"datasets": ["Round 1", "Round 2"]}
+
+    def test_defaults_are_none(self, tmp_path):
+        cfg = CrawlConfig.from_yaml(_write(tmp_path, self.BASE + "  selections: {oral: X}\n"))
+        assert (cfg.submission_invitation, cfg.decisions) == (None, None)
+
+    @pytest.mark.parametrize("extra", [
+        "  decisions: {field: decision}\n",
+        "  decisions: {invitation: A, reply_suffix: B, field: decision}\n",
+        "  decisions: {invitation: A}\n",
+        "  decisions: {invitation: A, field: decision}\n  extra_venue_ids: [Y]\n",
+        "  selections_bad: true\n",
+    ])
+    def test_rejects_malformed_decisions(self, tmp_path, extra):
+        body = self.BASE + extra
+        if "selections:" not in body:
+            body += "  selections: {oral: X}\n"
+        if "selections_bad" in extra:
+            body = self.BASE + "  selections: {oral: []}\n"
+        with pytest.raises(ValueError):
+            CrawlConfig.from_yaml(_write(tmp_path, body))
+
+    def test_decisions_need_api_v1(self, tmp_path):
+        body = self.BASE.replace("api_version: 1", "api_version: 2") + \
+            "  decisions: {invitation: A, field: decision}\n  selections: {oral: X}\n"
+        with pytest.raises(ValueError, match="api_version"):
+            CrawlConfig.from_yaml(_write(tmp_path, body))
