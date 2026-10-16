@@ -16,6 +16,7 @@ from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from ppr.api_client import note_pdate
 from ppr.readme_table import selection_cell, update_readme
 from ppr.register import (
     TRACK_VOCABULARY,
@@ -190,7 +191,10 @@ def _register_openreview(row: dict, venue: Venue, ws: Workspace, snap: _Snapshot
                          openreview: Callable[[], object]) -> int:
     client = openreview()
     venue_id = row["registration"]["venue_id"]
-    selections = _checked_selections(client.get_all_notes(content={"venueid": venue_id}), venue_id)
+    notes = client.get_all_notes(content={"venueid": venue_id})
+    if venue.rolling:  # one venueid spans every year; derive from the probed year's notes
+        notes = [n for n in notes if (d := note_pdate(n)) is not None and d.year == row["year"]]
+    selections = _checked_selections(notes, venue_id)
     expected = row["count"]
     extra_ids: list[str] = []
     for track in venue.extra_tracks:

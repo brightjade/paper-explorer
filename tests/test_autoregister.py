@@ -1,5 +1,6 @@
 import json
 import subprocess
+from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
 import pytest
@@ -94,11 +95,13 @@ def _crawler(counts):
     return crawl
 
 
-def _notes(*venues):
+def _notes(*venues, year=None):
     notes = []
     for v in venues:
         n = MagicMock()
         n.content = {"venue": {"value": v}}
+        if year:
+            n.pdate = int(datetime(year, 6, 1, tzinfo=timezone.utc).timestamp() * 1000)
         notes.append(n)
     return notes
 
@@ -234,9 +237,16 @@ class TestRollingVenue:
         _prior(ws, "tmlr_2026", 1686)
         row = _row("tmlr_2027", 30, {"venue_id": "TMLR"})
         outcomes, _ = _run([row], ws, counts={"tmlr_2027": 30},
-                           openreview=_openreview({"TMLR": _notes(*["Accepted by TMLR"] * 30)}))
+                           openreview=_openreview({"TMLR": _notes(*["Accepted by TMLR"] * 30, year=2027)}))
         assert outcomes[0].status == "registered", outcomes[0]
         assert "year_from_pdate: true" in (ws.configs_dir / "tmlr_2027.yaml").read_text()
+
+    def test_selections_come_from_the_probed_years_notes_only(self, ws):
+        row = _row("tmlr_2027", 30, {"venue_id": "TMLR"})
+        notes = _notes(*["Some old TMLR string"] * 5, year=2026) + _notes(*["Accepted by TMLR"] * 30, year=2027)
+        outcomes, _ = _run([row], ws, counts={"tmlr_2027": 30}, openreview=_openreview({"TMLR": notes}))
+        assert outcomes[0].status == "registered", outcomes[0]
+        assert 'main: "Accepted by TMLR"' in (ws.configs_dir / "tmlr_2027.yaml").read_text()
 
 
 class TestRevert:
