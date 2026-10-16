@@ -1,0 +1,14 @@
+# FSE 2026 Research Papers track page, Awards tab: FSE26 Distinguished Paper Awards
+source: https://conf.researchr.org/track/fse-2026/fse-2026-research-papers
+retrieved: 2026-10-15
+awards:
+  - {label: "Distinguished Paper Award", title: "A Grounded Theory of Debugging in Professional Software Engineering Practice"}
+  - {label: "Distinguished Paper Award", title: "An Empirical Study of Fuzz Harness Degradation"}
+  - {label: "Distinguished Paper Award", title: "Building Software by Rolling the Dice: A Qualitative Study of Vibe Coding"}
+  - {label: "Distinguished Paper Award", title: "Carbon-Taxed Transformers: A Green Compression Pipeline for Overgrown Language Models"}
+  - {label: "Distinguished Paper Award", title: "Clotho: Measuring Task-Specific Pre-Generation Test Adequacy for LLM Inputs"}
+  - {label: "Distinguished Paper Award", title: "Empowering Autonomous Debugging Agents with Efficient Dynamic Analysis"}
+  - {label: "Distinguished Paper Award", title: "GraphLocator: Graph-guided Causal Reasoning for Issue Localization"}
+  - {label: "Distinguished Paper Award", title: "One Size Does Fit All: Exploring Model Fusion for Software Engineering Tasks"}
+  - {label: "Distinguished Paper Award", title: "Pig: Leveraging Large Language Models for Python Library Migrations"}
+  - {label: "Distinguished Paper Award", title: "Understanding Binary Code Similarity for Real-World Vulnerability Detection: A Large-Scale Empirical Study"}

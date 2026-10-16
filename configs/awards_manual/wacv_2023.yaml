@@ -1,0 +1,21 @@
+# WACV 2023 Paper Awards page: award winners (by h4 award heading) and the 12 WACV 2023 Award Finalists
+source: https://wacv2023.thecvf.com/node/174
+retrieved: 2026-10-15
+awards:
+  - {label: "Best Paper – Honorable Mention", title: "Select, Label, and Mix: Learning Discriminative Invariant Feature Representations for Partial Domain Adaptation"}
+  - {label: "Best Paper – Honorable Mention", title: "PSENet: Progressive Self-Enhancement Network for Unsupervised Extreme-Light Image Enhancement"}
+  - {label: "Best Student Paper", title: "Self-Supervised Monocular Depth Estimation From Thermal Images via Adversarial Multi-Spectral Adaptation"}
+  - {label: "Best Paper - Algorithms", title: "Lossy Image Compression With Quantized Hierarchical VAEs"}
+  - {label: "Best Paper - Applications", title: "Exemplar Guided Deep Neural Network for Spatial Transcriptomics Analysis of Gene Expression Prediction"}
+  - {label: "Award Finalist", title: "Lossy Image Compression With Quantized Hierarchical VAEs"}
+  - {label: "Award Finalist", title: "Dance Style Transfer With Cross-Modal Transformer"}
+  - {label: "Award Finalist", title: "Saliency Guided Experience Packing for Replay in Continual Learning"}
+  - {label: "Award Finalist", title: "Self-Supervised Monocular Depth Estimation From Thermal Images via Adversarial Multi-Spectral Adaptation"}
+  - {label: "Award Finalist", title: "PSENet: Progressive Self-Enhancement Network for Unsupervised Extreme-Light Image Enhancement"}
+  - {label: "Award Finalist", title: "HyperShot: Few-Shot Learning by Kernel HyperNetworks"}
+  - {label: "Award Finalist", title: "FLAVR: Flow-Agnostic Video Representations for Fast Frame Interpolation"}
+  - {label: "Award Finalist", title: "Select, Label, and Mix: Learning Discriminative Invariant Feature Representations for Partial Domain Adaptation"}
+  - {label: "Award Finalist", title: "Probabilistic Volumetric Fusion for Dense Monocular SLAM"}
+  - {label: "Award Finalist", title: "Self-Attention Message Passing for Contrastive Few-Shot Learning"}
+  - {label: "Award Finalist", title: "Exemplar Guided Deep Neural Network for Spatial Transcriptomics Analysis of Gene Expression Prediction"}
+  - {label: "Award Finalist", title: "X-Align: Cross-Modal Cross-View Alignment for Bird's-Eye-View Segmentation"}

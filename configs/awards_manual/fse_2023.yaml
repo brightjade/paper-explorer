@@ -1,0 +1,19 @@
+# ESEC/FSE 2023 Awards page: Distinguished Papers, Best Artifact Award, and the Test of Time award (an ESEC/FSE 2013 paper)
+source: https://2023.esec-fse.org/info/awards
+retrieved: 2026-10-15
+awards:
+  - {label: "Distinguished Paper", title: "Baldur: Whole-Proof Generation and Repair with Large Language Models"}
+  - {label: "Distinguished Paper", title: "Speeding up SMT Solving via Compiler Optimization"}
+  - {label: "Distinguished Paper", title: "Mate! Are You Really Aware? An Explainability-Guided Testing Framework for Robustness of Malware Detectors"}
+  - {label: "Distinguished Paper", title: "A Highly Scalable, Hybrid, Cross-Platform Timing Analysis Framework Providing Accurate Differential Throughput Estimation via Instruction-Level Tracing"}
+  - {label: "Distinguished Paper", title: "An Automated Approach to Extracting Local Variables"}
+  - {label: "Distinguished Paper", title: "Can Machine Learning Pipelines Be Better Configured?"}
+  - {label: "Distinguished Paper", title: "NeuRI: Diversifying DNN Generation via Inductive Rule Inference"}
+  - {label: "Distinguished Paper", title: "Benchmarking Robustness of AI-Enabled Multi-sensor Fusion Systems: Challenges and Opportunities"}
+  - {label: "Distinguished Paper", title: "A Longitudinal Study of Student Contributions to OSS vs. OSS4SG with a Lightweight Intervention"}
+  - {label: "Distinguished Paper", title: "LExecutor: Learning-Guided Execution"}
+  - {label: "Distinguished Paper", title: "TransRacer: Function Dependence-Guided Transaction Race Detection for Smart Contracts"}
+  - {label: "Distinguished Paper", title: "Recommending Analogical APIs via Knowledge Graph Embedding"}
+  - {label: "Best Artifact Award", title: "Engineering a Formally Verified Automated Bug Finder"}
+  - {label: "Best Artifact Award", title: "Statistical Type Inference for Incomplete Programs"}
+  - {label: "Test of Time Award", title: "Dynodroid: an input generation system for Android apps", url: "https://2023.esec-fse.org/info/awards"}

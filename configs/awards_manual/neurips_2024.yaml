@@ -1,0 +1,6 @@
+# NeurIPS blog post announcing the NeurIPS 2024 Test of Time Paper Awards (NeurIPS 2014 papers); awards_detail lists none
+source: https://blog.neurips.cc/2024/11/27/announcing-the-neurips-2024-test-of-time-paper-awards/
+retrieved: 2026-10-15
+awards:
+  - {label: "Test of Time Award", title: "Generative Adversarial Nets", url: "https://blog.neurips.cc/2024/11/27/announcing-the-neurips-2024-test-of-time-paper-awards/"}
+  - {label: "Test of Time Award", title: "Sequence to Sequence Learning with Neural Networks", url: "https://blog.neurips.cc/2024/11/27/announcing-the-neurips-2024-test-of-time-paper-awards/"}

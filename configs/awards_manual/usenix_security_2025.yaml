@@ -1,0 +1,29 @@
+# USENIX Security '25 (34th USENIX Security Symposium) Paper Awards: Honorable Mentions, PDF
+source: https://www.usenix.org/sites/default/files/sec25_honorable_mentions.pdf
+retrieved: 2026-10-15
+awards:
+  - {label: "Honorable Mention", title: "Analyzing the AI Nudification Application Ecosystem"}
+  - {label: "Honorable Mention", title: "Narrowbeer: A Practical Replay Attack Against the Widevine DRM"}
+  - {label: "Honorable Mention", title: "IRBlock: A Large-Scale Measurement Study of the Great Firewall of Iran"}
+  - {label: "Honorable Mention", title: "Exposing and Circumventing SNI-based QUIC Censorship of the Great Firewall of China"}
+  - {label: "Honorable Mention", title: "TORCHLIGHT: Shedding LIGHT on Real-World Attacks on Cloudless IoT Devices Concealed within the Tor Network"}
+  - {label: "Honorable Mention", title: "TDXploit: Novel Techniques for Single-Stepping and Cache Attacks on Intel TDX"}
+  - {label: "Honorable Mention", title: "Shadowed Realities: An Investigation of UI Attacks in WebXR"}
+  - {label: "Honorable Mention", title: "I Know What You Said: Unveiling Hardware Cache Side-Channels in Local Large Language Model Inference"}
+  - {label: "Honorable Mention", title: "GDMA: Fully Automated DMA Rehosting via Iterative Type Overlays"}
+  - {label: "Honorable Mention", title: "Beyond Statistical Estimation: Differentially Private Individual Computation via Shuffling"}
+  - {label: "Honorable Mention", title: "Stack Overflow Meets Replication: Security Research Amid Evolving Code Snippets"}
+  - {label: "Honorable Mention", title: "Demystifying the (In)Security of QR Code-based Login in Real-world Deployments"}
+  - {label: "Honorable Mention", title: "Your Shield is My Sword: A Persistent Denial-of-Service Attack via the Reuse of Unvalidated Caches in DNSSEC Validation"}
+  - {label: "Honorable Mention", title: "Assessing the Aftermath: the Effects of a Global Takedown against DDoS-for-hire Services"}
+  - {label: "Honorable Mention", title: "Onions Got Puzzled: On the Challenges of Mitigating Denial-of-Service Problems in Tor Onion Services"}
+  - {label: "Honorable Mention", title: "VULCANBOOST: Boosting ReDoS Fixes through Symbolic Representation and Feature Normalization"}
+  - {label: "Honorable Mention", title: "zk-promises: Anonymous Moderation, Reputation, and Blocking from Anonymous Credentials with Callbacks"}
+  - {label: "Honorable Mention", title: "On the Virtues of Information Security in the UK Climate Movement"}
+  - {label: "Honorable Mention", title: "Characterizing the MrDeepFakes Sexual Deepfake Marketplace"}
+  - {label: "Honorable Mention", title: "Privacy Solution or Menace? Investigating Perceptions of Radio-Frequency Sensing"}
+  - {label: "Honorable Mention", title: "Endangered Privacy: Large-Scale Monitoring of Video Streaming Services"}
+  - {label: "Honorable Mention", title: "Achilles: A Formal Framework of Leaking Secrets from Signature Schemes via Rowhammer"}
+  - {label: "Honorable Mention", title: "Pig in a Poke: Automatically Detecting and Exploiting Link Following Vulnerabilities in Windows File Operations"}
+  - {label: "Honorable Mention", title: "Await() a Second: Evading Control Flow Integrity by Hijacking C++ Coroutines"}
+  - {label: "Honorable Mention", title: "The DOMino Effect: Detecting and Exploiting DOM Clobbering Gadgets via Concolic Execution with Symbolic DOM"}

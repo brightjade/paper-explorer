@@ -1,0 +1,26 @@
+# USENIX Security '26 (35th USENIX Security Symposium) Paper Awards: Runners-Up, PDF
+source: https://www.usenix.org/sites/default/files/sec26_runners_up.pdf
+retrieved: 2026-10-15
+awards:
+  - {label: "Runner-Up", title: "Analyzing the WebRTC Ecosystem and Breaking Authentication in DTLS-SRTP"}
+  - {label: "Runner-Up", title: "TONTOU: On the Exploitability of Time-of-Neutralization to Time-of-Use Windows"}
+  - {label: "Runner-Up", title: "KernelRCA: Facilitating Root Cause Analysis of Memory Corruptions in Linux Kernel with Contextual Causality Chain"}
+  - {label: "Runner-Up", title: "Distributed Synthesis of Differentially Private Tabular Datasets"}
+  - {label: "Runner-Up", title: "Love, Lies, and Language Models: Investigating AI's Role in Romance-Baiting Scams"}
+  - {label: "Runner-Up", title: "Assessing LLM Response Quality in the Context of Technology-Facilitated Abuse"}
+  - {label: "Runner-Up", title: "Breaking Widely Deployed Perceptual Hash Functions: Black-Box Collisions in Apple NeuralHash and Microsoft PhotoDNA"}
+  - {label: "Runner-Up", title: "Analyzing Cryptography in Context: A Cryptography-Native Approach to Threat Modeling"}
+  - {label: "Runner-Up", title: "NOIR: Privacy-Preserving Generation of Code with Open-Source LLMs"}
+  - {label: "Runner-Up", title: "A Formal Security Analysis of CAN XL"}
+  - {label: "Runner-Up", title: "SoK: DARPA's AI Cyber Challenge (AIxCC): Competition Design, Architectures, and Lessons Learned"}
+  - {label: "Runner-Up", title: "Design and Implementation of a Physical Implant Attack on the Boeing 737"}
+  - {label: "Runner-Up", title: "Hop: A Modern Transport and Remote Access Protocol"}
+  - {label: "Runner-Up", title: "Enjoy the Free Lunch, Someone Paid for Us: Escaping Resource Limits of MicroVM-based Containers"}
+  - {label: "Runner-Up", title: "WarrInt: Integrity Validation for Criminal Legal Process"}
+  - {label: "Runner-Up", title: "End-to-End Encrypted Collaborative Documents"}
+  - {label: "Runner-Up", title: "Message Injection Attacks Against Signal"}
+  - {label: "Runner-Up", title: "BlockMeNot: Automatic Selection of Domain and URL Blocking Granularity to Minimize Collateral Damage and Evasion"}
+  - {label: "Runner-Up", title: "BUIzz: Finding Policy Enforcement Bugs via Interaction Simulation on the Browser User Interface"}
+  - {label: "Runner-Up", title: "Jailbreaking the AMD Secure Processor: Enabling Live Analysis of SEV-SNP’s Undocumented Security Boundaries"}
+  - {label: "Runner-Up", title: "Scribe: Low-memory SNARKs via Read-Write Streaming"}
+  - {label: "Runner-Up", title: "Secure Distributed RSA Modulus Generation Revisited: A Faster and More Communication-Efficient Construction"}

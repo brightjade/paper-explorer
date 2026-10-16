@@ -1,0 +1,16 @@
+# CVPR 2023 Accepted Papers page; the 12 award candidates carry an Award Candidate icon next to their title
+source: https://cvpr.thecvf.com/Conferences/2023/AcceptedPapers
+retrieved: 2026-10-15
+awards:
+  - {label: "Award Candidate", title: "OmniObject3D: Large-Vocabulary 3D Object Dataset for Realistic Perception, Reconstruction and Generation"}
+  - {label: "Award Candidate", title: "Ego-Body Pose Estimation via Ego-Head Pose Estimation"}
+  - {label: "Award Candidate", title: "Visual Programming: Compositional Visual Reasoning Without Training"}
+  - {label: "Award Candidate", title: "On Distillation of Guided Diffusion Models"}
+  - {label: "Award Candidate", title: "Planning-Oriented Autonomous Driving"}
+  - {label: "Award Candidate", title: "What Can Human Sketches Do for Object Detection?"}
+  - {label: "Award Candidate", title: "DynIBaR: Neural Dynamic Image-Based Rendering"}
+  - {label: "Award Candidate", title: "MobileNeRF: Exploiting the Polygon Rasterization Pipeline for Efficient Neural Field Rendering on Mobile Architectures"}
+  - {label: "Award Candidate", title: "DreamBooth: Fine Tuning Text-to-Image Diffusion Models for Subject-Driven Generation"}
+  - {label: "Award Candidate", title: "Data-Driven Feature Tracking for Event Cameras"}
+  - {label: "Award Candidate", title: "Integral Neural Networks"}
+  - {label: "Award Candidate", title: "3D Registration With Maximal Cliques"}
