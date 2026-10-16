@@ -31,6 +31,12 @@ class TestMissingYears:
         out = missing_years("acl", "annual", {"acl_2020", "acl_2023"}, 2024)
         assert out == sorted(out)
 
+    def test_archive_gaps_are_never_proposed(self):
+        # IJCAI held no 2014 edition; after the backfill its earliest known
+        # year is 2013, and discovery must not probe 2014 every month.
+        known = {"ijcai_2013", "ijcai_2015", "ijcai_2023", "ijcai_2024", "ijcai_2025"}
+        assert missing_years("ijcai", "annual", known, 2026) == [2026, 2027]
+
 
 class TestKnownConferenceIds:
     def test_derives_from_committed_sources_not_data(self):

@@ -10,6 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from ppr import dblp_client
+from ppr.archive import first_live_year
 from ppr.scrapers import crossref, researchr, roboticsproceedings
 from ppr.venues import MANUAL_SOURCES, REGISTRY_STEM, Venue
 
@@ -45,10 +46,13 @@ def missing_years(
 ) -> list[int]:
     """Conference-years for `prefix` that could plausibly exist but are unregistered.
 
-    Looks from the venue's earliest known year through next year -- the extra
+    Looks from the venue's earliest known year -- but never earlier than the
+    first non-archive year (`ppr/archive.py`) -- through next year. The extra
     year catches a venue that publishes ahead of schedule, as OpenReview venues
-    routinely do. A venue with nothing registered yields nothing: there is no
-    baseline to extrapolate from, so its first year is registered by hand.
+    routinely do; the archive floor keeps the 2013-2022 backfill's gaps (IJCAI
+    2014, NAACL 2014/2017/2020) from being probed every month. A venue with
+    nothing registered yields nothing: there is no baseline to extrapolate
+    from, so its first year is registered by hand.
     """
     known = {
         int(cid.rsplit("_", 1)[1])
@@ -58,9 +62,10 @@ def missing_years(
     if not known:
         return []
 
+    start = max(min(known), first_live_year(today_year))
     return [
         year
-        for year in range(min(known), today_year + 2)
+        for year in range(start, today_year + 2)
         if _matches_cadence(year, cadence) and year not in known
     ]
 
