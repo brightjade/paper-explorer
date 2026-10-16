@@ -58,6 +58,54 @@ git log --oneline -1
 REMOTE
 }
 
+# 장시간 작업 전에 원격의 코드와 data/ 가 둘 다 최신인지 확인한다.
+# sync 는 코드만 맞추고 data/ 는 건드리지 않으므로 그것만으로는 부족하다.
+cmd_preflight() {
+  cmd_sync
+
+  echo "==> 원격 HEAD 와 origin/main 비교"
+  git -C "$REPO_ROOT" fetch origin
+  local want have
+  want="$(git -C "$REPO_ROOT" rev-parse origin/main)"
+  have="$(remote_bash "$(printf %q "$PPR_REMOTE_DIR")" <<'REMOTE'
+set -euo pipefail
+git -C "$1" rev-parse HEAD
+REMOTE
+)"
+  if [[ "$have" != "$want" ]]; then
+    echo "원격 HEAD($have)가 origin/main($want)과 다릅니다." >&2
+    exit 1
+  fi
+
+  echo "==> 원격 data/ 를 최신 data-* release 로 맞춤"
+  # sync_data 가 거부(원격 data/ 가 설치 이후 바뀜)하면 여기서 멈춘다. --force 는 쓰지 않는다.
+  if ! remote_bash "$(printf %q "$PPR_REMOTE_DIR")" <<'REMOTE'
+set -euo pipefail
+cd "$1"
+uv run python -m scripts.sync_data
+REMOTE
+  then
+    echo "원격 sync_data 가 실패하거나 거부했습니다. 위 메시지를 확인하세요." >&2
+    exit 1
+  fi
+
+  echo "==> 설치된 tag 와 최신 release tag 비교"
+  local latest installed
+  latest="$(cd "$REPO_ROOT" && uv run python -c 'from scripts.sync_data import fetch_latest_tag; print(fetch_latest_tag())')"
+  installed="$(remote_bash "$(printf %q "$PPR_REMOTE_DIR")" <<'REMOTE'
+set -euo pipefail
+cd "$1"
+python3 -c 'import json; print(json.load(open(".data-release.json"))["tag"])'
+REMOTE
+)"
+  if [[ "$installed" != "$latest" ]]; then
+    echo "원격 data/ 는 $installed, 최신 release 는 $latest 입니다." >&2
+    exit 1
+  fi
+  echo "준비 완료: 코드 $(git -C "$REPO_ROOT" rev-parse --short origin/main), data $latest"
+  echo "ppr release --base-tag $latest"
+}
+
 cmd_run() {
   local do_sync=1
   if [[ "${1:-}" == "--no-sync" ]]; then
@@ -185,6 +233,7 @@ usage() {
 사용법: scripts/remote.sh <명령> [인자...]
 
   sync                        로컬 push → 원격 pull --ff-only → uv sync
+  preflight                   sync 후 원격 HEAD=origin/main, data/=최신 release 확인 (장시간 작업 전)
   run [--no-sync] <ppr 인자...>  원격 tmux 세션에서 `uv run ppr <인자>` detach 실행
   ps                          실행 중인 ppr-* 세션 목록
   logs [세션]                 원격 로그 tail -f (생략 시 가장 최근 로그)
@@ -202,6 +251,7 @@ main() {
   if [[ $# -gt 0 ]]; then shift; fi
   case "$cmd" in
     sync) load_config; cmd_sync "$@" ;;
+    preflight) load_config; cmd_preflight "$@" ;;
     run) load_config; cmd_run "$@" ;;
     ps) load_config; cmd_ps "$@" ;;
     logs) load_config; cmd_logs "$@" ;;
