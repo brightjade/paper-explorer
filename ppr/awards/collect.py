@@ -25,6 +25,7 @@ from ppr.awards import cvf_registry, iclr_blog, manual, researchr_badges, sigsof
 from ppr.awards.join import attach
 from ppr.awards.labels import UnknownAwardLabel
 from ppr.awards.model import Award, awards_path, merge, read_awards, write_awards
+from ppr.matching import title_key
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +120,14 @@ def collect_conference(conf_id: str, data_dir: Path) -> Outcome:
         logger.warning("%s: an awards source failed: %s", conf_id, exc)
         return Outcome(conf_id, "failed", reason=f"{type(exc).__name__}: {exc}")
 
+    try:
+        return _merge_and_write(conf_id, data_dir, results)
+    except Exception as exc:  # corrupt awards.json, malformed papers, failed write
+        logger.warning("%s: collecting failed after the sources ran: %s", conf_id, exc)
+        return Outcome(conf_id, "failed", reason=f"{type(exc).__name__}: {exc}")
+
+
+def _merge_and_write(conf_id: str, data_dir: Path, results: dict[str, list[Award] | None]) -> Outcome:
     path = awards_path(data_dir, conf_id)
     previous = read_awards(path) or []
     papers = _papers(data_dir, conf_id)
@@ -128,15 +137,18 @@ def collect_conference(conf_id: str, data_dir: Path) -> Outcome:
             return Outcome(conf_id, "held", count=len(previous),
                            reason=f"every source returned nothing; keeping the {len(previous)} entries on file")
         return Outcome(conf_id, "not-yet")
-    lost = sorted(name for name, got in results.items()
-                  if got == [] and any(a.via == name for a in previous))
-    if lost:
-        on_file = sum(a.via in lost for a in previous)
+    covered = {(a.kind, title_key(a.title)) for a in merged}
+    uncovered: dict[str, int] = {}
+    for a in previous:
+        if results.get(a.via) == [] and (a.kind, title_key(a.title)) not in covered:
+            uncovered[a.via] = uncovered.get(a.via, 0) + 1
+    if uncovered:
+        names = sorted(uncovered)
         return Outcome(conf_id, "held", count=len(previous),
-                       reason=f"{', '.join(lost)} returned nothing; the file on disk has {on_file} entries from it")
-
+                       reason=f"{', '.join(names)} returned nothing; the file on disk has "
+                              f"{sum(uncovered.values())} entries from it")
+    attached = attach(papers, [a.to_dict() for a in merged])  # before the write, so a failure leaves the file alone
     write_awards(path, conf_id, merged)
-    attached = attach(papers, [a.to_dict() for a in merged])
     paper_level = sum(a.kind != "test_of_time" for a in merged)
     return Outcome(conf_id, "collected", count=len(merged), matched=paper_level - len(attached.unmatched),
                    unmatched=[e["title"] for e in attached.unmatched])

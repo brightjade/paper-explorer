@@ -3,7 +3,6 @@ import json
 import pytest
 import requests
 
-from ppr.awards import collect
 from ppr.awards.collect import (
     SOURCES_BY_PREFIX,
     collect_all,
@@ -171,3 +170,32 @@ class TestRegistry:
         (tmp_path / "pipeline_state.json").write_text("{}")
         assert conference_ids(tmp_path) == ["iclr_2025", "usenix_security_2025"]
         assert conference_ids(tmp_path / "missing") == []
+
+
+class TestTailFailures:
+    def test_a_corrupt_awards_file_fails_and_stays_untouched(self, demo, tmp_path):
+        demo([_a("Best Paper", "award", "Won", "a")], [])
+        path = awards_path(tmp_path, "demo_2025")
+        path.write_text("{not json", encoding="utf-8")
+        out = collect_conference("demo_2025", tmp_path)
+        assert out.status == "failed" and "JSONDecodeError" in out.reason
+        assert path.read_bytes() == b"{not json"
+
+    def test_one_bad_conference_does_not_stop_the_next(self, demo, tmp_path, monkeypatch):
+        demo([_a("Best Paper", "award", "Won", "a")], [])
+        bad = tmp_path / "demo_2024"
+        bad.mkdir()
+        (bad / "papers.jsonl").write_text("{broken\n", encoding="utf-8")
+        outs = collect_all(["demo_2024", "demo_2025"], tmp_path)
+        assert [o.status for o in outs] == ["failed", "collected"]
+
+
+class TestLostSource:
+    def test_a_source_covered_by_another_is_not_lost(self, demo, tmp_path):
+        _previous(tmp_path, _a("Best Paper Candidate", "candidate", "Won", "a"),
+                  _a("Best Paper Candidate", "candidate", "Also", "a"))
+        demo([], [_a("Best Paper Candidate", "candidate", "Won", "b"),
+                  _a("Best Paper Candidate", "candidate", "Also", "b")])
+        out = collect_conference("demo_2025", tmp_path)
+        assert (out.status, out.count) == ("collected", 2)
+        assert {a.via for a in read_awards(awards_path(tmp_path, "demo_2025"))} == {"b"}
