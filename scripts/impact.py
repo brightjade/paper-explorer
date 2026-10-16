@@ -11,7 +11,9 @@ build time and never written to data/.
 
 import re
 from collections import defaultdict
+from collections.abc import Callable, Sequence
 from datetime import date
+from itertools import islice
 from typing import NamedTuple
 
 # New-style arXiv ids (YYMM.NNNNN) carry the month the paper first went up.
@@ -138,3 +140,112 @@ def with_relative_citations(
         paper if impact is None else {**paper, "relative_citations": impact.relative_citations}
         for paper, impact in zip(papers, impacts)
     ]
+
+
+SORTS = ("relative", "citations")
+# Pool entries keep what a paper row renders; abstracts would make top.json
+# several megabytes for text nobody reads in a ranking.
+OPTIONAL_FIELDS = ("influential_citation_count", "tldr", "link", "open_access_pdf", "forum_id")
+POOL_EXTERNAL_IDS = ("ArXiv", "DOI")
+
+
+class _Candidate(NamedTuple):
+    conf_id: str
+    index: int
+    venue: str
+    year: int
+    category: str
+    paper: dict
+    impact: PaperImpact
+
+
+def _by_relative(c: _Candidate) -> tuple:
+    return (-c.impact.relative_citations, -c.paper["citation_count"], c.paper["title"])
+
+
+def _by_citations(c: _Candidate) -> tuple:
+    return (-c.paper["citation_count"], -c.impact.relative_citations, c.paper["title"])
+
+
+def _pool_entry(c: _Candidate) -> dict:
+    paper = c.paper
+    entry = {
+        "title": paper["title"],
+        "authors": paper.get("authors", []),
+        "venue": c.venue,
+        "year": c.year,
+        "conference_id": c.conf_id,
+        "selection": paper.get("selection", ""),
+        "citation_count": paper["citation_count"],
+        "relative_citations": c.impact.relative_citations,
+        "first_public": c.impact.first_public.isoformat(),
+    }
+    for key in OPTIONAL_FIELDS:
+        if paper.get(key) not in (None, ""):
+            entry[key] = paper[key]
+    ids = {
+        key: value
+        for key, value in (paper.get("external_ids") or {}).items()
+        if key in POOL_EXTERNAL_IDS and value
+    }
+    if ids:
+        entry["external_ids"] = ids
+    return entry
+
+
+def build_top(
+    all_papers: dict[str, list[dict]],
+    impacts: dict[str, list[PaperImpact | None]],
+    parse_conference_id: Callable[[str], tuple[str, int]],
+    category_of: Callable[[str], str],
+    categories: Sequence[str],
+    top_n: int = TOP_N,
+) -> dict:
+    """The Top 100 lists for every (period, category, sort), as indices into one pool.
+
+    The pool is keyed by (conference, position), never by title: two different
+    papers may share a title.
+    """
+    candidates: list[_Candidate] = []
+    years: set[int] = set()
+    for conf_id, papers in all_papers.items():
+        venue, year = parse_conference_id(conf_id)
+        years.add(year)
+        category = category_of(conf_id)
+        for index, (paper, impact) in enumerate(zip(papers, impacts[conf_id])):
+            if impact is not None:
+                candidates.append(_Candidate(conf_id, index, venue, year, category, paper, impact))
+
+    ordered = {
+        "relative": sorted(candidates, key=_by_relative),
+        "citations": sorted(candidates, key=_by_citations),
+    }
+    pool: list[dict] = []
+    pool_index: dict[tuple[str, int], int] = {}
+
+    def ref(c: _Candidate) -> int:
+        key = (c.conf_id, c.index)
+        if key not in pool_index:
+            pool_index[key] = len(pool)
+            pool.append(_pool_entry(c))
+        return pool_index[key]
+
+    year_keys = [str(y) for y in sorted(years, reverse=True)]
+    lists: dict[str, dict[str, dict[str, list[int]]]] = {}
+    for period in ["all", *year_keys]:
+        lists[period] = {}
+        for cat in ["all", *categories]:
+            lists[period][cat] = {}
+            for sort in SORTS:
+                picked = islice(
+                    (
+                        c
+                        for c in ordered[sort]
+                        if (period == "all" or str(c.year) == period)
+                        and (cat == "all" or c.category == cat)
+                    ),
+                    top_n,
+                )
+                lists[period][cat][sort] = [ref(c) for c in picked]
+
+    return {"categories": list(categories), "years": year_keys, "papers": pool, "lists": lists}

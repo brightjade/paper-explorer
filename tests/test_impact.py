@@ -4,6 +4,7 @@ import pytest
 
 from scripts.impact import (
     PaperImpact,
+    build_top,
     cohort_of,
     compute_impact,
     first_public,
@@ -193,3 +194,163 @@ class TestWithRelativeCitations:
         papers = [{"title": "a", "citation_count": 3}]
         with_relative_citations(papers, [PaperImpact(date(2025, 1, 1), 1.0)])
         assert "relative_citations" not in papers[0]
+
+
+def _parse(conf_id):
+    prefix, year = conf_id.rsplit("_", 1)
+    return prefix.upper(), int(year)
+
+
+def _category(conf_id):
+    return {"iclr": "ML", "cvpr": "CV", "acl": "NLP"}[conf_id.rsplit("_", 1)[0]]
+
+
+def _imp(rel, when=date(2025, 1, 15)):
+    return PaperImpact(when, rel)
+
+
+def _top(all_papers, impacts, top_n=100, categories=("ML", "CV", "NLP")):
+    return build_top(all_papers, impacts, _parse, _category, categories, top_n=top_n)
+
+
+def _titles(top, ids):
+    return [top["papers"][i]["title"] for i in ids]
+
+
+class TestBuildTop:
+    @pytest.fixture
+    def two_confs(self):
+        all_papers = {
+            "iclr_2025": [{"title": "a", "citation_count": 5}],
+            "cvpr_2024": [{"title": "b", "citation_count": 3}],
+            "acl_2023": [{"title": "c"}],  # never enriched
+        }
+        impacts = {"iclr_2025": [_imp(2.0)], "cvpr_2024": [_imp(1.0)], "acl_2023": [None]}
+        return all_papers, impacts
+
+    def test_every_combination_is_present(self, two_confs):
+        top = _top(*two_confs)
+        assert top["categories"] == ["ML", "CV", "NLP"]
+        assert top["years"] == ["2025", "2024", "2023"]
+        assert list(top["lists"]) == ["all", "2025", "2024", "2023"]
+        for period in top["lists"].values():
+            assert list(period) == ["all", "ML", "CV", "NLP"]
+            for cat in period.values():
+                assert set(cat) == {"relative", "citations"}
+
+    def test_filters_by_year_and_category(self, two_confs):
+        top = _top(*two_confs)
+        lists = top["lists"]
+        assert _titles(top, lists["all"]["all"]["relative"]) == ["a", "b"]
+        assert _titles(top, lists["2024"]["all"]["relative"]) == ["b"]
+        assert _titles(top, lists["all"]["ML"]["citations"]) == ["a"]
+        assert lists["2024"]["ML"]["relative"] == []
+        # a year whose only conference has no citations: present, and empty
+        assert lists["2023"]["all"]["relative"] == []
+        assert lists["2023"]["NLP"]["citations"] == []
+
+    def test_uncited_papers_are_left_out(self, two_confs):
+        top = _top(*two_confs)
+        assert "c" not in [p["title"] for p in top["papers"]]
+
+    def test_relative_sort_ties_break_by_citations_then_title(self):
+        all_papers = {
+            "iclr_2025": [
+                {"title": "b", "citation_count": 10},
+                {"title": "a", "citation_count": 10},
+                {"title": "c", "citation_count": 20},
+                {"title": "d", "citation_count": 99},
+            ]
+        }
+        impacts = {"iclr_2025": [_imp(2.0), _imp(2.0), _imp(2.0), _imp(1.0)]}
+        top = _top(all_papers, impacts)
+        assert _titles(top, top["lists"]["all"]["all"]["relative"]) == ["c", "a", "b", "d"]
+
+    def test_citation_sort_ties_break_by_relative_then_title(self):
+        all_papers = {
+            "iclr_2025": [
+                {"title": "x", "citation_count": 10},
+                {"title": "y", "citation_count": 10},
+                {"title": "w", "citation_count": 10},
+                {"title": "z", "citation_count": 50},
+            ]
+        }
+        impacts = {"iclr_2025": [_imp(1.0), _imp(3.0), _imp(3.0), _imp(0.5)]}
+        top = _top(all_papers, impacts)
+        assert _titles(top, top["lists"]["all"]["all"]["citations"]) == ["z", "w", "y", "x"]
+
+    def test_lists_are_capped(self):
+        all_papers = {
+            "iclr_2025": [{"title": t, "citation_count": n} for t, n in [("a", 3), ("b", 2), ("c", 1)]]
+        }
+        impacts = {"iclr_2025": [_imp(3.0), _imp(2.0), _imp(1.0)]}
+        top = _top(all_papers, impacts, top_n=2)
+        assert _titles(top, top["lists"]["all"]["all"]["relative"]) == ["a", "b"]
+        assert _titles(top, top["lists"]["2025"]["ML"]["citations"]) == ["a", "b"]
+
+    def test_pool_holds_each_paper_once_and_indices_are_valid(self, two_confs):
+        top = _top(*two_confs)
+        assert len(top["papers"]) == 2
+        for period in top["lists"].values():
+            for cat in period.values():
+                for ids in cat.values():
+                    assert all(0 <= i < len(top["papers"]) for i in ids)
+
+    def test_same_title_in_two_conferences_stays_two_papers(self):
+        all_papers = {
+            "iclr_2025": [{"title": "Same", "citation_count": 5}],
+            "cvpr_2025": [{"title": "Same", "citation_count": 4}],
+        }
+        impacts = {"iclr_2025": [_imp(2.0)], "cvpr_2025": [_imp(1.0)]}
+        top = _top(all_papers, impacts)
+        ids = top["lists"]["all"]["all"]["relative"]
+        assert [top["papers"][i]["conference_id"] for i in ids] == ["iclr_2025", "cvpr_2025"]
+
+    def test_pool_entry_fields(self):
+        paper = {
+            "title": "a",
+            "authors": ["X", "Y"],
+            "selection": "oral",
+            "citation_count": 5,
+            "influential_citation_count": 0,
+            "tldr": "short",
+            "link": "https://example.com/a",
+            "open_access_pdf": "https://example.com/a.pdf",
+            "forum_id": "abc",
+            "abstract": "long text",
+            "keywords": ["k"],
+            "publication_date": "2025-01-02",
+            "external_ids": {"ArXiv": "2501.00001", "DOI": "10.1/x", "CorpusId": 7},
+        }
+        top = _top({"iclr_2025": [paper]}, {"iclr_2025": [_imp(2.5, date(2025, 1, 2))]})
+        assert top["papers"][0] == {
+            "title": "a",
+            "authors": ["X", "Y"],
+            "venue": "ICLR",
+            "year": 2025,
+            "conference_id": "iclr_2025",
+            "selection": "oral",
+            "citation_count": 5,
+            "relative_citations": 2.5,
+            "first_public": "2025-01-02",
+            "influential_citation_count": 0,
+            "tldr": "short",
+            "link": "https://example.com/a",
+            "open_access_pdf": "https://example.com/a.pdf",
+            "forum_id": "abc",
+            "external_ids": {"ArXiv": "2501.00001", "DOI": "10.1/x"},
+        }
+
+    def test_pool_entry_omits_absent_fields(self):
+        top = _top({"iclr_2025": [{"title": "a", "citation_count": 5}]}, {"iclr_2025": [_imp(1.0)]})
+        assert top["papers"][0] == {
+            "title": "a",
+            "authors": [],
+            "venue": "ICLR",
+            "year": 2025,
+            "conference_id": "iclr_2025",
+            "selection": "",
+            "citation_count": 5,
+            "relative_citations": 1.0,
+            "first_public": "2025-01-15",
+        }
