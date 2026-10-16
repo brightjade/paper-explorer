@@ -1,6 +1,692 @@
 # 2013-2022 conference-years crawled from DBLP: each lists the toc pages
 # (proceedings volumes) that make up the main conference, with the selection
 # each volume's papers get. Generated once from DBLP's toc pages and
-# proceedings titles, then reviewed by hand. Past proceedings do not change:
-# edit by hand, never regenerate on a schedule.
-{}
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+aaai_2013:  # 251 papers
+  tocs:
+    - {key: db/conf/aaai/aaai2013.bht, selection: main}
+aaai_2014:  # 474 papers
+  tocs:
+    - {key: db/conf/aaai/aaai2014.bht, selection: main}
+aaai_2015:  # 674 papers
+  tocs:
+    - {key: db/conf/aaai/aaai2015.bht, selection: main}
+aaai_2016:  # 691 papers
+  tocs:
+    - {key: db/conf/aaai/aaai2016.bht, selection: main}
+aaai_2017:  # 786 papers
+  tocs:
+    - {key: db/conf/aaai/aaai2017.bht, selection: main}
+aaai_2018:  # 1101 papers
+  tocs:
+    - {key: db/conf/aaai/aaai2018.bht, selection: main}
+aaai_2019:  # 1343 papers
+  tocs:
+    - {key: db/conf/aaai/aaai2019.bht, selection: main}
+aaai_2020:  # 1864 papers
+  tocs:
+    - {key: db/conf/aaai/aaai2020.bht, selection: main}
+aaai_2021:  # 1961 papers
+  tocs:
+    - {key: db/conf/aaai/aaai2021.bht, selection: main}
+aaai_2022:  # 1624 papers
+  tocs:
+    - {key: db/conf/aaai/aaai2022.bht, selection: main}
+acl_2013:  # 327 papers
+  tocs:
+    - {key: db/conf/acl/acl2013-1.bht, selection: main}
+    - {key: db/conf/acl/acl2013-2.bht, selection: main}
+acl_2014:  # 286 papers
+  tocs:
+    - {key: db/conf/acl/acl2014-1.bht, selection: main}
+    - {key: db/conf/acl/acl2014-2.bht, selection: main}
+acl_2015:  # 318 papers
+  tocs:
+    - {key: db/conf/acl/acl2015-1.bht, selection: main}
+    - {key: db/conf/acl/acl2015-2.bht, selection: main}
+acl_2016:  # 328 papers
+  tocs:
+    - {key: db/conf/acl/acl2016-1.bht, selection: main}
+    - {key: db/conf/acl/acl2016-2.bht, selection: main}
+acl_2017:  # 302 papers
+  tocs:
+    - {key: db/conf/acl/acl2017-1.bht, selection: main}
+    - {key: db/conf/acl/acl2017-2.bht, selection: main}
+acl_2018:  # 381 papers
+  tocs:
+    - {key: db/conf/acl/acl2018-1.bht, selection: main}
+    - {key: db/conf/acl/acl2018-2.bht, selection: main}
+acl_2019:  # 660 papers
+  tocs:
+    - {key: db/conf/acl/acl2019-1.bht, selection: main}
+acl_2020:  # 778 papers
+  tocs:
+    - {key: db/conf/acl/acl2020.bht, selection: main}
+acl_2021:  # 1169 papers
+  tocs:
+    - {key: db/conf/acl/acl2021-1.bht, selection: main}
+    - {key: db/conf/acl/acl2021-2.bht, selection: main}
+    - {key: db/conf/acl/acl2021f.bht, selection: findings}
+acl_2022:  # 1034 papers
+  tocs:
+    - {key: db/conf/acl/acl2022-1.bht, selection: main}
+    - {key: db/conf/acl/acl2022-2.bht, selection: main}
+    - {key: db/conf/acl/acl2022f.bht, selection: findings}
+ase_2013:  # 94 papers
+  tocs:
+    - {key: db/conf/kbse/ase2013.bht, selection: main}
+ase_2014:  # 107 papers
+  tocs:
+    - {key: db/conf/kbse/ase2014.bht, selection: main}
+ase_2015:  # 100 papers
+  tocs:
+    - {key: db/conf/kbse/ase2015.bht, selection: main}
+ase_2016:  # 100 papers
+  tocs:
+    - {key: db/conf/kbse/ase2016.bht, selection: main}
+ase_2017:  # 117 papers
+  tocs:
+    - {key: db/conf/kbse/ase2017.bht, selection: main}
+ase_2018:  # 112 papers
+  tocs:
+    - {key: db/conf/kbse/ase2018.bht, selection: main}
+ase_2019:  # 154 papers
+  tocs:
+    - {key: db/conf/kbse/ase2019.bht, selection: main}
+ase_2020:  # 158 papers
+  tocs:
+    - {key: db/conf/kbse/ase2020.bht, selection: main}
+ase_2021:  # 166 papers
+  tocs:
+    - {key: db/conf/kbse/ase2021.bht, selection: main}
+ase_2022:  # 228 papers
+  tocs:
+    - {key: db/conf/kbse/ase2022.bht, selection: main}
+coling_2014:  # 221 papers
+  tocs:
+    - {key: db/conf/coling/coling2014.bht, selection: main}
+coling_2016:  # 337 papers
+  tocs:
+    - {key: db/conf/coling/coling2016.bht, selection: main}
+coling_2018:  # 330 papers
+  tocs:
+    - {key: db/conf/coling/coling2018.bht, selection: main}
+coling_2020:  # 634 papers
+  tocs:
+    - {key: db/conf/coling/coling2020.bht, selection: main}
+    - {key: db/conf/coling/coling2020i.bht, selection: industry}
+coling_2022:  # 633 papers
+  tocs:
+    - {key: db/conf/coling/coling2022.bht, selection: main}
+corl_2017:  # 49 papers
+  tocs:
+    - {key: db/conf/corl/corl2017.bht, selection: main}
+corl_2018:  # 75 papers
+  tocs:
+    - {key: db/conf/corl/corl2018.bht, selection: main}
+corl_2019:  # 110 papers
+  tocs:
+    - {key: db/conf/corl/corl2019.bht, selection: main}
+corl_2020:  # 165 papers
+  tocs:
+    - {key: db/conf/corl/corl2020.bht, selection: main}
+cvpr_2013:  # 471 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2013.bht, selection: main}
+cvpr_2014:  # 540 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2014.bht, selection: main}
+cvpr_2015:  # 602 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2015.bht, selection: main}
+cvpr_2016:  # 643 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2016.bht, selection: main}
+cvpr_2017:  # 783 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2017.bht, selection: main}
+cvpr_2018:  # 979 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2018.bht, selection: main}
+cvpr_2019:  # 1294 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2019.bht, selection: main}
+cvpr_2020:  # 1465 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2020.bht, selection: main}
+cvpr_2021:  # 1660 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2021.bht, selection: main}
+cvpr_2022:  # 2072 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2022.bht, selection: main}
+eacl_2014:  # 163 papers
+  tocs:
+    - {key: db/conf/eacl/eacl2014.bht, selection: main}
+eacl_2017:  # 239 papers
+  tocs:
+    - {key: db/conf/eacl/eacl2017-1.bht, selection: main}
+    - {key: db/conf/eacl/eacl2017-2.bht, selection: main}
+eacl_2021:  # 326 papers
+  tocs:
+    - {key: db/conf/eacl/eacl2021.bht, selection: main}
+eccv_2014:  # 362 papers
+  tocs:
+    - {key: db/conf/eccv/eccv2014-1.bht, selection: main}
+    - {key: db/conf/eccv/eccv2014-2.bht, selection: main}
+    - {key: db/conf/eccv/eccv2014-3.bht, selection: main}
+    - {key: db/conf/eccv/eccv2014-4.bht, selection: main}
+    - {key: db/conf/eccv/eccv2014-5.bht, selection: main}
+    - {key: db/conf/eccv/eccv2014-6.bht, selection: main}
+    - {key: db/conf/eccv/eccv2014-7.bht, selection: main}
+eccv_2016:  # 415 papers
+  tocs:
+    - {key: db/conf/eccv/eccv2016-1.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-2.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-3.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-4.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-5.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-6.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-7.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-8.bht, selection: main}
+eccv_2018:  # 776 papers
+  tocs:
+    - {key: db/conf/eccv/eccv2018-1.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-2.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-3.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-4.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-5.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-6.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-7.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-8.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-9.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-10.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-11.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-12.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-13.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-14.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-15.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-16.bht, selection: main}
+eccv_2020:  # 1358 papers
+  tocs:
+    - {key: db/conf/eccv/eccv2020-1.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-2.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-3.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-4.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-5.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-6.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-7.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-8.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-9.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-10.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-11.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-12.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-13.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-14.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-15.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-16.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-17.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-18.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-19.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-20.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-21.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-22.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-23.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-24.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-25.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-26.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-27.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-28.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-29.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-30.bht, selection: main}
+eccv_2022:  # 1645 papers
+  tocs:
+    - {key: db/conf/eccv/eccv2022-1.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-2.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-3.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-4.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-5.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-6.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-7.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-8.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-9.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-10.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-11.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-12.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-13.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-14.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-15.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-16.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-17.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-18.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-19.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-20.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-21.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-22.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-23.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-24.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-25.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-26.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-27.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-28.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-29.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-30.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-31.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-32.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-33.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-34.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-35.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-36.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-37.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-38.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-39.bht, selection: main}
+emnlp_2013:  # 205 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2013.bht, selection: main}
+emnlp_2014:  # 226 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2014.bht, selection: main}
+emnlp_2015:  # 312 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2015.bht, selection: main}
+emnlp_2016:  # 264 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2016.bht, selection: main}
+emnlp_2017:  # 322 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2017.bht, selection: main}
+emnlp_2018:  # 549 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2018.bht, selection: main}
+emnlp_2019:  # 681 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2019-1.bht, selection: main}
+emnlp_2020:  # 1199 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2020-1.bht, selection: main}
+    - {key: db/conf/emnlp/emnlp2020f.bht, selection: findings}
+emnlp_2021:  # 1273 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2021-1.bht, selection: main}
+    - {key: db/conf/emnlp/emnlp2021f.bht, selection: findings}
+emnlp_2022:  # 1440 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2022.bht, selection: main}
+    - {key: db/conf/emnlp/emnlp2022f.bht, selection: findings}
+    - {key: db/conf/emnlp/emnlp2022i.bht, selection: industry}
+fse_2013:  # 95 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2013.bht, selection: main}
+fse_2014:  # 105 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2014.bht, selection: main}
+fse_2015:  # 124 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2015.bht, selection: main}
+fse_2016:  # 143 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2016.bht, selection: main}
+fse_2017:  # 124 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2017.bht, selection: main}
+fse_2018:  # 124 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2018.bht, selection: main}
+fse_2019:  # 150 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2019.bht, selection: main}
+fse_2020:  # 169 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2020.bht, selection: main}
+fse_2021:  # 188 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2021.bht, selection: main}
+fse_2022:  # 186 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2022.bht, selection: main}
+iccv_2013:  # 454 papers
+  tocs:
+    - {key: db/conf/iccv/iccv2013.bht, selection: main}
+iccv_2015:  # 526 papers
+  tocs:
+    - {key: db/conf/iccv/iccv2015.bht, selection: main}
+iccv_2017:  # 621 papers
+  tocs:
+    - {key: db/conf/iccv/iccv2017.bht, selection: main}
+iccv_2019:  # 1075 papers
+  tocs:
+    - {key: db/conf/iccv/iccv2019.bht, selection: main}
+iccv_2021:  # 1611 papers
+  tocs:
+    - {key: db/conf/iccv/iccv2021.bht, selection: main}
+iclr_2013:  # 23 papers
+  tocs:
+    - {key: db/conf/iclr/iclr2013.bht, selection: main}
+iclr_2014:  # 35 papers
+  tocs:
+    - {key: db/conf/iclr/iclr2014.bht, selection: main}
+iclr_2015:  # 31 papers
+  tocs:
+    - {key: db/conf/iclr/iclr2015.bht, selection: main}
+iclr_2016:  # 80 papers
+  tocs:
+    - {key: db/conf/iclr/iclr2016.bht, selection: main}
+icml_2013:  # 283 papers
+  tocs:
+    - {key: db/conf/icml/icml2013.bht, selection: main}
+icml_2014:  # 310 papers
+  tocs:
+    - {key: db/conf/icml/icml2014.bht, selection: main}
+icml_2015:  # 270 papers
+  tocs:
+    - {key: db/conf/icml/icml2015.bht, selection: main}
+icml_2016:  # 322 papers
+  tocs:
+    - {key: db/conf/icml/icml2016.bht, selection: main}
+icml_2017:  # 434 papers
+  tocs:
+    - {key: db/conf/icml/icml2017.bht, selection: main}
+icml_2018:  # 621 papers
+  tocs:
+    - {key: db/conf/icml/icml2018.bht, selection: main}
+icml_2019:  # 774 papers
+  tocs:
+    - {key: db/conf/icml/icml2019.bht, selection: main}
+icml_2020:  # 1085 papers
+  tocs:
+    - {key: db/conf/icml/icml2020.bht, selection: main}
+icml_2021:  # 1183 papers
+  tocs:
+    - {key: db/conf/icml/icml2021.bht, selection: main}
+icml_2022:  # 1234 papers
+  tocs:
+    - {key: db/conf/icml/icml2022.bht, selection: main}
+icra_2013:  # 873 papers
+  tocs:
+    - {key: db/conf/icra/icra2013.bht, selection: main}
+icra_2014:  # 1037 papers
+  tocs:
+    - {key: db/conf/icra/icra2014.bht, selection: main}
+icra_2015:  # 940 papers
+  tocs:
+    - {key: db/conf/icra/icra2015.bht, selection: main}
+icra_2016:  # 693 papers
+  tocs:
+    - {key: db/conf/icra/icra2016.bht, selection: main}
+icra_2017:  # 795 papers
+  tocs:
+    - {key: db/conf/icra/icra2017.bht, selection: main}
+icra_2018:  # 817 papers
+  tocs:
+    - {key: db/conf/icra/icra2018.bht, selection: main}
+icra_2019:  # 1024 papers
+  tocs:
+    - {key: db/conf/icra/icra2019.bht, selection: main}
+icra_2020:  # 1073 papers
+  tocs:
+    - {key: db/conf/icra/icra2020.bht, selection: main}
+icra_2021:  # 1386 papers
+  tocs:
+    - {key: db/conf/icra/icra2021.bht, selection: main}
+icra_2022:  # 929 papers
+  tocs:
+    - {key: db/conf/icra/icra2022.bht, selection: main}
+icse_2013:  # 242 papers
+  tocs:
+    - {key: db/conf/icse/icse2013.bht, selection: main}
+icse_2014:  # 99 papers
+  tocs:
+    - {key: db/conf/icse/icse2014.bht, selection: main}
+icse_2015:  # 86 papers
+  tocs:
+    - {key: db/conf/icse/icse2015-1.bht, selection: main}
+icse_2016:  # 101 papers
+  tocs:
+    - {key: db/conf/icse/icse2016.bht, selection: main}
+icse_2017:  # 68 papers
+  tocs:
+    - {key: db/conf/icse/icse2017.bht, selection: main}
+icse_2018:  # 153 papers
+  tocs:
+    - {key: db/conf/icse/icse2018.bht, selection: main}
+icse_2019:  # 109 papers
+  tocs:
+    - {key: db/conf/icse/icse2019.bht, selection: main}
+icse_2020:  # 129 papers
+  tocs:
+    - {key: db/conf/icse/icse2020.bht, selection: main}
+icse_2021:  # 138 papers
+  tocs:
+    - {key: db/conf/icse/icse2021.bht, selection: main}
+icse_2022:  # 199 papers
+  tocs:
+    - {key: db/conf/icse/icse2022.bht, selection: main}
+ijcai_2013:  # 496 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2013.bht, selection: main}
+ijcai_2015:  # 649 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2015.bht, selection: main}
+ijcai_2016:  # 658 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2016.bht, selection: main}
+ijcai_2017:  # 781 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2017.bht, selection: main}
+ijcai_2018:  # 870 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2018.bht, selection: main}
+ijcai_2019:  # 965 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2019.bht, selection: main}
+ijcai_2020:  # 778 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2020.bht, selection: main}
+ijcai_2021:  # 721 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2021.bht, selection: main}
+ijcai_2022:  # 863 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2022.bht, selection: main}
+iros_2013:  # 913 papers
+  tocs:
+    - {key: db/conf/iros/iros2013.bht, selection: main}
+iros_2014:  # 749 papers
+  tocs:
+    - {key: db/conf/iros/iros2014.bht, selection: main}
+iros_2015:  # 970 papers
+  tocs:
+    - {key: db/conf/iros/iros2015.bht, selection: main}
+iros_2016:  # 830 papers
+  tocs:
+    - {key: db/conf/iros/iros2016.bht, selection: main}
+iros_2017:  # 878 papers
+  tocs:
+    - {key: db/conf/iros/iros2017.bht, selection: main}
+iros_2018:  # 1086 papers
+  tocs:
+    - {key: db/conf/iros/iros2018.bht, selection: main}
+iros_2019:  # 934 papers
+  tocs:
+    - {key: db/conf/iros/iros2019.bht, selection: main}
+iros_2020:  # 1128 papers
+  tocs:
+    - {key: db/conf/iros/iros2020.bht, selection: main}
+iros_2021:  # 1032 papers
+  tocs:
+    - {key: db/conf/iros/iros2021.bht, selection: main}
+iros_2022:  # 1214 papers
+  tocs:
+    - {key: db/conf/iros/iros2022.bht, selection: main}
+issta_2013:  # 38 papers
+  tocs:
+    - {key: db/conf/issta/issta2013.bht, selection: main}
+issta_2014:  # 49 papers
+  tocs:
+    - {key: db/conf/issta/issta2014.bht, selection: main}
+issta_2015:  # 44 papers
+  tocs:
+    - {key: db/conf/issta/issta2015.bht, selection: main}
+issta_2016:  # 41 papers
+  tocs:
+    - {key: db/conf/issta/issta2016.bht, selection: main}
+issta_2017:  # 55 papers
+  tocs:
+    - {key: db/conf/issta/issta2017.bht, selection: main}
+issta_2018:  # 38 papers
+  tocs:
+    - {key: db/conf/issta/issta2018.bht, selection: main}
+issta_2019:  # 53 papers
+  tocs:
+    - {key: db/conf/issta/issta2019.bht, selection: main}
+issta_2020:  # 55 papers
+  tocs:
+    - {key: db/conf/issta/issta2020.bht, selection: main}
+issta_2021:  # 59 papers
+  tocs:
+    - {key: db/conf/issta/issta2021.bht, selection: main}
+issta_2022:  # 72 papers
+  tocs:
+    - {key: db/conf/issta/issta2022.bht, selection: main}
+naacl_2013:  # 167 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2013.bht, selection: main}
+naacl_2015:  # 239 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2015.bht, selection: main}
+naacl_2016:  # 181 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2016.bht, selection: main}
+naacl_2018:  # 357 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2018-1.bht, selection: main}
+    - {key: db/conf/naacl/naacl2018-2.bht, selection: main}
+    - {key: db/conf/naacl/naacl2018-3.bht, selection: industry}
+naacl_2019:  # 452 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2019-1.bht, selection: main}
+    - {key: db/conf/naacl/naacl2019-2.bht, selection: industry}
+naacl_2021:  # 515 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2021-2.bht, selection: industry}
+    - {key: db/conf/naacl/naacl2021.bht, selection: main}
+naacl_2022:  # 694 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2022.bht, selection: main}
+    - {key: db/conf/naacl/naacl2022f.bht, selection: findings}
+    - {key: db/conf/naacl/naacl2022i.bht, selection: industry}
+neurips_2013:  # 360 papers
+  tocs:
+    - {key: db/conf/nips/nips2013.bht, selection: main}
+neurips_2014:  # 411 papers
+  tocs:
+    - {key: db/conf/nips/nips2014.bht, selection: main}
+neurips_2015:  # 403 papers
+  tocs:
+    - {key: db/conf/nips/nips2015.bht, selection: main}
+neurips_2016:  # 569 papers
+  tocs:
+    - {key: db/conf/nips/nips2016.bht, selection: main}
+neurips_2017:  # 679 papers
+  tocs:
+    - {key: db/conf/nips/nips2017.bht, selection: main}
+neurips_2018:  # 1010 papers
+  tocs:
+    - {key: db/conf/nips/nips2018.bht, selection: main}
+neurips_2019:  # 1427 papers
+  tocs:
+    - {key: db/conf/nips/nips2019.bht, selection: main}
+neurips_2020:  # 1898 papers
+  tocs:
+    - {key: db/conf/nips/neurips2020.bht, selection: main}
+rss_2013:  # 55 papers
+  tocs:
+    - {key: db/conf/rss/rss2013.bht, selection: main}
+rss_2014:  # 57 papers
+  tocs:
+    - {key: db/conf/rss/rss2014.bht, selection: main}
+rss_2015:  # 49 papers
+  tocs:
+    - {key: db/conf/rss/rss2015.bht, selection: main}
+rss_2016:  # 47 papers
+  tocs:
+    - {key: db/conf/rss/rss2016.bht, selection: main}
+rss_2017:  # 75 papers
+  tocs:
+    - {key: db/conf/rss/rss2017.bht, selection: main}
+rss_2018:  # 71 papers
+  tocs:
+    - {key: db/conf/rss/rss2018.bht, selection: main}
+rss_2019:  # 84 papers
+  tocs:
+    - {key: db/conf/rss/rss2019.bht, selection: main}
+rss_2020:  # 103 papers
+  tocs:
+    - {key: db/conf/rss/rss2020.bht, selection: main}
+rss_2021:  # 92 papers
+  tocs:
+    - {key: db/conf/rss/rss2021.bht, selection: main}
+rss_2022:  # 74 papers
+  tocs:
+    - {key: db/conf/rss/rss2022.bht, selection: main}
+usenix_security_2013:  # 45 papers
+  tocs:
+    - {key: db/conf/uss/uss2013.bht, selection: main}
+usenix_security_2014:  # 67 papers
+  tocs:
+    - {key: db/conf/uss/uss2014.bht, selection: main}
+usenix_security_2015:  # 67 papers
+  tocs:
+    - {key: db/conf/uss/uss2015.bht, selection: main}
+usenix_security_2016:  # 72 papers
+  tocs:
+    - {key: db/conf/uss/uss2016.bht, selection: main}
+usenix_security_2017:  # 85 papers
+  tocs:
+    - {key: db/conf/uss/uss2017.bht, selection: main}
+usenix_security_2018:  # 101 papers
+  tocs:
+    - {key: db/conf/uss/uss2018.bht, selection: main}
+usenix_security_2019:  # 113 papers
+  tocs:
+    - {key: db/conf/uss/uss2019.bht, selection: main}
+usenix_security_2020:  # 159 papers
+  tocs:
+    - {key: db/conf/uss/uss2020.bht, selection: main}
+usenix_security_2021:  # 247 papers
+  tocs:
+    - {key: db/conf/uss/uss2021.bht, selection: main}
+usenix_security_2022:  # 256 papers
+  tocs:
+    - {key: db/conf/uss/uss2022.bht, selection: main}
+wacv_2013:  # 73 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2013.bht, selection: main}
+wacv_2014:  # 152 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2014.bht, selection: main}
+wacv_2015:  # 155 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2015.bht, selection: main}
+wacv_2016:  # 189 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2016.bht, selection: main}
+wacv_2017:  # 140 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2017.bht, selection: main}
+wacv_2018:  # 221 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2018.bht, selection: main}
+wacv_2019:  # 230 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2019.bht, selection: main}
+wacv_2020:  # 378 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2020.bht, selection: main}
+wacv_2021:  # 406 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2021.bht, selection: main}
+wacv_2022:  # 406 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2022.bht, selection: main}
