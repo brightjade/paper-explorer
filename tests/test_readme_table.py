@@ -74,3 +74,16 @@ class TestUpdateReadme:
         p.write_text(README)
         assert update_readme(p, "SIGGRAPH", 2026, "main") is False
         assert p.read_text() == README
+
+
+from pathlib import Path
+
+
+def test_autoregister_never_edits_the_backfill_table():
+    """The 2013-2022 table is static. Its header starts `| Venue |`, not
+    `| Conference |`, so set_cell never treats it as a year grid."""
+    readme = (Path(__file__).resolve().parent.parent / "README.md").read_text(encoding="utf-8")
+    section = lambda text: text.split("### 2013–2022", 1)[1].split("\n## ", 1)[0]
+    updated = set_cell(readme, "ICLR", 2027, "oral")
+    assert updated is not None
+    assert section(updated) == section(readme)

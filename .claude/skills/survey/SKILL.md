@@ -31,7 +31,7 @@ Conference IDs follow the pattern `<venue>_<year>` (e.g., `iclr_2025`, `emnlp_20
 | Security | USENIX Security |
 | SE | ICSE, FSE, ASE, ISSTA |
 
-Year range varies per venue (generally 2023-2026). Not all conferences have enriched data.
+Year range varies per venue (generally 2013-2026). Before 2023 most venues come from DBLP and carry only main / findings / industry labels; ICLR 2017-2022, NeurIPS 2021-2022 and CoRL 2021-2022 keep oral / spotlight / poster. Not all conferences have enriched data.
 
 ---
 
@@ -42,7 +42,7 @@ Year range varies per venue (generally 2023-2026). Not all conferences have enri
 If the user has not specified conferences or year range, ask a clarifying question. Present the venue categories above and ask:
 
 1. **Which venue categories or specific conferences** should be searched? Offer the categories as options (ML, NLP, CV, etc.) and let them also name specific venues.
-2. **Year range** — default to all available years (2023-2026) but let the user narrow it.
+2. **Year range** — default to all available years (2013-2026) but let the user narrow it.
 
 Do not proceed until you know the research idea, target conferences, and year range.
 
@@ -98,7 +98,7 @@ Organize papers into three tiers:
 After compiling results from the conference data, critically assess: are there well-known seminal papers that should appear but didn't? This happens when:
 - A famous paper was published at a venue not in the dataset
 - A highly influential preprint was never formally published at a tracked conference
-- A foundational paper predates the year range (pre-2023)
+- A foundational paper predates the year range (pre-2013)
 
 Use WebSearch to find these missing papers. **Only add web-searched papers if they are genuinely seminal and influential** — high citation count, widely recognized in the community. Do not pad the survey with random arXiv preprints. When you add a web-searched paper, clearly mark it as "not from conference proceedings" in the report.
 

@@ -148,6 +148,38 @@ NeurIPS also includes `datasets_oral`, `datasets_spotlight`, `datasets_poster` t
 | ASE | main | main | main | main |
 | ISSTA | main | main | main | main |
 
+### 2013–2022
+
+Earlier years come from DBLP, except where OpenReview keeps the presentation type. DBLP's proceedings volumes separate main, findings and industry papers but not orals.
+
+| Venue | Years | Source | Labels |
+|---|---|---|---|
+| ICLR | 2013–2022 | DBLP 2013–2016, OpenReview 2017–22 | main (2013–2016); oral, poster 2017–19; oral, spotlight, poster 2020–22 |
+| NeurIPS | 2013–2022 | DBLP 2013–2020, OpenReview 2021–22 | main (2013–2020); oral, spotlight, poster 2021; main 2022; datasets 2021–22 |
+| ICML | 2013–2022 | DBLP 2013–2022 | main |
+| AAAI | 2013–2022 | DBLP 2013–2022 | main |
+| IJCAI | 2013, 2015–2022 | DBLP 2013, 2015–2022 | main |
+| ACL | 2013–2022 | DBLP 2013–2022 | main; findings 2021–2022 |
+| EMNLP | 2013–2022 | DBLP 2013–2022 | main; findings 2020–2022; industry 2022 |
+| NAACL | 2013, 2015–2016, 2018–2019, 2021–2022 | DBLP 2013, 2015–2016, 2018–2019, 2021–2022 | main; findings 2022; industry 2018–2019, 2021–2022 |
+| EACL | 2014, 2017, 2021 | DBLP 2014, 2017, 2021 | main |
+| COLING | 2014, 2016, 2018, 2020, 2022 | DBLP 2014, 2016, 2018, 2020, 2022 | main; industry 2020 |
+| CVPR | 2013–2022 | DBLP 2013–2022 | main |
+| ICCV | 2013, 2015, 2017, 2019, 2021 | DBLP 2013, 2015, 2017, 2019, 2021 | main |
+| ECCV | 2014, 2016, 2018, 2020, 2022 | DBLP 2014, 2016, 2018, 2020, 2022 | main |
+| WACV | 2013–2022 | DBLP 2013–2022 | main |
+| CoRL | 2017–2022 | DBLP 2017–2020, OpenReview 2021–22 | main (2017–2020); oral, poster 2021–22 |
+| ICRA | 2013–2022 | DBLP 2013–2022 | main |
+| IROS | 2013–2022 | DBLP 2013–2022 | main |
+| RSS | 2013–2022 | DBLP 2013–2022 | main |
+| USENIX Security | 2013–2022 | DBLP 2013–2022 | main |
+| ICSE | 2013–2022 | DBLP 2013–2022 | main |
+| FSE | 2013–2022 | DBLP 2013–2022 | main |
+| ASE | 2013–2022 | DBLP 2013–2022 | main |
+| ISSTA | 2013–2022 | DBLP 2013–2022 | main |
+
+Three venues differ in scope from 2023 on. AAAI's DBLP volumes include student abstracts and demos, which the 2023+ crawl leaves out. FSE and ASE publish every track in one volume, so their 2013–2022 counts are higher than a research-track-only crawl would give.
+
 ## Literature Survey (Claude Code skill)
 
 Use the `/survey` command in Claude Code to generate a grounded literature survey from the accepted papers in this repository. Requires enriched data (`papers_enriched.jsonl`) for the target conferences.
