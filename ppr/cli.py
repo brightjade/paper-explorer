@@ -118,7 +118,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Exit non-zero unless each of these ends enriched or nothing-to-do (used after a re-crawl).",
     )
 
-    # validate
+    # awards
     awards_parser = subparsers.add_parser(
         "awards", help="Collect paper awards into data/<id>/awards.json"
     )
@@ -128,6 +128,7 @@ def build_parser() -> argparse.ArgumentParser:
     awards_parser.add_argument("--report", type=Path, default=None,
                                help="Write per-conference outcomes as JSON")
 
+    # validate
     validate_parser = subparsers.add_parser(
         "validate", help="Cross-reference paper counts against DBLP (e.g., ppr validate iclr_2025)"
     )
