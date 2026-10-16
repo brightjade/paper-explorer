@@ -45,6 +45,7 @@ CATEGORIES = ("ML", "NLP", "CV", "Robotics", "SE", "Security", "Others")
 
 VENUE_CATEGORIES = {
     "iclr": "ML",
+    "tmlr": "ML",
     "neurips": "ML",
     "icml": "ML",
     "aaai": "ML",

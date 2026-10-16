@@ -398,3 +398,16 @@ class TestBuildTop:
             "relative_citations": 1.0,
             "first_public": "2025-01-15",
         }
+
+
+def test_venue_date_replaces_the_announce_month():
+    assert first_public({"venue_date": "2025-11-20"}, 2025, 1) == date(2025, 11, 20)
+
+
+def test_venue_date_still_loses_to_an_earlier_arxiv_month():
+    paper = {"venue_date": "2025-11-20", "external_ids": {"ArXiv": "2406.01234"}}
+    assert first_public(paper, 2025, 1) == date(2024, 6, 15)
+
+
+def test_a_malformed_venue_date_falls_back_to_the_announce_month():
+    assert first_public({"venue_date": "2025-13-40"}, 2025, 1) == date(2025, 1, 15)
