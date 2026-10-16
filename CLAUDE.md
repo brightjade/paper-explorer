@@ -15,6 +15,7 @@ uv run ppr validate iclr_2025                  # Validate paper count against DB
 ./build.sh                                     # Build static JSON for web app
 uv run ppr autoregister discover.json --report register.json   # Register live venues by rule (--commit commits each venue)
 uv run ppr enrich --all --time-budget 4h --report enrich.json  # Enrich within a time budget
+uv run ppr awards --all --report awards.json                  # Collect paper awards into data/<id>/awards.json
 uv run ppr release --base-tag data-YYYY-MM-DD --dry-run         # Plan a data release
 uv run python -m scripts.sync_data                             # Mirror the newest data release into data/ (refuses over local edits)
 uv run pytest tests/                           # Run all tests
@@ -29,6 +30,7 @@ Conference ID = config filename without `.yaml` (for OpenReview) or key in `SCRA
 - Scraper: `ppr.scrapers.SCRAPERS[<id>]` (every non-OpenReview source)
 - Output: `data/<id>/papers.jsonl`
 - Enriched: `data/<id>/papers_enriched.jsonl` (sorted by citation count, with abstracts)
+- Awards: `data/<id>/awards.json` (from `ppr awards`; joined onto papers by `scripts/build_data.py`)
 
 ## Architecture
 
@@ -57,7 +59,7 @@ Pipeline code lives in the `ppr/` package; `scripts/` holds the web-data build a
   - `aaai.py` -- AAAI proceedings from `ojs.aaai.org`. Scrapes multiple OJS issue pages per year (technical tracks + special tracks).
   - `usenix.py` -- USENIX Security. Scrapes `technical-sessions` page (`parse_sessions`). Authors are the people-text first `<p>`'s text outside `<em>` (affiliations are inside it); later `<p>`s are notes, which the awards collector reads. Needs browser UA to avoid 403.
   - `dblp.py` -- ICRA/IROS/IJCAI 2023-2025 from DBLP toc pages via `ppr/dblp_client.py`. Maps records to papers; skips records without a document page. Also loads the 2013–2022 backfill from configs/backfill/dblp.yaml; a backfill toc that yields no paper fails the conference.
-  - `researchr.py` -- SE research tracks on conf.researchr.org. `parse_track_page` (shared by the probe) reads the page title's track name and the `#event-overview` rows of that track, strips badges and "[Remote]" tags. Paced at robots.txt's `Crawl-delay: 2`; plain paths only.
+  - `researchr.py` -- SE research tracks on conf.researchr.org. `parse_track_page` (shared by the probe) reads the page title's track name and the `#event-overview` rows of that track, returns each row's badge strings (read by the awards collector) and keeps them and "[Remote]" tags out of titles. Paced at robots.txt's `Crawl-delay: 2`; plain paths only.
   - `crossref.py` -- ICRA/IROS by exact Crossref `container-title`. Cursor paging that raises if it ends short, markup-stripped titles, no `mailto`.
   - `roboticsproceedings.py` -- RSS proceedings volumes; one index request per volume.
   - `cvf.py` -- CV conferences (CVPR, ICCV, WACV) from CVF Open Access, or from the conference's AcceptedPapers page before proceedings appear (ICCV 2025, WACV 2026, no paper links); ECCV from ECVA. Parses paper lists with author metadata.
@@ -76,6 +78,7 @@ Pipeline code lives in the `ppr/` package; `scripts/` holds the web-data build a
 - `ppr/report.py` -- `pipeline_state.json` deferral streaks, and the tracking-issue decision (`notify` / `blind` / `close`). Issues exist only for what a human must act on. The workflow's github-script only executes this decision; the executor is tested by `node tests/workflow/monthly-workflow.test.js`.
 - `ppr/release.py` -- Publishes `data/` as a `data-YYYY-MM-DD` GitHub Release: refuses if the newest data release is not the one the run started from, creates before pruning, keeps 3. The newest data release is the dataset's source of truth.
 - `.github/workflows/monthly.yml` -- 07:23 UTC on the 3rd: discover → autoregister → tests → enrich (210m budget) → release → push → dispatch deploy, with a separate `notify` job for the issue. Installs with `uv sync --locked`, fails closed if `data.zip` extracts no conference data, and refuses non-dry-run runs that do not start from `main` (dry runs work from any branch). A `workflow_dispatch` `recrawl` input re-crawls the listed conference IDs before enrich, and `ppr enrich --require` fails the run before release unless each of them ends enriched.
+- `ppr/awards/` -- Paper awards, kept apart from crawl and enrich because they are announced months after the accepted list. `labels.py` maps each label a venue prints onto one of five kinds (`award`, `honorable`, `candidate`, `artifact`, `test_of_time`); an unknown label raises `UnknownAwardLabel` (researchr badges excepted: most are artifact or topic badges). One module per source -- `virtual.py` (awards_detail, CVPR AwardCandidates), `iclr_blog.py` (WordPress REST, forum-id join), `cvf_registry.py` (thecvf.com, every CVPR/ICCV/ECCV prize), `researchr_badges.py`, `sigsoft.py` (SE backfill), `usenix_notes.py`, `manual.py` (`configs/awards_manual/<id>.yaml`, reviewed one-off lists) -- fetched through `fetch.py` at each host's robots.txt Crawl-delay. `collect.py` runs each venue's ordered `SOURCES_BY_PREFIX` list, merges (earlier source wins a duplicate), and ends each conference `collected` / `not-yet` / `held` (unknown label, or it would lose entries) / `failed` (source raised); held and failed keep the file on disk and exit 0. `ppr awards --all` covers years from `FIRST_YEAR` (2023) on; named ids run as given. `join.py` binds entries to papers by forum id, else `title_key`; test-of-time stays conference-level.
 - `ppr/models.py` -- `Paper` dataclass with `selection` field. `to_dict()` excludes `None`, empty-string and empty-collection fields. `write_papers()` is the one way `papers.jsonl` gets written, by both save paths, and refuses to replace a non-empty file with zero papers (`EmptyOverwriteError`) -- a broken source returns `[]`, not an exception.
 - `ppr/config.py` -- `CrawlConfig` from YAML. `conference_id` derived from filename, output path derived from that.
 - `ppr/readme_table.py` -- Fills one cell of README's hand-grouped conference tables for autoregister (adding a year column when needed), editing in place rather than regenerating.

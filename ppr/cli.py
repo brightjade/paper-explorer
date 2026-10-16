@@ -119,6 +119,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     # validate
+    awards_parser = subparsers.add_parser(
+        "awards", help="Collect paper awards into data/<id>/awards.json"
+    )
+    awards_parser.add_argument("conferences", nargs="*", help="Conference IDs (e.g. neurips_2024)")
+    awards_parser.add_argument("--all", action="store_true",
+                               help="Every data/<id> whose venue has an awards rule")
+    awards_parser.add_argument("--report", type=Path, default=None,
+                               help="Write per-conference outcomes as JSON")
+
     validate_parser = subparsers.add_parser(
         "validate", help="Cross-reference paper counts against DBLP (e.g., ppr validate iclr_2025)"
     )
@@ -271,6 +280,20 @@ def cmd_enrich(args: argparse.Namespace) -> None:
         print(f"required conference {conf_id} ended {status.get(conf_id, 'missing')}; failing the run")
     if failures or unmet:
         raise SystemExit(1)
+
+
+def cmd_awards(args: argparse.Namespace) -> None:
+    from ppr.awards.collect import collect_all, conference_ids, format_summary, results_to_json
+
+    conf_ids = conference_ids(DATA_DIR) if args.all else args.conferences
+    if not conf_ids:
+        raise SystemExit("No conferences given. Pass conference IDs or use --all.")
+    outcomes = collect_all(conf_ids, DATA_DIR)
+    print(format_summary(outcomes))
+    if args.report:
+        args.report.write_text(results_to_json(outcomes), encoding="utf-8")
+    # Held and failed conferences keep their previous awards.json and go to the
+    # monthly issue; they do not fail the run (ppr/awards/collect.py says why).
 
 
 def cmd_validate(args: argparse.Namespace) -> None:
@@ -434,6 +457,7 @@ def main() -> None:
     commands = {
         "crawl": cmd_crawl,
         "enrich": cmd_enrich,
+        "awards": cmd_awards,
         "validate": cmd_validate,
         "discover": cmd_discover,
         "autoregister": cmd_autoregister,
