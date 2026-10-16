@@ -5,6 +5,7 @@ from collections import Counter
 import openreview
 
 from ppr.config import CrawlConfig
+from ppr.matching import title_key
 from ppr.models import Paper, write_papers
 
 logger = logging.getLogger(__name__)
@@ -12,6 +13,36 @@ logger = logging.getLogger(__name__)
 
 class EmptyCrawlError(Exception):
     """The API returned papers but none matched the configured selections."""
+
+
+class DuplicateConflictError(Exception):
+    """Two v1 notes describe the same paper but carry different labels."""
+
+
+def collapse_duplicates(entries: list[tuple[Paper, int]]) -> tuple[list[Paper], int]:
+    """Keep one paper per (title, authors): the note created first.
+
+    NeurIPS 2021's v1 export lists 297 accepted papers twice, under two forums
+    with identical labels. Two different papers that merely share a title keep
+    their own entries, because their authors differ. A pair whose labels
+    differ is not a duplicate we understand, so it raises rather than guessing.
+    """
+    kept: dict[tuple, tuple[Paper, int]] = {}
+    for paper, created in entries:
+        key = (title_key(paper.title), tuple(title_key(a) for a in paper.authors))
+        prior = kept.get(key)
+        if prior is None:
+            kept[key] = (paper, created)
+            continue
+        if prior[0].selection != paper.selection:
+            raise DuplicateConflictError(
+                f"{paper.title!r} appears as {prior[0].selection} ({prior[0].forum_id}) "
+                f"and {paper.selection} ({paper.forum_id})"
+            )
+        if created < prior[1]:
+            kept[key] = (paper, created)
+    papers = [p for p, _ in kept.values()]
+    return papers, len(entries) - len(papers)
 
 
 def _resolve_credentials(
@@ -65,25 +96,60 @@ class OpenReviewAPIClient:
         self.config = config
         self.client = client
 
+    def _selection_lookup(self) -> dict[str, str]:
+        """Venue or decision string -> selection name; a selection may list several."""
+        lookup: dict[str, str] = {}
+        for name, values in self.config.selections.items():
+            for value in [values] if isinstance(values, str) else values:
+                lookup[value] = name
+        return lookup
+
+    def _fetch_v1(self) -> tuple[list, dict[str, str] | None]:
+        """v1 submissions, plus forum -> decision when labels live in decision notes.
+
+        The second value is None when each note's own `venue` is the label.
+        """
+        cfg = self.config
+        invitation = cfg.submission_invitation or f"{cfg.venue_id}/-/Blind_Submission"
+        decisions = cfg.decisions
+        if decisions and decisions.get("reply_suffix"):
+            # ICLR 2019-2020: a decision reply on each submission. The v1 API
+            # refuses a non-prefix regex such as `Paper.*/-/Decision`, so the
+            # replies come attached to the submissions instead.
+            notes = self.client.get_all_notes(invitation=invitation, details="directReplies")
+            by_forum: dict[str, str] = {}
+            for note in notes:
+                for reply in (note.details or {}).get("directReplies", []):
+                    if reply.get("invitation", "").endswith(decisions["reply_suffix"]):
+                        by_forum[note.forum] = reply.get("content", {}).get(decisions["field"], "")
+                        break
+            return notes, by_forum
+        notes = list(self.client.get_all_notes(invitation=invitation))
+        if decisions:
+            # ICLR 2018: decisions are notes of their own, one per forum.
+            decided = self.client.get_all_notes(invitation=decisions["invitation"])
+            return notes, {d.forum: d.content.get(decisions["field"], "") for d in decided}
+        for extra_vid in cfg.extra_venue_ids:
+            logger.info("Fetching extra venue: %s", extra_vid)
+            extra = self.client.get_all_notes(invitation=f"{extra_vid}/-/Submission")
+            logger.info("  Found %d papers from %s", len(extra), extra_vid)
+            notes.extend(extra)
+        return notes, None
+
     def fetch_papers(self) -> list[Paper]:
         """Fetch accepted papers, tagged with their configured selection type."""
-        sel_map = self.config.selections
         is_v1 = self.config.api_version == 1
-
-        if is_v1:
-            invitation = f"{self.config.venue_id}/-/Blind_Submission"
-        else:
-            invitation = f"{self.config.venue_id}/-/Submission"
-
         logger.info(
-            "Fetching accepted papers for %s %s (invitation=%s, api_v%d)",
-            self.config.name, self.config.year, invitation, self.config.api_version,
+            "Fetching accepted papers for %s %s (venue=%s, api_v%d)",
+            self.config.name, self.config.year, self.config.venue_id, self.config.api_version,
         )
 
+        decisions_by_forum: dict[str, str] | None = None
         try:
             if is_v1:
-                notes = self.client.get_all_notes(invitation=invitation)
+                notes, decisions_by_forum = self._fetch_v1()
             else:
+                invitation = f"{self.config.venue_id}/-/Submission"
                 notes = self.client.get_all_notes(
                     invitation=invitation,
                     content={"venueid": self.config.venue_id},
@@ -106,26 +172,22 @@ class OpenReviewAPIClient:
             )
             return []
 
-        logger.info("Found %d accepted papers total", len(notes))
-
-        # Reverse map: venue string -> selection name
-        venue_to_selection = {v: k for k, v in sel_map.items()}
-
-        papers = []
+        logger.info("Found %d notes total", len(notes))
+        lookup = self._selection_lookup()
+        entries: list[tuple[Paper, int]] = []
+        seen: set[str] = set()
         for note in notes:
             if is_v1:
-                venue_str = note.content.get("venue", "")
                 content = note.content
+                label = (decisions_by_forum.get(note.forum, "")
+                         if decisions_by_forum is not None else content.get("venue", ""))
             else:
-                venue_str = note.content.get("venue", {}).get("value", "")
-                content = {
-                    k: v.get("value") for k, v in note.content.items()
-                }
-
-            selection = venue_to_selection.get(venue_str)
+                label = note.content.get("venue", {}).get("value", "")
+                content = {k: v.get("value") for k, v in note.content.items()}
+            seen.add(label)
+            selection = lookup.get(label)
             if selection is None:
                 continue
-
             paper = Paper(
                 title=content.get("title", ""),
                 link=f"https://openreview.net/pdf?id={note.forum}",
@@ -135,20 +197,23 @@ class OpenReviewAPIClient:
                 abstract=content.get("abstract", ""),
                 forum_id=note.forum,
             )
-            papers.append(paper)
+            created = note.tcdate if isinstance(getattr(note, "tcdate", None), int) else 0
+            entries.append((paper, created))
 
-        if notes and not papers:
-            seen = sorted({
-                (note.content.get("venue", "") if is_v1
-                 else note.content.get("venue", {}).get("value", ""))
-                for note in notes
-            })
+        if notes and not entries:
             raise EmptyCrawlError(
                 f"{self.config.venue_id}: {len(notes)} papers returned but none "
-                f"matched the configured selections {sorted(sel_map.values())}. "
-                f"Venue strings actually present: {seen}. "
+                f"matched the configured selections {sorted(lookup)}. "
+                f"Venue strings actually present: {sorted(seen)}. "
                 f"Fix the config's `selections` before crawling."
             )
+
+        if is_v1:
+            papers, collapsed = collapse_duplicates(entries)
+            if collapsed:
+                logger.info("Collapsed %d duplicate notes", collapsed)
+        else:
+            papers = [p for p, _ in entries]
 
         counts = Counter(p.selection for p in papers)
         for sel, count in counts.most_common():
