@@ -383,6 +383,7 @@ class EnrichResult:
     resumed: int = 0
     unbound: int = 0
     deferred: int = 0  # papers left unmatched when the time budget ran out; a subset of cold
+    untried: int = 0  # archive papers batch-only mode never title-matched; a subset of cold
     reason: str = ""
 
 
@@ -585,6 +586,7 @@ async def enrich_conference(
     *,
     full: bool = False,
     deadline: Deadline = NO_DEADLINE,
+    batch_only: bool = False,
 ) -> EnrichResult:
     """Enrich a single conference, choosing the cheapest workable path.
 
@@ -592,6 +594,11 @@ async def enrich_conference(
     cold paths resumes instead of starting over. The checkpoint only ever
     shortcuts lookups: guards and the final write still see the whole paper set,
     so a resumed run produces exactly the file an uninterrupted one would.
+
+    `batch_only` is the archive mode (see `ppr/archive.py`): the refresh and
+    DOI batches run, title matching does not. Semantic Scholar finished
+    indexing these years long ago, so a title it could not match then it will
+    not match now; those papers are written as routed and counted `untried`.
     """
     conf_dir = data_dir / conf_id
     checkpoint = Checkpoint(checkpoint_path(conf_dir))
@@ -651,6 +658,7 @@ async def enrich_conference(
     # UnboundLocalError on the read below.
     unbound: list[Paper] = []
     deferred = 0
+    untried = 0
     with checkpoint:
         async with httpx.AsyncClient(timeout=60.0) as http:
             unbound, refresh_fuzzy = await _run_batch(
@@ -667,10 +675,13 @@ async def enrich_conference(
                 client, http, doi_cold, doi_id_of,
                 mode="set", record=checkpoint.record,
             )
-            title_cold_fuzzy, deferred = await _run_title_cold(
-                client, http, title_cold, conf_id,
-                record=checkpoint.record, deadline=deadline,
-            )
+            if batch_only:
+                title_cold_fuzzy, untried = 0, len(title_cold)
+            else:
+                title_cold_fuzzy, deferred = await _run_title_cold(
+                    client, http, title_cold, conf_id,
+                    record=checkpoint.record, deadline=deadline,
+                )
 
     # One combined line per conference — refresh is where most fuzzy verdicts
     # actually land, so counting only the title-cold path here would miss
@@ -708,6 +719,7 @@ async def enrich_conference(
         resumed=resumed,
         unbound=len(unbound),
         deferred=deferred,
+        untried=untried,
     )
 
 

@@ -1802,3 +1802,58 @@ class TestCmdEnrichDeadlineWiring:
 
     def test_no_budget_means_no_deadline(self, monkeypatch):
         assert self._captured(monkeypatch, ["enrich", "a_2026"]) is NO_DEADLINE
+
+
+class TestBatchOnly:
+    """Archive conferences: refresh and DOI batches only, never title matching."""
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_refreshes_and_leaves_title_cold_papers_untried(self, tmp_path):
+        raw = [_paper(title="Bound"), _paper(title="Never Found")]
+        enriched = [
+            _paper(title="Bound", external_ids={"CorpusId": 1}, citation_count=1),
+            _paper(title="Never Found", match_status="not_found"),
+        ]
+        _conf(tmp_path, "cvpr_2019", raw, enriched)
+        respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[
+            {"title": "Bound", "citationCount": 50, "externalIds": {"CorpusId": 1},
+             "authors": [{"name": "X"}]},
+        ]))
+        bulk = respx.get(BULK_URL).mock(return_value=httpx.Response(200, json={"data": []}))
+        match = respx.get(MATCH_URL).mock(return_value=httpx.Response(200, json={"data": []}))
+
+        result = await enrich_conference(
+            "cvpr_2019", S2Client(min_interval=0.0), tmp_path, batch_only=True
+        )
+
+        assert result.status == "enriched"
+        assert (result.refreshed, result.untried, result.deferred) == (1, 1, 0)
+        assert not bulk.called and not match.called
+        out = {p.title: p for p in read_papers(tmp_path / "cvpr_2019" / "papers_enriched.jsonl")}
+        assert out["Bound"].citation_count == 50
+        assert out["Never Found"].match_status == "not_found"
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_doi_papers_still_bind_by_batch(self, tmp_path):
+        # Review focus 2: an archive conference never cold-enriched still gets
+        # its DOI papers, and the rest show up as untried, not as success.
+        raw = [_paper(title="Has DOI", link="https://doi.org/10.1/x"), _paper(title="No DOI")]
+        _conf(tmp_path, "icra_2016", raw)
+        respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[
+            {"title": "Has DOI", "citationCount": 7, "externalIds": {"CorpusId": 9},
+             "authors": [{"name": "X"}]},
+        ]))
+        match = respx.get(MATCH_URL).mock(return_value=httpx.Response(200, json={"data": []}))
+
+        result = await enrich_conference(
+            "icra_2016", S2Client(min_interval=0.0), tmp_path, batch_only=True
+        )
+
+        assert result.status == "enriched"
+        assert (result.cold, result.untried) == (2, 1)
+        assert not match.called
+        out = {p.title: p for p in read_papers(tmp_path / "icra_2016" / "papers_enriched.jsonl")}
+        assert out["Has DOI"].citation_count == 7
+        assert out["No DOI"].citation_count is None
