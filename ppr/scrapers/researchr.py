@@ -89,6 +89,9 @@ def parse_track_page(text: str) -> tuple[str, list[dict]]:
     - ICSE 2025"). Rows come from `#event-overview` only -- the schedule lists
     the same papers again -- and a row whose `prog-track` names another track
     (a journal-first paper in a research session) is dropped.
+
+    Each row also carries its badge strings (`badges`): the awards collector
+    reads distinguished-paper badges from them (`ppr/awards/researchr_badges.py`).
     """
     soup = BeautifulSoup(text, "html.parser")
     parts = [p.strip() for p in (soup.title.get_text() if soup.title else "").split(" - ")]
@@ -106,6 +109,8 @@ def parse_track_page(text: str) -> tuple[str, list[dict]]:
         if event in seen or prog is None or prog.get_text(strip=True) != track:
             continue
         seen.add(event)
+        badges = [b["data-facet-badge"]
+                  for b in anchor.select("span.pull-right span.output-badge[data-facet-badge]")]
         for badge in anchor.select("span.pull-right"):
             badge.decompose()
         title = _SESSION_TAG.sub("", " ".join(anchor.get_text().split()))
@@ -116,6 +121,7 @@ def parse_track_page(text: str) -> tuple[str, list[dict]]:
             "title": title,
             "authors": [" ".join(n.split()) for n in names if n.strip()],
             "link": preprint["href"] if preprint and preprint.get("href") else "",
+            "badges": badges,
         })
     return track, rows
 

@@ -12,13 +12,15 @@ URL = "https://conf.researchr.org/track/icse-2025/icse-2025-research-track"
 
 
 def _row(event, title, track="Research Track", authors=("Al One", "Bea Two"),
-         preprint=None, badge=False):
+         preprint=None, badge=False, badges=()):
     """One Accepted Papers row, shaped like the live ICSE 2025 page."""
+    names = (["Artifact-Available"] if badge else []) + list(badges)
     badge_html = (
-        '<span class="pull-right"><span title="Artifact-Available" '
-        'data-facet-badge="Artifact-Available" class="output-badge">'
-        '<img alt="Artifact-Available" class="outputimage"/></span></span>'
-        if badge else ""
+        '<span class="pull-right">' + "".join(
+            f'<span title="{b}" data-facet-badge="{b}" class="output-badge">'
+            f'<img alt="{b}" class="outputimage"/></span>' for b in names
+        ) + "</span>"
+        if names else ""
     )
     performers = ", ".join(
         f'<a href="https://conf.researchr.org/profile/x/p{i}" class="navigate">{a}</a>'
@@ -74,7 +76,13 @@ class TestParseTrackPage:
         ]))
         assert track == "Research Track"
         assert rows == [{"title": "3DGen: Provably Correct Parsers",
-                         "authors": ["Sarah Fakhoury", "Markus Kuppe"], "link": ""}]
+                         "authors": ["Sarah Fakhoury", "Markus Kuppe"], "link": "", "badges": []}]
+
+    def test_badges_are_returned_and_kept_out_of_the_title(self):
+        _, rows = parse_track_page(_page([_row("e1", "A Catalog of Anti-patterns",
+                                               badges=("Distinguished Paper Award", "Artifact-Available"))]))
+        assert rows[0]["title"] == "A Catalog of Anti-patterns"
+        assert rows[0]["badges"] == ["Distinguished Paper Award", "Artifact-Available"]
 
     def test_badges_are_not_part_of_the_title(self):
         _, rows = parse_track_page(_page([_row("e1", "A Catalog of Anti-patterns", badge=True)]))
