@@ -55,3 +55,23 @@ def test_enrich_requires_every_recrawled_conference():
     run = _named("Enrich")["run"]
     assert "--require" in run
     assert "$RECRAWL" in run
+
+
+def test_awards_run_after_tests_and_before_enrich():
+    names = [s.get("name") for s in _steps(_wf())]
+    assert names.index("Tests") < names.index("Awards") < names.index("Enrich")
+
+
+def test_awards_collect_everything_and_write_a_report():
+    assert _named("Awards")["run"] == "uv run ppr awards --all --report awards.json"
+
+
+def test_the_awards_report_is_uploaded_even_after_a_failure():
+    upload = next(s for s in _steps(_wf()) if s.get("with", {}).get("name") == "report-awards")
+    assert upload["with"]["path"] == "awards.json"
+    assert "!cancelled()" in upload["if"]
+
+
+def test_notify_reads_the_awards_report():
+    decide = next(s for s in _wf()["jobs"]["notify"]["steps"] if s.get("name") == "Decide the issue action")
+    assert "--awards reports/awards.json" in decide["run"]

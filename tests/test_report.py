@@ -202,3 +202,32 @@ class TestCorruptJson:
         ])
         cli.cmd_report(args)
         assert json.loads(out.read_text())["action"] == "notify"
+
+
+class TestAwardsInTheIssue:
+    def _awards(self, *rows):
+        return {"results": [{"count": 0, "matched": 0, "unmatched": [], "reason": "", **r} for r in rows]}
+
+    def test_held_awards_notify(self):
+        out = _decide(awards=self._awards(
+            {"conf_id": "iclr_2027", "status": "held", "reason": "no award rule matches 'Spotlight Prize'"}))
+        assert out["action"] == "notify"
+        assert "iclr_2027" in out["body"] and "Spotlight Prize" in out["comment"]
+
+    def test_a_failed_awards_source_notifies(self):
+        out = _decide(awards=self._awards({"conf_id": "cvpr_2027", "status": "failed", "reason": "HTTPError: 503"}))
+        assert out["action"] == "notify" and "HTTPError: 503" in out["body"]
+
+    def test_unmatched_awards_are_context_not_a_trigger(self):
+        out = _decide(awards=self._awards(
+            {"conf_id": "icml_2025", "status": "collected", "unmatched": ["Position: X", "Position: Y"]}))
+        assert out["action"] == "close"
+
+    def test_unmatched_awards_show_beside_a_real_trigger(self):
+        out = _decide(awards=self._awards(
+            {"conf_id": "icml_2025", "status": "collected", "unmatched": ["Position: X"]},
+            {"conf_id": "cvpr_2027", "status": "failed", "reason": "HTTPError: 503"}))
+        assert "Position: X" in out["body"]
+
+    def test_no_awards_report_changes_nothing(self):
+        assert _decide()["action"] == "close"

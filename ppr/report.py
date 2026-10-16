@@ -33,7 +33,7 @@ def _last_stage(discover, register, enrich) -> str:
     if register is None:
         return "autoregister"
     if enrich is None:
-        return "tests or enrich"
+        return "tests, awards or enrich"
     if any(r.get("status") == "failed" for r in enrich.get("results", [])):
         return "enrich"
     return "state, build, release, push or deploy"
@@ -44,7 +44,8 @@ def _section(title: str, lines: list[str]) -> str:
 
 
 def decide_issue(*, discover: dict | None, register: dict | None, enrich: dict | None,
-                 state: dict | None, pipeline_result: str, run_url: str, today: str) -> dict:
+                 state: dict | None, pipeline_result: str, run_url: str, today: str,
+                 awards: dict | None = None) -> dict:
     results = (discover or {}).get("results", [])
     outcomes = (register or {}).get("outcomes", [])
     enrich_rows = (enrich or {}).get("results", [])
@@ -77,12 +78,22 @@ def decide_issue(*, discover: dict | None, register: dict | None, enrich: dict |
               for r in results if r.get("status") == "needs-manual"]
     registered = [f"- `{o['conf_id']}` — {o.get('count', 0)} papers"
                   for o in outcomes if o.get("status") == "registered"]
+    award_rows = (awards or {}).get("results", [])
+    awards_held = [f"- `{r['conf_id']}` — {r.get('reason', '')}" for r in award_rows if r.get("status") == "held"]
+    awards_failed = [f"- `{r['conf_id']}` — {r.get('reason', '')}" for r in award_rows if r.get("status") == "failed"]
+    awards_unmatched = [
+        f"- `{r['conf_id']}` — {len(r['unmatched'])} award(s) name no paper in data/: "
+        + "; ".join(r["unmatched"][:3])
+        for r in award_rows if r.get("unmatched")
+    ]
 
     triggers = {"Pipeline failed": failure, "Held by autoregister": held,
                 "Past their announce month but parsing 0 papers": stale,
                 "Skipped by an enrich guard": skipped,
                 f"Unbound above {UNBOUND_ALERT_RATIO:.0%}": unbound,
-                f"Deferred {DEFERRED_STREAK_ALERT}+ runs in a row": deferred}
+                f"Deferred {DEFERRED_STREAK_ALERT}+ runs in a row": deferred,
+                "Awards held (an unknown label, or a source went quiet)": awards_held,
+                "Awards source failed": awards_failed}
     fired = {k: v for k, v in triggers.items() if v}
 
     if not fired:
@@ -100,6 +111,7 @@ def decide_issue(*, discover: dict | None, register: dict | None, enrich: dict |
         *(_section(k, v) for k, v in fired.items()),
         _section("Not probed", unreachable),
         _section("Registered this run (context)", registered),
+        _section("Awards matching no paper (context)", awards_unmatched),
         _section("Need a hand-written scraper (context)", manual),
         f"Run: {run_url}",
         "_Run `/check-new-conferences` in Claude Code for the manual path._",
