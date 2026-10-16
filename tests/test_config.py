@@ -170,3 +170,12 @@ class TestYearFromPdate:
         body = self.BODY + "  year_from_pdate: true\n  api_version: 1\n"
         with pytest.raises(ValueError, match="api_version"):
             CrawlConfig.from_yaml(_write(tmp_path, body))
+
+
+def test_tmlr_configs():
+    for y in range(2022, 2027):
+        cfg = CrawlConfig.from_yaml(f"configs/tmlr_{y}.yaml")
+        assert cfg.venue_id == "TMLR"
+        assert cfg.year == y
+        assert cfg.year_from_pdate is True
+        assert cfg.selections == {"main": "Accepted by TMLR"}

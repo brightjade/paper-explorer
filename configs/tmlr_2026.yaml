@@ -1,0 +1,8 @@
+conference:
+  name: "TMLR"
+  year: 2026
+  venue_id: "TMLR"
+  api_version: 2
+  year_from_pdate: true
+  selections:
+    main: "Accepted by TMLR"

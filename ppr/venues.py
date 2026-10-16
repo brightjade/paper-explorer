@@ -35,6 +35,10 @@ class Venue:
     # e.g. NeurIPS's Datasets & Benchmarks track. Autoregister includes one
     # only when the API returns papers for it -- a template, never a promise.
     extra_tracks: tuple[dict, ...] = ()
+    # A journal whose accepted papers share one venueid and arrive all year
+    # (TMLR). The conference-year is the paper's publication year, not the
+    # venueid, so discovery counts only that year's notes.
+    rolling: bool = False
 
 
 def _parse_extra_tracks(prefix: str, entry: dict) -> tuple[dict, ...]:
@@ -83,6 +87,12 @@ def load_registry(path: Path = REGISTRY_PATH) -> dict[str, Venue]:
         if not isinstance(month, int) or not 1 <= month <= 12:
             raise ValueError(f"venue {prefix!r}: announce_month must be 1-12, got {month!r}")
 
+        rolling = entry.get("rolling", False)
+        if not isinstance(rolling, bool):
+            raise ValueError(f"venue {prefix!r}: rolling must be true or false, got {rolling!r}")
+        if rolling and entry["source"] != "openreview":
+            raise ValueError(f"venue {prefix!r}: rolling is only valid for openreview")
+
         registry[prefix] = Venue(
             prefix=prefix,
             name=entry["name"],
@@ -91,6 +101,7 @@ def load_registry(path: Path = REGISTRY_PATH) -> dict[str, Venue]:
             probe=entry["probe"],
             announce_month=month,
             extra_tracks=_parse_extra_tracks(prefix, entry),
+            rolling=rolling,
         )
 
     return registry
