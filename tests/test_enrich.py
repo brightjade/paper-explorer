@@ -1915,6 +1915,27 @@ class TestEnrichAllArchive:
         assert calls == [("neurips_2017", {"full": False, "deadline": NO_DEADLINE})]
 
 
+    @pytest.mark.asyncio
+    async def test_exempt_live_ids_run_before_newer_live_ids_but_keep_the_deadline(
+            self, tmp_path, monkeypatch):
+        calls = []
+
+        async def fake(conf_id, client, data_dir, **kwargs):
+            calls.append((conf_id, kwargs))
+            return EnrichResult(conf_id, "enriched")
+
+        monkeypatch.setattr("ppr.enrich.enrich_conference", fake)
+        d = Deadline(0, clock=lambda: 100.0)
+        await enrich_all(["icml_2026", "acl_2024", "neurips_2017"],
+                         S2Client(min_interval=0.0), tmp_path, deadline=d,
+                         today=self.NOV_2026, exempt=frozenset({"neurips_2017"}))
+        assert calls == [
+            ("neurips_2017", {"full": False, "deadline": d}),
+            ("icml_2026", {"full": False, "deadline": d}),
+            ("acl_2024", {"full": False, "deadline": d}),
+        ]
+
+
 class TestArchiveSummary:
     def test_not_due_rows_are_counted_not_listed(self):
         out = format_enrich_summary([
@@ -1927,6 +1948,18 @@ class TestArchiveSummary:
     def test_untried_papers_are_named_in_the_footer(self):
         out = format_enrich_summary([EnrichResult("icra_2016", "enriched", cold=2, untried=1)])
         assert "1 unmatched papers left untried" in out
+
+    def test_mostly_untried_conferences_are_named(self):
+        out = format_enrich_summary([
+            EnrichResult("rss_2014", "enriched", total=10, untried=8),
+            EnrichResult("icra_2016", "enriched", total=10, untried=8),
+            EnrichResult("iros_2016", "enriched", total=10, untried=2),
+        ])
+        assert "Mostly untried (run `ppr enrich <id>`): icra_2016, rss_2014" in out
+
+    def test_mostly_untried_line_omits_conferences_under_half(self):
+        out = format_enrich_summary([EnrichResult("iros_2016", "enriched", total=10, untried=2)])
+        assert "Mostly untried" not in out
 
 
 class TestCmdEnrichArchiveWiring:

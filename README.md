@@ -70,7 +70,7 @@ ppr crawl iclr_2025 neurips_2025 icml_2025
 # Enrich with citation counts and abstracts
 ppr enrich iclr_2025
 ppr enrich iclr_2025 neurips_2025 icml_2025
-ppr enrich --all                      # refresh every conference under data/
+ppr enrich --all                      # refresh data/; archive years (4+ old) follow a monthly cohort, batch-only
 
 # Every run also re-attempts papers no earlier run could match, and re-checks
 # the papers it already matched against the record they are bound to.
@@ -178,7 +178,7 @@ Earlier years come from DBLP, except where OpenReview keeps the presentation typ
 | ASE | 2013–2022 | DBLP 2013–2022 | main |
 | ISSTA | 2013–2022 | DBLP 2013–2022 | main |
 
-Three venues differ in scope from 2023 on. AAAI's DBLP volumes include student abstracts and demos, which the 2023+ crawl leaves out. FSE and ASE publish every track in one volume, so their 2013–2022 counts are higher than a research-track-only crawl would give.
+Four venue-years differ in scope from 2023 on. ICSE 2013 is one DBLP volume of 242 papers (its research track had about 85), so it also carries other tracks; from 2014 DBLP splits a companion volume off and the backfill excludes it. AAAI's DBLP volumes include student abstracts and demos, which the 2023+ crawl leaves out. FSE and ASE publish every track in one volume, so their 2013–2022 counts are higher than a research-track-only crawl would give.
 
 ## Literature Survey (Claude Code skill)
 

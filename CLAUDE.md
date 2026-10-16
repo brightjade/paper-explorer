@@ -10,7 +10,7 @@ uv run ppr discover                            # Check tracked venues for new ac
 uv run ppr crawl iclr_2025                     # Crawl one conference
 uv run ppr crawl iclr_2025 neurips_2025        # Crawl multiple (one OpenReview login)
 uv run ppr enrich iclr_2025 neurips_2025        # Enrich with Semantic Scholar metadata
-uv run ppr enrich --all                        # Refresh citations for every conference
+uv run ppr enrich --all                        # Refresh citations; archive years (4+ old) follow a monthly cohort, batch-only
 uv run ppr validate iclr_2025                  # Validate paper count against DBLP
 ./build.sh                                     # Build static JSON for web app
 uv run ppr autoregister discover.json --report register.json   # Register live venues by rule (--commit commits each venue)
@@ -51,7 +51,7 @@ All produce JSONL. Enrichment (citations + abstracts via Semantic Scholar) works
 Pipeline code lives in the `ppr/` package; `scripts/` holds the web-data build and the data mirror:
 
 - `ppr/cli.py` -- Entry point (`ppr`) with subcommands: `crawl`, `enrich`, `validate`, `discover`, `autoregister`, `report`, `release`. `crawl` accepts multiple conference IDs, logs into OpenReview once per API version, and scrapes every other source without auth.
-- `ppr/api_client.py` -- `create_openreview_client()` logs in once (API v2; `create_openreview_v1_client()` for the configs that set `api_version: 1` -- iclr_2017–2023, neurips_2021–2022, corl_2021–2023). v1 can read labels from decision notes (`decisions`), fetches `extra_venue_ids` too, and collapses notes that repeat a paper (same title and authors; NeurIPS 2021 lists 297 twice), `OpenReviewAPIClient` takes the client + config. Fetches all accepted papers in one API call (plus one per `extra_venue_ids` entry), filters by `venue` string client-side.
+- `ppr/api_client.py` -- `create_openreview_client()` logs in once (API v2; `create_openreview_v1_client()` for the configs that set `api_version: 1` -- iclr_2017–2023, neurips_2021–2022, corl_2021–2023). v1 can read labels from decision notes (`decisions`), fetches `extra_venue_ids` too, and collapses notes that repeat a paper (same title and authors; NeurIPS 2021 lists 297 twice). `OpenReviewAPIClient` takes the client + config. Fetches accepted papers in one API call (plus one per `extra_venue_ids` entry) and filters by `venue` string client-side; configs with `decisions` read labels from decision notes instead, through a second call or direct replies.
 - `ppr/scrapers/` -- Web scrapers for conferences not on OpenReview. Each module exports a `SCRAPERS` dict mapping conference IDs to scraper functions. `ppr/scrapers/__init__.py` aggregates all scrapers.
   - `acl.py` -- ACL-family (EMNLP, ACL, NAACL, EACL, COLING). Handles separate-page, single-page and paragraph layouts on conference sites, and ACL Anthology volume pages. Skips list entries without authors (filters footer noise).
   - `aaai.py` -- AAAI proceedings from `ojs.aaai.org`. Scrapes multiple OJS issue pages per year (technical tracks + special tracks).

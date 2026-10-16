@@ -660,6 +660,7 @@ usenix_security_2021:  # 247 papers
 usenix_security_2022:  # 256 papers
   tocs:
     - {key: db/conf/uss/uss2022.bht, selection: main}
+# Volume title reads "IEEE Workshop on Applications of Computer Vision" (WACV was renamed in 2014); it is the main conference, kept by an override.
 wacv_2013:  # 73 papers
   tocs:
     - {key: db/conf/wacv/wacv2013.bht, selection: main}

@@ -94,7 +94,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     enrich_parser.add_argument(
         "--all", action="store_true",
-        help="Enrich every conference under data/.",
+        help="Enrich every conference under data/. Archive years (4+ years old) "
+        "follow a monthly cohort, batch-only.",
     )
     enrich_parser.add_argument(
         "--full", action="store_true",

@@ -4,5 +4,6 @@ conference:
   venue_id: "robot-learning.org/CoRL/2021/Conference"
   api_version: 1
   selections:
+    # OpenReview writes "CoRL2021" with no space.
     oral: "CoRL2021 Oral"
     poster: "CoRL2021 Poster"

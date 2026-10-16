@@ -752,13 +752,17 @@ async def enrich_all(
     `ppr/archive.py`. This month's cohort runs first and batch-only, so its
     cost lands inside the time budget rather than after it; the others are
     reported `not-due` and left untouched. Conferences in `exempt` (a
-    re-crawl's `--require`) always get a full enrich.
+    re-crawl's `--require`) always get a full enrich, ahead of the other live ones.
     """
     plan = plan_enrich(conf_ids, today, exempt)
     results = []
     for conf_id in order_newest_first(plan.due):
         results.append(await _enrich_one(conf_id, client, data_dir, full=full, batch_only=True))
-    for conf_id in order_newest_first(plan.live):
+    # A re-crawled archive id would otherwise sort last and hit the deadline, deferring
+    # its misses into next month's untried. It keeps the deadline: the job has a ceiling.
+    first = [c for c in plan.live if c in exempt]
+    rest = [c for c in plan.live if c not in exempt]
+    for conf_id in order_newest_first(first) + order_newest_first(rest):
         results.append(await _enrich_one(conf_id, client, data_dir, full=full, deadline=deadline))
     results.extend(EnrichResult(conf_id, "not-due") for conf_id in sorted(plan.not_due))
     return results
@@ -809,6 +813,9 @@ def format_enrich_summary(results: list[EnrichResult]) -> str:
             f"Archive: {untried} unmatched papers left untried "
             "(title matching is off for archive years; `ppr enrich <id>` runs it)."
         )
+        mostly = sorted(r.conf_id for r in results if r.untried * 2 > r.total)
+        if mostly:
+            lines.append(f"Mostly untried (run `ppr enrich <id>`): {', '.join(mostly)}")
     return "\n".join(lines)
 
 

@@ -7,4 +7,6 @@ conference:
     - "NeurIPS.cc/2022/Track/Datasets_and_Benchmarks"
   selections:
     main: "NeurIPS 2022 Accept"
+    # The venue string really ends with a space on OpenReview; keep it. If "tidied",
+    # the track drops silently (163 of 2,834 papers, under validate's 10% tolerance).
     datasets: "NeurIPS 2022 Datasets and Benchmarks "

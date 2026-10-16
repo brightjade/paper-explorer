@@ -9,6 +9,12 @@ REGISTRY = load_backfill()
 TOCS = [(conf_id, t) for conf_id, e in REGISTRY.items() for t in e["tocs"]]
 
 
+def test_registry_is_loaded():
+    # Changes only with a reviewed edit of configs/backfill/dblp.yaml. A missing or
+    # moved file makes load_backfill() return {}, and every other test would pass on nothing.
+    assert len(REGISTRY) == 190
+
+
 def test_every_entry_has_tocs():
     assert all(e["tocs"] for e in REGISTRY.values())
 
@@ -41,9 +47,11 @@ def test_only_main_volume_suffixes():
 
 
 def test_ids_do_not_collide_with_other_sources():
-    from ppr.scrapers import SCRAPERS
-    from ppr.scrapers.dblp import SCRAPERS as DBLP_SCRAPERS
+    import importlib
 
     configs = {p.stem for p in (ROOT / "configs").glob("*.yaml")}
-    others = set(SCRAPERS) - set(DBLP_SCRAPERS)
-    assert not (set(REGISTRY) & (configs | others))
+    others = set(configs)
+    for name in ("acl", "aaai", "usenix", "researchr", "crossref", "cvf",
+                 "roboticsproceedings", "ijcai"):
+        others |= set(importlib.import_module(f"ppr.scrapers.{name}").SCRAPERS)
+    assert not (set(REGISTRY) & others)

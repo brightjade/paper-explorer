@@ -31,7 +31,7 @@ Conference IDs follow the pattern `<venue>_<year>` (e.g., `iclr_2025`, `emnlp_20
 | Security | USENIX Security |
 | SE | ICSE, FSE, ASE, ISSTA |
 
-Year range varies per venue (generally 2013-2026). Before 2023 most venues come from DBLP and carry only main / findings / industry labels; ICLR 2017-2022, NeurIPS 2021-2022 and CoRL 2021-2022 keep oral / spotlight / poster. Not all conferences have enriched data.
+Year range varies per venue (generally 2013-2026). Before 2023 most venues come from DBLP and carry only main / findings / industry labels; OpenReview years keep their own labels: ICLR 2017-19 oral / poster, ICLR 2020-22 oral / spotlight / poster, NeurIPS 2021 oral / spotlight / poster plus `datasets`, NeurIPS 2022 only `main` + `datasets` (no oral label, so filtering it for orals finds none), CoRL 2021-22 oral / poster. Not all conferences have enriched data.
 
 ---
 
