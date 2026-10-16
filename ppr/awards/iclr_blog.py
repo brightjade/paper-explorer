@@ -55,6 +55,11 @@ def parse_post(content: str, url: str) -> list[Award]:
         for a in links:
             forum_id = parse_qs(urlparse(a["href"]).query).get("id", [""])[0]
             title = " ".join(a.get_text(" ").split()).rstrip(".")
+            if title.startswith("http"):  # 2024: the link text is the URL; the title is bold in the paragraph
+                block = a.find_parent(["p", "li"])
+                bold = block.find(["strong", "b"]) if block else None
+                if bold and bold.get_text(strip=True):
+                    title = " ".join(bold.get_text(" ").split()).rstrip(".")
             awards.append(Award(label=label, kind=kind, title=title, via="iclr_blog",
                                 source=url, forum_id=forum_id))
     return awards

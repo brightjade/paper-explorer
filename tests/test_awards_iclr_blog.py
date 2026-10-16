@@ -70,6 +70,24 @@ class TestParsePost:
             ("Honorable Mention", "The Polar Express", "yRtgZ1K8hO"),
         ]
 
+    def test_url_link_text_takes_the_title_from_the_strong_in_the_same_paragraph(self):
+        content = (
+            '<h3 class="wp-block-heading">Award Winners</h3>'
+            '<p class="wp-block-paragraph"><strong>Generalization in diffusion models arises from '
+            'geometry-adaptive harmonic representations</strong><br/>Zahra Kadkhodaie, Florentin Guth<br/>'
+            '<a href="https://openreview.net/forum?id=ANvmVS2Yr0">https://openreview.net/forum?id=ANvmVS2Yr0</a>'
+            '<br/><a href="https://iclr.cc/virtual/2024/oral/19783">https://iclr.cc/virtual/2024/oral/19783</a></p>'
+        )
+        out = parse_post(content, URL_2025)
+        assert [(a.label, a.title, a.forum_id) for a in out] == [
+            ("Award Winners", "Generalization in diffusion models arises from geometry-adaptive harmonic "
+             "representations", "ANvmVS2Yr0")]
+
+    def test_url_link_text_without_a_strong_keeps_the_link_text(self):
+        content = ('<h3>Outstanding Papers</h3><p><a href="https://openreview.net/forum?id=abc">'
+                   'https://openreview.net/forum?id=abc</a></p>')
+        assert parse_post(content, URL_2025)[0].title == "https://openreview.net/forum?id=abc"
+
 
 class TestSource:
     def test_picks_the_post_for_the_year(self, blog):

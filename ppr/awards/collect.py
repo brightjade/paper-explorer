@@ -17,7 +17,7 @@ data, and an unreachable awards page must not stop the month's citation release.
 
 import json
 import logging
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Callable
 
@@ -82,6 +82,12 @@ def _papers(data_dir: Path, conf_id: str) -> list[dict]:
     return []
 
 
+def _retitle(awards: list[Award], papers: list[dict]) -> list[Award]:
+    """Give an award the title of the paper its forum id names, so two spellings of one paper dedupe in merge."""
+    titles = {p["forum_id"]: p["title"] for p in papers if p.get("forum_id") and p.get("title")}
+    return [replace(a, title=titles[a.forum_id]) if a.forum_id in titles else a for a in awards]
+
+
 def conference_ids(data_dir: Path) -> list[str]:
     """Every data/<id> whose venue has an awards rule and whose year is FIRST_YEAR or later, sorted."""
     if not data_dir.exists():
@@ -115,7 +121,8 @@ def collect_conference(conf_id: str, data_dir: Path) -> Outcome:
 
     path = awards_path(data_dir, conf_id)
     previous = read_awards(path) or []
-    merged = merge([got for got in results.values() if got])
+    papers = _papers(data_dir, conf_id)
+    merged = merge([_retitle(got, papers) for got in results.values() if got])
     if not merged:
         if previous:
             return Outcome(conf_id, "held", count=len(previous),
@@ -129,7 +136,7 @@ def collect_conference(conf_id: str, data_dir: Path) -> Outcome:
                        reason=f"{', '.join(lost)} returned nothing; the file on disk has {on_file} entries from it")
 
     write_awards(path, conf_id, merged)
-    attached = attach(_papers(data_dir, conf_id), [a.to_dict() for a in merged])
+    attached = attach(papers, [a.to_dict() for a in merged])
     paper_level = sum(a.kind != "test_of_time" for a in merged)
     return Outcome(conf_id, "collected", count=len(merged), matched=paper_level - len(attached.unmatched),
                    unmatched=[e["title"] for e in attached.unmatched])

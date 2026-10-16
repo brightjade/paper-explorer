@@ -55,6 +55,21 @@ def _previous(tmp_path, *awards):
     return awards_path(tmp_path, "demo_2025").read_bytes()
 
 
+def test_award_titles_follow_the_paper_with_the_same_forum_id(monkeypatch, tmp_path):
+    conf_dir = tmp_path / "demo_2025"
+    conf_dir.mkdir()
+    (conf_dir / "papers.jsonl").write_text(
+        json.dumps({"title": "AlphaEdit: Null-Space Editing", "forum_id": "f1"}) + "\n", encoding="utf-8")
+    first = Award(label="Outstanding Papers", kind="award", title="AlphaEdit (Null-Space Constrained Editing)", via="a",
+                  source="https://a.test/", forum_id="f1")
+    monkeypatch.setitem(SOURCES_BY_PREFIX, "demo", [
+        ("a", _src([first])), ("b", _src([_a("Best Paper", "award", "AlphaEdit: Null-Space Editing", "b")]))])
+    out = collect_conference("demo_2025", tmp_path)
+    assert (out.status, out.count, out.matched) == ("collected", 1, 1)
+    [only] = read_awards(awards_path(tmp_path, "demo_2025"))
+    assert (only.via, only.title, only.forum_id) == ("a", "AlphaEdit: Null-Space Editing", "f1")
+
+
 class TestOutcomes:
     def test_collected_writes_the_merge_and_counts_joins(self, demo, tmp_path):
         demo([_a("Best Paper", "award", "Won", "a")],
