@@ -4,6 +4,7 @@ import { useManifest } from "./hooks/useManifest";
 import { Home } from "./pages/Home";
 import { Conference } from "./pages/Conference";
 import { Author } from "./pages/Author";
+import { Top } from "./pages/Top";
 import { Trends } from "./pages/Trends";
 import "./App.css";
 
@@ -22,6 +23,7 @@ export default function App() {
           </h1>
           <nav>
             <NavLink to="/">Conferences</NavLink>
+            <NavLink to="/top">Top 100</NavLink>
             <NavLink to="/trends">Trends</NavLink>
             <a
               href="https://github.com/brightjade/paper-explorer"
@@ -42,6 +44,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/conference/:id" element={<Conference />} />
+          <Route path="/top" element={<Top />} />
           <Route path="/author/:name" element={<Author />} />
           <Route path="/trends" element={<Trends />} />
         </Routes>
