@@ -2,7 +2,7 @@
 
 A static React + TypeScript + Vite site for browsing the dataset: a conference list (`/`), per-conference paper tables (`/conference/:id`), author pages (`/author/:name`) and topic and citation trends (`/trends`).
 
-It reads only what `scripts/build_data.py` writes to `web/public/data/` (gitignored): `manifest.json`, `authors.json`, `trends.json`, and per conference a `<conference_id>.json` plus a `<conference_id>.jsonl` copy offered for download.
+It reads only what `scripts/build_data.py` writes to `web/public/data/` (gitignored): `manifest.json`, `authors.json`, `trends.json`, and per conference a `<conference_id>.json`. The Download button builds `<conference_id>.jsonl` in the browser from that JSON.
 
 ## Local development
 
