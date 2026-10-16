@@ -37,6 +37,17 @@ class TestUpdateState:
         assert state == {"deferred_streak": {"a_2026": 1}}
 
 
+    def test_a_batch_only_archive_refresh_clears_an_old_streak(self):
+        state = {"deferred_streak": {"cvpr_2019": 2}}
+        out = update_state(state, [{"conf_id": "cvpr_2019", "status": "enriched", "deferred": 0}])
+        assert "cvpr_2019" not in out["deferred_streak"]
+
+    def test_not_due_neither_extends_nor_breaks_a_streak(self):
+        state = {"deferred_streak": {"cvpr_2019": 2}}
+        out = update_state(state, [{"conf_id": "cvpr_2019", "status": "not-due", "deferred": 0}])
+        assert out["deferred_streak"] == {"cvpr_2019": 2}
+
+
 class TestDecideIssue:
     def test_clean_run_closes(self):
         assert _decide()["action"] == "close"

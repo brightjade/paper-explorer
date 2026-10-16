@@ -8,12 +8,14 @@ import re
 import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
+from datetime import date
 from pathlib import Path
 from typing import TextIO
 
 import httpx
 from tqdm import tqdm
 
+from ppr.archive import plan_enrich
 from ppr.matching import MATCHED, MATCHED_FUZZY, REJECT, match_verdict, title_key
 from ppr.models import Paper
 from ppr.s2_client import BATCH_CHUNK_SIZE, S2Client
@@ -375,7 +377,7 @@ def order_newest_first(conf_ids: list[str]) -> list[str]:
 @dataclass
 class EnrichResult:
     conf_id: str
-    status: str  # "enriched" | "skipped" | "failed" | "nothing-to-do"
+    status: str  # "enriched" | "skipped" | "failed" | "nothing-to-do" | "not-due"
     path: str = ""  # "refresh" | "id-cold" | "title-cold" | ""
     total: int = 0
     refreshed: int = 0
@@ -723,6 +725,17 @@ async def enrich_conference(
     )
 
 
+async def _enrich_one(conf_id: str, client: S2Client, data_dir: Path, **kwargs) -> EnrichResult:
+    logger.info("Enriching %s...", conf_id)
+    try:
+        return await enrich_conference(conf_id, client, data_dir, **kwargs)
+    except Exception as exc:  # keep going; the summary reports the failure
+        # "failed", never "skipped": a skip is a guard doing its job, a
+        # failure is a bug or an outage, and the CLI exits non-zero on it.
+        logger.exception("Failed to enrich %s", conf_id)
+        return EnrichResult(conf_id, "failed", reason=str(exc))
+
+
 async def enrich_all(
     conf_ids: list[str],
     client: S2Client,
@@ -730,26 +743,24 @@ async def enrich_all(
     *,
     full: bool = False,
     deadline: Deadline = NO_DEADLINE,
+    today: date | None = None,
+    exempt: frozenset[str] = frozenset(),
 ) -> list[EnrichResult]:
-    """Enrich each conference in turn. One failure never stops the rest."""
+    """Enrich each conference in turn. One failure never stops the rest.
+
+    With `today` set -- the monthly `--all` run -- archive conferences follow
+    `ppr/archive.py`. This month's cohort runs first and batch-only, so its
+    cost lands inside the time budget rather than after it; the others are
+    reported `not-due` and left untouched. Conferences in `exempt` (a
+    re-crawl's `--require`) always get a full enrich.
+    """
+    plan = plan_enrich(conf_ids, today, exempt)
     results = []
-    for conf_id in order_newest_first(conf_ids):
-        logger.info("Enriching %s...", conf_id)
-        try:
-            results.append(
-                await enrich_conference(
-                    conf_id,
-                    client,
-                    data_dir,
-                    full=full,
-                    deadline=deadline,
-                )
-            )
-        except Exception as exc:  # keep going; the summary reports the failure
-            # "failed", never "skipped": a skip is a guard doing its job, a
-            # failure is a bug or an outage, and the CLI exits non-zero on it.
-            logger.exception("Failed to enrich %s", conf_id)
-            results.append(EnrichResult(conf_id, "failed", reason=str(exc)))
+    for conf_id in order_newest_first(plan.due):
+        results.append(await _enrich_one(conf_id, client, data_dir, full=full, batch_only=True))
+    for conf_id in order_newest_first(plan.live):
+        results.append(await _enrich_one(conf_id, client, data_dir, full=full, deadline=deadline))
+    results.extend(EnrichResult(conf_id, "not-due") for conf_id in sorted(plan.not_due))
     return results
 
 
@@ -769,6 +780,8 @@ def format_enrich_summary(results: list[EnrichResult]) -> str:
         "-" * 122,
     ]
     for r in results:
+        if r.status == "not-due":
+            continue  # counted in the footer: ~130 identical rows would bury the rest
         lines.append(
             f"{r.conf_id:<24} {r.status:<14} {r.path:<11} "
             f"{r.total:>7} {r.refreshed:>8} {r.cold:>7} {r.resumed:>8} "
@@ -778,9 +791,11 @@ def format_enrich_summary(results: list[EnrichResult]) -> str:
     enriched = sum(1 for r in results if r.status == "enriched")
     failed = sum(1 for r in results if r.status == "failed")
     lines.append("")
+    not_due = sum(1 for r in results if r.status == "not-due")
     lines.append(
         f"{enriched} enriched, {skipped} skipped, {failed} failed, "
-        f"{len(results)} total."
+        + (f"{not_due} not due (archive), " if not_due else "")
+        + f"{len(results)} total."
     )
     if failed:
         names = ", ".join(r.conf_id for r in results if r.status == "failed")
@@ -788,6 +803,12 @@ def format_enrich_summary(results: list[EnrichResult]) -> str:
     deferred = sum(r.deferred for r in results)
     if deferred:
         lines.append(f"Time budget ran out: {deferred} papers deferred to the next run.")
+    untried = sum(r.untried for r in results)
+    if untried:
+        lines.append(
+            f"Archive: {untried} unmatched papers left untried "
+            "(title matching is off for archive years; `ppr enrich <id>` runs it)."
+        )
     return "\n".join(lines)
 
 

@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import logging
 import os
+from datetime import date
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -238,6 +239,10 @@ def cmd_enrich(args: argparse.Namespace) -> None:
 
     deadline = Deadline(args.time_budget) if args.time_budget is not None else NO_DEADLINE
     client = S2Client(api_key=args.api_key or None)
+    # Only the monthly --all run applies the archive rule. Named conferences,
+    # and those a re-crawl requires, get a full enrich; so does --full, which
+    # exists to re-run every cold path.
+    today = date.today() if args.all and not args.full else None
     results = asyncio.run(
         enrich_all(
             conf_ids,
@@ -245,6 +250,8 @@ def cmd_enrich(args: argparse.Namespace) -> None:
             DATA_DIR,
             full=args.full,
             deadline=deadline,
+            today=today,
+            exempt=frozenset(args.require),
         )
     )
     print(format_enrich_summary(results))

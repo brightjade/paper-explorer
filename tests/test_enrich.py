@@ -1857,3 +1857,101 @@ class TestBatchOnly:
         out = {p.title: p for p in read_papers(tmp_path / "icra_2016" / "papers_enriched.jsonl")}
         assert out["Has DOI"].citation_count == 7
         assert out["No DOI"].citation_count is None
+
+
+from datetime import date
+
+from ppr.cli import build_parser, cmd_enrich  # noqa: F811
+from ppr.enrich import Deadline, format_enrich_summary  # noqa: F811
+
+
+class TestEnrichAllArchive:
+    NOV_2026 = date(2026, 11, 3)
+
+    @pytest.mark.asyncio
+    async def test_due_archive_runs_first_batch_only_and_not_due_is_skipped(self, tmp_path, monkeypatch):
+        calls = []
+
+        async def fake(conf_id, client, data_dir, **kwargs):
+            calls.append((conf_id, kwargs))
+            return EnrichResult(conf_id, "enriched")
+
+        monkeypatch.setattr("ppr.enrich.enrich_conference", fake)
+        d = Deadline(0, clock=lambda: 100.0)
+        results = await enrich_all(
+            ["icml_2026", "neurips_2017", "cvpr_2019", "iros_2016"],
+            S2Client(min_interval=0.0), tmp_path, deadline=d, today=self.NOV_2026,
+        )
+        # November: cohort 2 = cvpr_2019, iros_2016. neurips_2017 is cohort 1.
+        assert calls == [
+            ("cvpr_2019", {"full": False, "batch_only": True}),
+            ("iros_2016", {"full": False, "batch_only": True}),
+            ("icml_2026", {"full": False, "deadline": d}),
+        ]
+        assert [(r.conf_id, r.status) for r in results][-1] == ("neurips_2017", "not-due")
+
+    @pytest.mark.asyncio
+    async def test_not_due_files_are_byte_identical(self, tmp_path):
+        _conf(tmp_path, "neurips_2017", [_paper(title="A")],
+              [_paper(title="A", external_ids={"CorpusId": 1}, citation_count=3)])
+        path = tmp_path / "neurips_2017" / "papers_enriched.jsonl"
+        before = path.read_bytes()
+        results = await enrich_all(["neurips_2017"], S2Client(min_interval=0.0), tmp_path,
+                                   today=self.NOV_2026)
+        assert [(r.conf_id, r.status) for r in results] == [("neurips_2017", "not-due")]
+        assert path.read_bytes() == before
+
+    @pytest.mark.asyncio
+    async def test_exempt_archive_conference_gets_a_full_enrich(self, tmp_path, monkeypatch):
+        calls = []
+
+        async def fake(conf_id, client, data_dir, **kwargs):
+            calls.append((conf_id, kwargs))
+            return EnrichResult(conf_id, "enriched")
+
+        monkeypatch.setattr("ppr.enrich.enrich_conference", fake)
+        await enrich_all(["neurips_2017"], S2Client(min_interval=0.0), tmp_path,
+                         today=self.NOV_2026, exempt=frozenset({"neurips_2017"}))
+        assert calls == [("neurips_2017", {"full": False, "deadline": NO_DEADLINE})]
+
+
+class TestArchiveSummary:
+    def test_not_due_rows_are_counted_not_listed(self):
+        out = format_enrich_summary([
+            EnrichResult("icml_2026", "enriched", total=1),
+            EnrichResult("neurips_2017", "not-due"),
+        ])
+        assert "neurips_2017" not in out
+        assert "1 enriched, 0 skipped, 0 failed, 1 not due (archive), 2 total." in out
+
+    def test_untried_papers_are_named_in_the_footer(self):
+        out = format_enrich_summary([EnrichResult("icra_2016", "enriched", cold=2, untried=1)])
+        assert "1 unmatched papers left untried" in out
+
+
+class TestCmdEnrichArchiveWiring:
+    def _kwargs(self, monkeypatch, argv):
+        seen = {}
+
+        async def fake_enrich_all(*args, **kwargs):
+            seen.update(kwargs)
+            # Both ids end enriched, so the --require check does not exit first.
+            return [EnrichResult("a_2026", "enriched"), EnrichResult("x_2015", "enriched")]
+
+        monkeypatch.setattr("ppr.cli.enrich_all", fake_enrich_all)
+        monkeypatch.setattr("ppr.cli.all_conference_ids", lambda _d: ["a_2026", "x_2015"])
+        cmd_enrich(build_parser().parse_args(argv))
+        return seen
+
+    def test_all_applies_the_archive_rule_and_exempts_required_ids(self, monkeypatch):
+        seen = self._kwargs(monkeypatch, ["enrich", "--all", "--require", "x_2015"])
+        assert seen["today"] == date.today()
+        assert seen["exempt"] == frozenset({"x_2015"})
+
+    def test_named_conferences_get_no_archive_rule(self, monkeypatch):
+        assert self._kwargs(monkeypatch, ["enrich", "x_2015"])["today"] is None
+
+    def test_full_turns_the_archive_rule_off(self, monkeypatch):
+        # Review focus 3: --full re-runs every cold path; batch-only would
+        # leave non-DOI archive papers unenriched behind the coverage guard.
+        assert self._kwargs(monkeypatch, ["enrich", "--all", "--full"])["today"] is None
