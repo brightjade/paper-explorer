@@ -374,6 +374,17 @@ class TestBuildTop:
             "external_ids": {"ArXiv": "2501.00001", "DOI": "10.1/x"},
         }
 
+    def test_pool_entry_keeps_awards(self):
+        awards = [{"label": "Best Paper", "kind": "award"}]
+        top = _top(
+            {"iclr_2025": [{"title": "a", "citation_count": 5, "awards": awards},
+                           {"title": "b", "citation_count": 4}]},
+            {"iclr_2025": [_imp(2.0), _imp(1.0)]},
+        )
+        by_title = {p["title"]: p for p in top["papers"]}
+        assert by_title["a"]["awards"] == awards
+        assert "awards" not in by_title["b"]
+
     def test_pool_entry_omits_absent_fields(self):
         top = _top({"iclr_2025": [{"title": "a", "citation_count": 5}]}, {"iclr_2025": [_imp(1.0)]})
         assert top["papers"][0] == {

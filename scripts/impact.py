@@ -168,7 +168,7 @@ def with_relative_citations(
 SORTS = ("relative", "citations")
 # Pool entries keep what a paper row renders; abstracts would make top.json
 # several megabytes for text nobody reads in a ranking.
-OPTIONAL_FIELDS = ("influential_citation_count", "tldr", "link", "open_access_pdf", "forum_id")
+OPTIONAL_FIELDS = ("influential_citation_count", "tldr", "link", "open_access_pdf", "forum_id", "awards")
 POOL_EXTERNAL_IDS = ("ArXiv", "DOI")
 
 
