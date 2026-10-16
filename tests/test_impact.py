@@ -180,12 +180,25 @@ class TestComputeImpact:
         impacts = compute_impact(all_papers, {}, min_cohort=1)
         assert impacts["newconf_2025"][0].first_public == date(2025, 6, 15)
 
-    @pytest.mark.parametrize("prefix", ["aaai", "coling", "wacv"])
+    @pytest.mark.parametrize("prefix", ["aaai", "wacv"])
     def test_venues_announcing_the_year_before_date_from_that_year(self, prefix):
         # AAAI 2026's accepted list went up in Nov 2025, not Dec 2026.
         all_papers = {f"{prefix}_2026": [{"title": "a", "citation_count": 5}]}
         impacts = compute_impact(all_papers, {prefix: 11}, min_cohort=1)
         assert impacts[f"{prefix}_2026"][0].first_public == date(2025, 11, 15)
+
+    @pytest.mark.parametrize(
+        "conf_id, expected",
+        [
+            ("coling_2024", date(2024, 3, 15)),  # LREC-COLING 2024 met in May
+            ("coling_2025", date(2024, 11, 15)),  # COLING 2025 met in January
+            ("coling_2022", date(2022, 11, 15)),  # an Aug-Dec year: the registry rule
+        ],
+    )
+    def test_coling_dates_follow_each_years_calendar(self, conf_id, expected):
+        all_papers = {conf_id: [{"title": "a", "citation_count": 5}]}
+        impacts = compute_impact(all_papers, {"coling": 11}, min_cohort=1)
+        assert impacts[conf_id][0].first_public == expected
 
     def test_multiword_prefix(self):
         all_papers = {"usenix_security_2024": [{"title": "a", "citation_count": 5}]}

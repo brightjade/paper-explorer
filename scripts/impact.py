@@ -25,12 +25,15 @@ DBLP_CORR = re.compile(r"^journals/corr/abs-(\d{2})(\d{2})-\d{4,5}")
 ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # For a prefix missing from configs/venues.yaml.
 DEFAULT_ANNOUNCE_MONTH = 6
-# Venues whose accepted list goes up the calendar year before the conference
-# (AAAI 2026 in Nov 2025, WACV 2026 in Oct 2025, COLING 2025 in Nov 2024), so
-# their announce_month belongs to year - 1. Measured on 2026-10-15: their arXiv
-# preprints precede date(year, announce_month) by a median 11-13 months, every
-# other venue's by 0-8.
-ANNOUNCED_YEAR_BEFORE = frozenset({"aaai", "coling", "wacv"})
+# Venues that meet early in the year and post their accepted list the autumn
+# before (AAAI 2026 in Nov 2025, WACV 2026 in Oct 2025), so their announce_month
+# belongs to year - 1. Measured on 2026-10-15: every AAAI and WACV year's arXiv
+# preprints peak in Sep-Dec of the year before.
+ANNOUNCED_YEAR_BEFORE = frozenset({"aaai", "wacv"})
+# COLING moves around the calendar, so one announce_month cannot date it.
+# LREC-COLING 2024 met in May (preprints peak 2024-03) and COLING 2025 in January
+# (2024-09..12). Its Aug-Dec years (2016-2022) fit the registry rule as is.
+CONFERENCE_MONTHS = {"coling_2024": (2024, 3), "coling_2025": (2024, 11)}
 # A quarter with fewer cited papers than this joins the cohort before it: the
 # quarter in progress, and the sparse quarters before the dataset's first year.
 MIN_COHORT = 300
@@ -66,6 +69,15 @@ def first_public(paper: dict, year: int, announce_month: int) -> date:
             pass
 
     return min(candidates)
+
+
+def venue_year_month(conf_id: str, announce_months: dict[str, int]) -> tuple[int, int]:
+    """The (year, month) a conference's accepted list went public."""
+    if conf_id in CONFERENCE_MONTHS:
+        return CONFERENCE_MONTHS[conf_id]
+    prefix, conf_year = conf_id.rsplit("_", 1)
+    year = int(conf_year) - 1 if prefix in ANNOUNCED_YEAR_BEFORE else int(conf_year)
+    return year, announce_months.get(prefix, DEFAULT_ANNOUNCE_MONTH)
 
 
 def cohort_of(d: date) -> tuple[int, int]:
@@ -109,9 +121,7 @@ def compute_impact(
     dated: dict[str, list[tuple[date, int] | None]] = {}
     counts: dict[tuple[int, int], int] = defaultdict(int)
     for conf_id, papers in all_papers.items():
-        prefix, conf_year = conf_id.rsplit("_", 1)
-        year = int(conf_year) - (prefix in ANNOUNCED_YEAR_BEFORE)
-        month = announce_months.get(prefix, DEFAULT_ANNOUNCE_MONTH)
+        year, month = venue_year_month(conf_id, announce_months)
         rows: list[tuple[date, int] | None] = []
         for paper in papers:
             cites = paper.get("citation_count")
