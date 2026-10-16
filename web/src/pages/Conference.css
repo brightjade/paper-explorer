@@ -87,3 +87,25 @@
     display: none;
   }
 }
+
+.paper-list-more {
+  display: flex;
+  justify-content: center;
+  padding: 1.25rem 0;
+}
+
+.paper-list-more button {
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.paper-list-more button:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}

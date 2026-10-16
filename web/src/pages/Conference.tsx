@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useConferenceData } from "../hooks/useConferenceData";
 import { useManifest } from "../hooks/useManifest";
+import { useRevealOnScroll } from "../hooks/useRevealOnScroll";
 import { MetricsLegend } from "../components/MetricsLegend";
 import { PaperRow } from "../components/PaperRow";
 import { SearchInput } from "../components/SearchInput";
@@ -85,6 +86,11 @@ export function Conference() {
     return result;
   }, [papers, search, trackFilter, sortBy, awardFilter]);
 
+  // Thousands of rows take seconds to mount; render them in batches as the
+  // reader scrolls. Search, filters and the download still cover every paper.
+  const listKey = [id, search, trackFilter, sortBy, awardFilter].join("\u0000");
+  const { shown, sentinelRef, showMore } = useRevealOnScroll(filtered.length, listKey);
+
   if (error) return <div className="loading">Error: {error}</div>;
   if (!papers) return <div className="loading">Loading papers...</div>;
 
@@ -155,9 +161,16 @@ export function Conference() {
       </div>
 
       <div className="paper-list">
-        {filtered.map((paper, i) => (
+        {filtered.slice(0, shown).map((paper, i) => (
           <PaperRow key={paper.title} paper={paper} rank={i + 1} />
         ))}
+        {shown < filtered.length && (
+          <div ref={sentinelRef} className="paper-list-more">
+            <button type="button" onClick={showMore}>
+              Show more ({(filtered.length - shown).toLocaleString()} remaining)
+            </button>
+          </div>
+        )}
         {filtered.length === 0 && (
           <div className="loading">No papers match your search.</div>
         )}

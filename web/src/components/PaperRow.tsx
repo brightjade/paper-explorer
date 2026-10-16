@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Paper } from "../types";
 import { TrackBadge } from "./TrackBadge";
@@ -16,7 +16,9 @@ interface PaperRowProps {
   emphasis?: "citations" | "relative";
 }
 
-export function PaperRow({ paper, rank, conference, emphasis = "citations" }: PaperRowProps) {
+// Memoized: a conference page appends rows in batches, and without it every
+// batch would re-render the thousands of rows already on screen.
+export const PaperRow = memo(function PaperRow({ paper, rank, conference, emphasis = "citations" }: PaperRowProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -152,4 +154,4 @@ export function PaperRow({ paper, rank, conference, emphasis = "citations" }: Pa
       )}
     </div>
   );
-}
+});
