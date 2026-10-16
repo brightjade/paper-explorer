@@ -756,8 +756,7 @@ class TestEnrichConference:
     @pytest.mark.asyncio
     async def test_refresh_null_entry_does_not_flip_match_status(self, tmp_path):
         # A batch entry of None on refresh must not be read as "not_found" —
-        # that labelling belongs only to the cold paths, which run with
-        # mode="set".
+        # that labelling belongs only to title matching, which has asked.
         _conf(
             tmp_path,
             "iclr_2026",
@@ -822,6 +821,135 @@ class TestEnrichConference:
         out = read_papers(tmp_path / "icra_2026" / "papers_enriched.jsonl")
         assert out[0].citation_count == 9
         assert out[0].match_status == "matched"
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_doi_miss_falls_back_to_title_matching(self, tmp_path):
+        # DBLP records DOIs Semantic Scholar never linked to its paper (most of
+        # ECCV and EMNLP 2022). A DOI it does not know is not a paper it lacks.
+        _conf(tmp_path, "eccv_2022", [
+            _paper(title="Known DOI", link="https://doi.org/10.1/a"),
+            _paper(title="In Bulk", link="https://doi.org/10.1/b"),
+            _paper(title="By Title", link="https://doi.org/10.1/c", authors=["Ann Lee"]),
+        ])
+        respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[
+            {"title": "Known DOI", "citationCount": 1}, None, None,
+        ]))
+        respx.get(BULK_URL).mock(return_value=httpx.Response(200, json={
+            "total": 1, "data": [{"title": "In Bulk", "citationCount": 2}],
+        }))
+        match = respx.get(MATCH_URL).mock(return_value=httpx.Response(200, json={
+            "data": [{"title": "By Title", "citationCount": 3,
+                      "authors": [{"name": "Ann Lee"}]}],
+        }))
+
+        result = await enrich_conference("eccv_2022", S2Client(min_interval=0.0), tmp_path)
+
+        assert match.call_count == 1  # only the paper neither the DOI nor bulk found
+        assert (result.total, result.cold) == (3, 3)  # a fallback is not a second paper
+        out = {p.title: p for p in read_papers(tmp_path / "eccv_2022" / "papers_enriched.jsonl")}
+        assert [(t, out[t].citation_count, out[t].match_status) for t in sorted(out)] == [
+            ("By Title", 3, "matched"),
+            ("In Bulk", 2, "matched"),
+            ("Known DOI", 1, "matched"),
+        ]
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_doi_miss_that_title_matching_rejects_is_not_found(self, tmp_path):
+        _conf(tmp_path, "icra_2022", [_paper(title="Unindexed", link="https://doi.org/10.1/a")])
+        respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[None]))
+        match = respx.get(MATCH_URL).mock(return_value=httpx.Response(200, json={
+            "data": [{"title": "A Different Paper Entirely", "citationCount": 99}],
+        }))
+
+        await enrich_conference("icra_2022", S2Client(min_interval=0.0), tmp_path)
+
+        assert match.called
+        out = read_papers(tmp_path / "icra_2022" / "papers_enriched.jsonl")
+        assert (out[0].citation_count, out[0].match_status) == (None, "not_found")
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_doi_miss_past_the_deadline_is_deferred(self, tmp_path):
+        _conf(tmp_path, "icra_2022", [_paper(title="Miss", link="https://doi.org/10.1/a")])
+        respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[None]))
+        match = respx.get(MATCH_URL).mock(return_value=httpx.Response(200, json={"data": []}))
+
+        result = await enrich_conference(
+            "icra_2022", S2Client(min_interval=0.0), tmp_path, deadline=_passed()
+        )
+
+        assert (result.cold, result.deferred) == (1, 1)
+        assert not match.called
+        out = read_papers(tmp_path / "icra_2022" / "papers_enriched.jsonl")
+        assert out[0].match_status != "matched"
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_failed_doi_chunk_goes_to_title_matching(self, tmp_path):
+        _conf(tmp_path, "icra_2022", [_paper(title="A", link="https://doi.org/10.1/a",
+                                             authors=["Ann Lee"])])
+        respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json={"error": "odd"}))
+        respx.get(MATCH_URL).mock(return_value=httpx.Response(200, json={
+            "data": [{"title": "A", "citationCount": 4, "authors": [{"name": "Ann Lee"}]}],
+        }))
+
+        await enrich_conference("icra_2022", S2Client(min_interval=0.0), tmp_path)
+
+        out = read_papers(tmp_path / "icra_2022" / "papers_enriched.jsonl")
+        assert (out[0].citation_count, out[0].match_status) == (4, "matched")
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_unbound_paper_whose_doi_misses_is_title_matched(self, tmp_path):
+        _conf(
+            tmp_path, "icra_2022",
+            [_paper(title="Ours", link="https://doi.org/10.1/a", authors=["Ann Lee"])],
+            [_paper(title="Ours", external_ids={"CorpusId": 1}, citation_count=50,
+                    match_status="matched")],
+        )
+
+        def _batch(request):
+            ids = json.loads(request.content)["ids"]
+            if ids == ["CorpusId:1"]:
+                return httpx.Response(200, json=[{"title": "A Stranger's Paper",
+                                                  "authors": [{"name": "Bo Kim"}],
+                                                  "externalIds": {"CorpusId": 1}}])
+            return httpx.Response(200, json=[None])
+
+        respx.post(BATCH_URL).mock(side_effect=_batch)
+        respx.get(MATCH_URL).mock(return_value=httpx.Response(200, json={
+            "data": [{"title": "Ours", "citationCount": 6, "authors": [{"name": "Ann Lee"}],
+                      "externalIds": {"CorpusId": 2}}],
+        }))
+
+        result = await enrich_conference("icra_2022", S2Client(min_interval=0.0), tmp_path)
+
+        assert result.unbound == 1
+        out = read_papers(tmp_path / "icra_2022" / "papers_enriched.jsonl")
+        assert (out[0].citation_count, out[0].external_ids, out[0].match_status) == (
+            6, {"CorpusId": 2}, "matched")
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_doi_miss_is_checkpointed_only_after_its_title_retry(self, tmp_path):
+        # Like an unbound paper: a kill between the DOI miss and its title retry
+        # must leave it to be asked again, not frozen as not_found.
+        _conf(tmp_path, "icra_2022", [
+            _paper(title="Hit", link="https://doi.org/10.1/a"),
+            _paper(title="Miss", link="https://doi.org/10.1/b"),
+        ])
+        respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[
+            {"title": "Hit", "citationCount": 1}, None,
+        ]))
+        respx.get(MATCH_URL).mock(side_effect=RuntimeError("killed"))
+
+        with pytest.raises(RuntimeError):
+            await enrich_conference("icra_2022", S2Client(min_interval=0.0), tmp_path)
+
+        done = read_papers(tmp_path / "icra_2022" / ".papers_enriched.tmp.jsonl")
+        assert [p.title for p in done] == ["Hit"]
 
     @respx.mock
     @pytest.mark.asyncio
@@ -1857,6 +1985,21 @@ class TestBatchOnly:
         out = {p.title: p for p in read_papers(tmp_path / "icra_2016" / "papers_enriched.jsonl")}
         assert out["Has DOI"].citation_count == 7
         assert out["No DOI"].citation_count is None
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_a_doi_miss_is_untried_not_title_matched(self, tmp_path):
+        _conf(tmp_path, "eccv_2016", [_paper(title="Miss", link="https://doi.org/10.1/x")])
+        respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[None]))
+        bulk = respx.get(BULK_URL).mock(return_value=httpx.Response(200, json={"data": []}))
+        match = respx.get(MATCH_URL).mock(return_value=httpx.Response(200, json={"data": []}))
+
+        result = await enrich_conference(
+            "eccv_2016", S2Client(min_interval=0.0), tmp_path, batch_only=True
+        )
+
+        assert (result.status, result.cold, result.untried) == ("enriched", 1, 1)
+        assert not bulk.called and not match.called
 
 
 from datetime import date
