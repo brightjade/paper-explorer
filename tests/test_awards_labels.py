@@ -60,6 +60,8 @@ OBSERVED = {
     "Winner of the 2024 Internet Defense Prize": "award",
     "Runner-Up Winner of the 2023 Internet Defense Prize": "honorable",
     "Runner-Up": "honorable",
+    "Best Paper Nominee": "candidate",
+    "Best Paper Award Nominee": "candidate",
 }
 
 
@@ -70,6 +72,7 @@ def test_every_observed_label_maps_to_its_kind(label, kind):
 
 @pytest.mark.parametrize("label", [
     "Artifact-Available", "Artifact-Functional", "Artifact-Reusable",
+    "Artifacts Available", "Artifacts Evaluated \u2013 Functional", "Artifact Evaluated",
     "Highlight", "Virtual Attendance", "Recorded talk",
 ])
 def test_known_non_awards_are_none(label):

@@ -20,7 +20,7 @@ class UnknownAwardLabel(ValueError):
 
 # Badges and markers that sit beside awards on the same pages and are not awards.
 _IGNORED = [re.compile(p, re.I) for p in (
-    r"^artifact[- ](available|functional|reusable|evaluated)",
+    r"^artifacts?[- ](available|functional|reusable|evaluated)",
     r"^highlights?$",
     r"virtual attendance",
     r"recorded talk",
@@ -32,7 +32,7 @@ _IGNORED = [re.compile(p, re.I) for p in (
 _DEFAULT_RULES = [(re.compile(p, re.I), kind) for p, kind in (
     (r"test of time|longuet-higgins|helmholtz|koenderink", "test_of_time"),
     (r"artifact", "artifact"),
-    (r"candidate|finalist", "candidate"),
+    (r"candidate|finalist|nominee|nominated|shortlist", "candidate"),
     (r"honou?rable mention|runner[- ]?up", "honorable"),
     (r"best|outstanding|distinguished paper|marr prize|internet defense prize|^award winners?$", "award"),
 )]
