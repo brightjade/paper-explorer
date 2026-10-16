@@ -5,6 +5,8 @@ import { useManifest } from "../hooks/useManifest";
 import { MetricsLegend } from "../components/MetricsLegend";
 import { PaperRow } from "../components/PaperRow";
 import { SearchInput } from "../components/SearchInput";
+import { AwardSummary } from "../components/AwardSummary";
+import { awardChips } from "../awards";
 import type { Paper } from "../types";
 import "./Conference.css";
 
@@ -27,8 +29,11 @@ export function Conference() {
   const [search, setSearch] = useState("");
   const [trackFilter, setTrackFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortKey>("citations");
+  const [awardFilter, setAwardFilter] = useState<string | null>(null);
 
   const meta = manifest?.find((c) => c.id === id);
+  const chips = useMemo(() => awardChips(papers ?? []), [papers]);
+  const activeAward = chips.some((c) => c.label === awardFilter) ? awardFilter : null;
   const downloadJsonl = () => {
     if (!papers || !id) return;
     // Built from the JSON the page already loaded, minus the build-time fields:
@@ -50,6 +55,10 @@ export function Conference() {
       result = result.filter((p) => p.selection === trackFilter);
     }
 
+    if (activeAward) {
+      result = result.filter((p) => p.awards?.some((a) => a.label === activeAward));
+    }
+
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -68,7 +77,7 @@ export function Conference() {
     });
 
     return result;
-  }, [papers, search, trackFilter, sortBy]);
+  }, [papers, search, trackFilter, sortBy, activeAward]);
 
   if (error) return <div className="loading">Error: {error}</div>;
   if (!papers) return <div className="loading">Loading papers...</div>;
@@ -96,6 +105,13 @@ export function Conference() {
         </button>
       </p>
       <MetricsLegend />
+
+      <AwardSummary
+        chips={chips}
+        testOfTime={meta?.test_of_time}
+        active={activeAward}
+        onSelect={setAwardFilter}
+      />
 
       <div className="conference-controls">
         <SearchInput
