@@ -30,10 +30,16 @@ export function Conference() {
   const [trackFilter, setTrackFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortKey>("citations");
   const [awardFilter, setAwardFilter] = useState<string | null>(null);
+  const [awardFilterFor, setAwardFilterFor] = useState(id);
+  // The page stays mounted across /conference/:id routes, and award labels repeat
+  // across venues and years: a filter belongs to the conference it was picked on.
+  if (id !== awardFilterFor) {
+    setAwardFilterFor(id);
+    setAwardFilter(null);
+  }
 
   const meta = manifest?.find((c) => c.id === id);
   const chips = useMemo(() => awardChips(papers ?? []), [papers]);
-  const activeAward = chips.some((c) => c.label === awardFilter) ? awardFilter : null;
   const downloadJsonl = () => {
     if (!papers || !id) return;
     // Built from the JSON the page already loaded, minus the build-time fields:
@@ -55,8 +61,8 @@ export function Conference() {
       result = result.filter((p) => p.selection === trackFilter);
     }
 
-    if (activeAward) {
-      result = result.filter((p) => p.awards?.some((a) => a.label === activeAward));
+    if (awardFilter) {
+      result = result.filter((p) => p.awards?.some((a) => a.label === awardFilter));
     }
 
     if (search) {
@@ -77,7 +83,7 @@ export function Conference() {
     });
 
     return result;
-  }, [papers, search, trackFilter, sortBy, activeAward]);
+  }, [papers, search, trackFilter, sortBy, awardFilter]);
 
   if (error) return <div className="loading">Error: {error}</div>;
   if (!papers) return <div className="loading">Loading papers...</div>;
@@ -109,7 +115,7 @@ export function Conference() {
       <AwardSummary
         chips={chips}
         testOfTime={meta?.test_of_time}
-        active={activeAward}
+        active={awardFilter}
         onSelect={setAwardFilter}
       />
 
