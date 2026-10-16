@@ -21,7 +21,7 @@ from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Callable
 
-from ppr.awards import cvf_registry, iclr_blog, manual, researchr_badges, sigsoft, usenix_notes, virtual
+from ppr.awards import cvf_registry, iclr_blog, manual, researchr_badges, sigsoft, tmlr_certifications, usenix_notes, virtual
 from ppr.awards.join import attach
 from ppr.awards.labels import UnknownAwardLabel
 from ppr.awards.model import Award, awards_path, merge, read_awards, write_awards
@@ -61,7 +61,11 @@ SOURCES_BY_PREFIX: dict[str, list[tuple[str, Source]]] = {
     "ase": _SE,
     "issta": _SE,
     "usenix_security": [("usenix", usenix_notes.usenix_awards), ("manual", manual.manual)],
+    "tmlr": [("tmlr", tmlr_certifications.tmlr_certifications)],
 }
+
+# A venue that starts earlier than FIRST_YEAR.
+FIRST_YEAR_BY_PREFIX = {"tmlr": 2022}
 
 
 @dataclass
@@ -90,13 +94,14 @@ def _retitle(awards: list[Award], papers: list[dict]) -> list[Award]:
 
 
 def conference_ids(data_dir: Path) -> list[str]:
-    """Every data/<id> whose venue has an awards rule and whose year is FIRST_YEAR or later, sorted."""
+    """Every data/<id> whose venue has an awards rule and whose year is its venue's first year
+    (FIRST_YEAR_BY_PREFIX, else FIRST_YEAR) or later, sorted."""
     if not data_dir.exists():
         return []
     out = []
     for d in data_dir.iterdir():
         prefix, _, year = d.name.rpartition("_")
-        if d.is_dir() and prefix in SOURCES_BY_PREFIX and year.isdigit() and int(year) >= FIRST_YEAR:
+        if d.is_dir() and prefix in SOURCES_BY_PREFIX and year.isdigit() and int(year) >= FIRST_YEAR_BY_PREFIX.get(prefix, FIRST_YEAR):
             out.append(d.name)
     return sorted(out)
 

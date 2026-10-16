@@ -99,3 +99,16 @@ def test_prefix_rules_come_before_the_defaults(monkeypatch):
 def test_kind_order_follows_kinds():
     assert KINDS == ("award", "honorable", "candidate", "artifact", "test_of_time")
     assert [KIND_ORDER[k] for k in KINDS] == [0, 1, 2, 3, 4]
+
+
+@pytest.mark.parametrize("label,kind", [
+    ("Outstanding Certification", "award"), ("Featured Certification", "honorable"),
+    ("J2C Certification", None), ("Survey Certification", None),
+    ("Expert Certification", None), ("Reproducibility Certification", None)])
+def test_tmlr_certifications(label, kind):
+    assert classify(label, "tmlr") == kind
+
+
+def test_tmlr_never_falls_back_to_the_default_rules():
+    with pytest.raises(UnknownAwardLabel):
+        classify("Best Paper Certification", "tmlr")  # the defaults would call this "award"
