@@ -44,13 +44,26 @@ def env(tmp_path):
     return load_registry(venues), data_dir, configs_dir
 
 
-def test_january_adds_last_year_and_skips_unregistered_years(env):
+def test_last_year_is_due_january_through_march_and_unregistered_years_are_skipped(env):
     registry, data_dir, configs_dir = env
     _seed(data_dir, "tmlr_2026", ["a"])
     _seed(data_dir, "iclr_2026", ["a"])
     assert due_ids(registry, data_dir, configs_dir, date(2027, 1, 3)) == ["tmlr_2026"]
     assert due_ids(registry, data_dir, configs_dir, date(2026, 11, 3)) == ["tmlr_2026"]
-    assert due_ids(registry, data_dir, configs_dir, date(2027, 2, 3)) == []
+    assert due_ids(registry, data_dir, configs_dir, date(2027, 2, 3)) == ["tmlr_2026"]
+    assert due_ids(registry, data_dir, configs_dir, date(2027, 3, 3)) == ["tmlr_2026"]
+    assert due_ids(registry, data_dir, configs_dir, date(2027, 4, 3)) == []
+
+
+def test_january_lists_last_year_before_this_year(env):
+    registry, data_dir, configs_dir = env
+    (configs_dir / "tmlr_2027.yaml").write_text(
+        render_openreview_config("TMLR", 2027, "TMLR", {"main": "Accepted by TMLR"}, year_from_pdate=True),
+        encoding="utf-8",
+    )
+    _seed(data_dir, "tmlr_2026", ["a"])
+    _seed(data_dir, "tmlr_2027", ["a"])
+    assert due_ids(registry, data_dir, configs_dir, date(2027, 1, 3)) == ["tmlr_2026", "tmlr_2027"]
 
 
 def test_a_growing_crawl_is_written(env):
@@ -67,7 +80,7 @@ def test_a_vanished_paper_holds_even_when_the_count_grows(env):
     path = data_dir / "tmlr_2026" / "papers.jsonl"
     before = path.read_bytes()
     (o,) = recrawl_rolling(["tmlr_2026"], configs_dir, data_dir, lambda cfg: _papers(["a", "c", "d"]))
-    assert o.status == "held" and "b" in o.reason
+    assert o.status == "held" and "b" in o.reason and "crawl returned 3" in o.reason
     assert path.read_bytes() == before
 
 

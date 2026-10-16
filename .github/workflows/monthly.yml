@@ -96,7 +96,7 @@ jobs:
 
       - name: Rolling recrawl
         # A rolling venue (TMLR) has no accepted-list date, so its current year
-        # is recrawled every month (last year's too in January). A held or failed
+        # is recrawled every month (last year's too, January through March). A held or failed
         # venue keeps its file and goes to the issue; this step does not fail
         # the run.
         run: uv run ppr rolling --report rolling.json

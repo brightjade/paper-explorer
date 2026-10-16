@@ -1,7 +1,7 @@
 """Monthly recrawl of a rolling venue (TMLR), never dropping a paper.
 
 A rolling venue's current year keeps growing, so the monthly run crawls it again
-(`due_ids`: this year's id, plus last year's in January to catch the stragglers).
+(`due_ids`: this year's id, plus last year's through March to catch the stragglers).
 A recrawl is written only when every paper already on disk is still in it.
 
 The rule is "every paper on disk is still there", not "the count did not shrink".
@@ -37,8 +37,12 @@ class RollingOutcome:
 
 
 def due_ids(registry: dict[str, Venue], data_dir: Path, configs_dir: Path, today: date) -> list[str]:
-    """Rolling conference ids to recrawl: registered (config and data both exist)."""
-    years = [today.year - 1, today.year] if today.month == 1 else [today.year]
+    """Rolling conference ids to recrawl: registered (config and data both exist).
+
+    Last year stays due through March, so one failed January run does not leave its
+    late-December papers out (and the hold in the issue lasts more than a month).
+    """
+    years = [today.year - 1, today.year] if today.month <= 3 else [today.year]
     ids = []
     for year in years:
         for prefix, venue in registry.items():
@@ -81,7 +85,7 @@ def recrawl_rolling(
             shown = ", ".join(missing[:3])
             outcomes.append(RollingOutcome(
                 conf_id, "held", len(old), len(new),
-                f"{len(missing)} paper(s) on disk missing from the crawl: {shown}"))
+                f"{len(missing)} paper(s) on disk missing from the crawl (crawl returned {len(new)}): {shown}"))
             continue
         try:
             write_papers(new, path)
