@@ -27,11 +27,13 @@ def update_state(state: dict, enrich_results: list[dict]) -> dict:
     return {**state, "deferred_streak": streak}
 
 
-def _last_stage(discover, register, enrich) -> str:
+def _last_stage(discover, register, rolling, enrich) -> str:
     if discover is None:
         return "setup or discover"
     if register is None:
         return "autoregister"
+    if rolling is None:
+        return "recrawl or rolling recrawl"
     if enrich is None:
         return "tests, awards or enrich"
     if any(r.get("status") == "failed" for r in enrich.get("results", [])):
@@ -54,7 +56,7 @@ def decide_issue(*, discover: dict | None, register: dict | None, enrich: dict |
     enrich_failed = [f"- Enrich failed for: `{r.get('conf_id', '?')}` — {r.get('reason', '')}"
                      for r in enrich_rows if r.get("status") == "failed"]
     failure = (
-        [f"- The pipeline job ended `{pipeline_result}` during {_last_stage(discover, register, enrich)}. {run_url}"]
+        [f"- The pipeline job ended `{pipeline_result}` during {_last_stage(discover, register, rolling, enrich)}. {run_url}"]
         if pipeline_result in ("failure", "cancelled") else []
     )
     failure += enrich_failed if failure else []

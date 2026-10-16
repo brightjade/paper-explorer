@@ -7,7 +7,8 @@ RUN = "https://github.com/o/r/actions/runs/1"
 
 def _decide(**kw):
     base = dict(discover={"results": [], "stale_empty": []}, register={"outcomes": []},
-                enrich={"results": []}, state={}, pipeline_result="success",
+                enrich={"results": []}, rolling={"results": []}, state={},
+                pipeline_result="success",
                 run_url=RUN, today="2026-11-03")
     base.update(kw)
     return decide_issue(**base)
@@ -99,6 +100,11 @@ class TestDecideIssue:
         assert a["action"] == "notify"
         assert "autoregister" in a["body"]
         assert RUN in a["body"]
+
+    def test_a_rolling_step_that_wrote_no_report_is_named(self):
+        a = _decide(rolling=None, enrich=None, pipeline_result="failure")
+        assert a["action"] == "notify"
+        assert "recrawl or rolling recrawl" in a["body"]
 
     def test_failed_enrich_row_names_the_conference_and_the_stage(self):
         e = {"results": [{"conf_id": "x_2026", "status": "failed", "reason": "S2 down"},
