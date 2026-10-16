@@ -1,15 +1,20 @@
 """Scraper for USENIX Security conference accepted papers.
 
-USENIX publishes accepted papers on their Drupal-based website.
-The technical-sessions page lists all papers with titles, authors, and affiliations.
+USENIX publishes accepted papers on their Drupal-based website. The
+technical-sessions page lists every paper as an `article.node-paper`: the title
+in `h2 a`, and a people-text block whose first <p> names the authors -- names
+as plain text, each group's affiliation in an <em> -- and whose later <p>s are
+notes such as "Distinguished Paper Award Winner", which the awards collector
+reads (`ppr/awards/usenix_notes.py`).
 Requires a browser User-Agent header to avoid 403 responses.
 """
 
 import logging
+import re
 from functools import partial
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 
 from ppr.models import Paper
 
@@ -29,60 +34,59 @@ USENIX_CONFERENCES = {
     "usenix_security_2026": "usenixsecurity26",
 }
 
+# Names are split on commas and the word "and" ("A, B, and C"); \b keeps
+# "Alexandra" and "Ferdinand" whole.
+_NAME_SEPARATOR = re.compile(r",|\band\b")
 
-def _parse_authors(text: str) -> list[str]:
-    """Parse authors from USENIX format: 'Name1 and Name2,Affil;Name3,Affil'.
 
-    Authors and affiliations are separated by commas within semicolon-delimited
-    groups. Multiple authors in the same group are separated by 'and' or commas
-    before the affiliation.
+def sessions_url(conf_id: str) -> str:
+    return f"https://www.usenix.org/conference/{USENIX_CONFERENCES[conf_id]}/technical-sessions"
+
+
+def _authors(p) -> list[str]:
+    """Names are the text outside <em>; affiliations are inside it.
+
+    Reading the block as one string lost every author but the first of a group
+    sharing an affiliation and took ';'-separated affiliations for names. A <p>
+    with no <em> is not an author line (the 2026 Test-of-Time panel's
+    "Originally presented at ...").
     """
-    authors = []
-    for group in text.split(";"):
-        name_part = group.strip().split(",", 1)[0].strip()
-        for name in name_part.replace(" and ", ", ").split(","):
-            name = name.strip()
-            if name:
-                authors.append(name)
-    return authors
+    if p is None or p.find("em") is None:
+        return []
+    text = "".join(c for c in p.children if isinstance(c, NavigableString))
+    return [name for name in (" ".join(part.split()) for part in _NAME_SEPARATOR.split(text)) if name]
+
+
+def parse_sessions(markup: str | bytes) -> list[dict]:
+    """One {"title", "link", "authors", "notes"} per paper article on the page."""
+    soup = BeautifulSoup(markup, "html.parser")
+    rows = []
+    for article in soup.select("article.node-paper"):
+        link_tag = article.select_one("h2 a")
+        title = link_tag.get_text(strip=True) if link_tag else ""
+        if not title:
+            continue
+        href = link_tag.get("href", "")
+        if href and not href.startswith("http"):
+            href = f"https://www.usenix.org{href}"
+        people = article.select(".field-name-field-paper-people-text p")
+        rows.append({
+            "title": title,
+            "link": href,
+            "authors": _authors(people[0] if people else None),
+            "notes": [" ".join(p.get_text(" ").split()) for p in people[1:]],
+        })
+    return rows
 
 
 def _scrape_usenix(conf_id: str) -> list[Paper]:
     """Scrape all accepted papers from a USENIX Security technical-sessions page."""
-    slug = USENIX_CONFERENCES[conf_id]
-    url = f"https://www.usenix.org/conference/{slug}/technical-sessions"
+    url = sessions_url(conf_id)
     logger.info("Scraping %s from %s", conf_id, url)
-
     response = requests.get(url, headers=HEADERS, timeout=60)
     response.raise_for_status()
-    soup = BeautifulSoup(response.content, "html.parser")
-
-    papers = []
-    for article in soup.select("article.node-paper"):
-        link_tag = article.select_one("h2 a")
-        if not link_tag:
-            continue
-        title = link_tag.get_text(strip=True)
-        href = link_tag.get("href", "")
-        if href and not href.startswith("http"):
-            href = f"https://www.usenix.org{href}"
-
-        auth_div = article.select_one(".field-name-field-paper-people-text")
-        if auth_div:
-            authors = _parse_authors(auth_div.get_text(strip=True))
-        else:
-            authors = []
-
-        if not title:
-            continue
-
-        papers.append(Paper(
-            title=title,
-            link=href,
-            authors=authors,
-            selection="main",
-        ))
-
+    papers = [Paper(title=r["title"], link=r["link"], authors=r["authors"], selection="main")
+              for r in parse_sessions(response.content)]
     logger.info("Found %d papers for %s", len(papers), conf_id)
     return papers
 
