@@ -1,0 +1,48 @@
+/* Text and an icon, never a pill: it must not read as a Type badge. */
+.award-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  vertical-align: 0.05em;
+  color: var(--award-color, var(--text-secondary));
+}
+
+.award-icon {
+  width: 0.95em;
+  height: 0.95em;
+  flex: none;
+}
+
+.award-award {
+  --award-color: var(--award-gold);
+}
+
+.award-honorable {
+  --award-color: var(--text-secondary);
+}
+
+.award-candidate,
+.award-artifact {
+  --award-color: var(--text-muted);
+  font-weight: 500;
+}
+
+.award-more {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.award-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.award-list .award-marker {
+  margin-left: 0;
+}

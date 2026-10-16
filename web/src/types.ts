@@ -1,5 +1,18 @@
 import type { Category } from "./categories";
 
+export type AwardKind = "award" | "honorable" | "candidate" | "artifact" | "test_of_time";
+
+export interface PaperAward {
+  label: string;
+  kind: AwardKind;
+}
+
+export interface TestOfTimeEntry {
+  label: string;
+  title: string;
+  url?: string;
+}
+
 export interface Paper {
   title: string;
   authors: string[];
@@ -17,6 +30,7 @@ export interface Paper {
   fields_of_study?: string[];
   open_access_pdf?: string;
   external_ids?: Record<string, string>;
+  awards?: PaperAward[];
 }
 
 export interface ConferenceMeta {
@@ -32,6 +46,7 @@ export interface ConferenceMeta {
     title: string;
     citation_count: number;
   }[];
+  test_of_time?: TestOfTimeEntry[];
 }
 
 export interface AuthorSummary {

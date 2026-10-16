@@ -4,6 +4,7 @@ import { useAuthors } from "../hooks/useAuthors";
 import { useManifest } from "../hooks/useManifest";
 import { MetricsLegend } from "../components/MetricsLegend";
 import { TrackBadge } from "../components/TrackBadge";
+import { AwardMarker } from "../components/AwardMarker";
 import type { Paper } from "../types";
 import { RELATIVE_TOOLTIP, formatRelative } from "../format";
 import "./Author.css";
@@ -96,6 +97,7 @@ export function Author() {
                     ) : (
                       p.title
                     )}
+                    <AwardMarker awards={p.awards} />
                   </div>
                   <TrackBadge track={p.selection} />
                   <span className="author-paper-citations">

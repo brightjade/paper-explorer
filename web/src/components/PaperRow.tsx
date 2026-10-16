@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Paper } from "../types";
 import { TrackBadge } from "./TrackBadge";
+import { AwardList, AwardMarker } from "./AwardMarker";
 import { VENUE_COLORS } from "../pages/trends/constants";
 import { INFLUENTIAL_TOOLTIP, RELATIVE_TOOLTIP, formatRelative } from "../format";
 import "./PaperRow.css";
@@ -23,7 +24,10 @@ export function PaperRow({ paper, rank, conference, emphasis = "citations" }: Pa
       <div className="paper-row-main" onClick={() => setExpanded(!expanded)}>
         <span className="paper-rank">{rank}</span>
         <div className="paper-info">
-          <div className="paper-title">{paper.title}</div>
+          <div className="paper-title">
+            {paper.title}
+            <AwardMarker awards={paper.awards} />
+          </div>
           <div className="paper-authors">
             {(paper.authors ?? []).map((a, i) => (
               <span key={i}>
@@ -75,6 +79,7 @@ export function PaperRow({ paper, rank, conference, emphasis = "citations" }: Pa
       </div>
       {expanded && (
         <div className="paper-details">
+          {paper.awards && paper.awards.length > 0 && <AwardList awards={paper.awards} />}
           {paper.tldr && (
             <p className="paper-tldr">{paper.tldr}</p>
           )}
