@@ -5,8 +5,11 @@ import shutil
 import statistics
 import sys
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from pathlib import Path
 
+from ppr.venues import load_registry
+from scripts.impact import build_top, compute_impact, with_relative_citations
 from scripts.ngrams import build_ngram_data
 
 VENUE_NAMES = {
@@ -35,6 +38,48 @@ VENUE_NAMES = {
     "eacl": "EACL",
     "coling": "COLING",
 }
+
+# Display order of the category chips on Home and Top 100 (web/src/categories.ts
+# holds the same list).
+CATEGORIES = ("ML", "NLP", "CV", "Robotics", "SE", "Security", "Others")
+
+VENUE_CATEGORIES = {
+    "iclr": "ML",
+    "neurips": "ML",
+    "icml": "ML",
+    "aaai": "ML",
+    "ijcai": "ML",
+    "colm": "NLP",
+    "emnlp": "NLP",
+    "acl": "NLP",
+    "naacl": "NLP",
+    "eacl": "NLP",
+    "coling": "NLP",
+    "cvpr": "CV",
+    "iccv": "CV",
+    "eccv": "CV",
+    "wacv": "CV",
+    "icra": "Robotics",
+    "iros": "Robotics",
+    "rss": "Robotics",
+    "corl": "Robotics",
+    "icse": "SE",
+    "fse": "SE",
+    "ase": "SE",
+    "issta": "SE",
+    "usenix_security": "Security",
+}
+
+
+def category_of(conf_id: str) -> str:
+    """The category of a conference ID; a prefix nobody mapped is Others."""
+    return VENUE_CATEGORIES.get(conf_id.rsplit("_", 1)[0], "Others")
+
+
+def present_categories(conf_ids: Iterable[str]) -> list[str]:
+    """The categories that hold at least one of `conf_ids`, in display order."""
+    found = {category_of(conf_id) for conf_id in conf_ids}
+    return [c for c in CATEGORIES if c in found]
 
 
 def parse_conference_id(conf_id: str) -> tuple[str, int]:
@@ -85,6 +130,7 @@ def build_manifest_entry(conf_id: str, papers: list[dict]) -> dict:
         "id": conf_id,
         "venue": venue,
         "year": year,
+        "category": category_of(conf_id),
         "paper_count": len(papers),
         "has_citations": has_citations,
         "total_citations": total_citations,
@@ -128,7 +174,6 @@ def build_trends(all_papers: dict[str, list[dict]]) -> dict:
     citation_lists_by_year: dict[str, dict[str, list[int]]] = defaultdict(lambda: defaultdict(list))
     influential_by_year: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     track_breakdown_by_year: dict[str, dict[str, Counter]] = defaultdict(lambda: defaultdict(Counter))
-    top_papers_by_year: dict[str, list[dict]] = defaultdict(list)
 
     for conf_id, papers in all_papers.items():
         venue, year = parse_conference_id(conf_id)
@@ -145,15 +190,6 @@ def build_trends(all_papers: dict[str, list[dict]]) -> dict:
             selection = paper.get("selection", "")
             if selection:
                 track_breakdown_by_year[year_str][venue][selection] += 1
-
-            if paper.get("citation_count") is not None:
-                top_papers_by_year[year_str].append({
-                    "title": paper["title"],
-                    "venue": venue,
-                    "citation_count": paper["citation_count"],
-                    "influential_citation_count": paper.get("influential_citation_count") or 0,
-                    "conference_id": conf_id,
-                })
 
     years_sorted = sorted(venue_counts_by_year.keys())
 
@@ -219,16 +255,9 @@ def build_trends(all_papers: dict[str, list[dict]]) -> dict:
         if ratios:
             influential_ratio_by_year[year_str] = ratios
 
-    # Sort top papers per year, take top 20
-    top_papers_final = {}
-    for year_str, papers_list in top_papers_by_year.items():
-        papers_list.sort(key=lambda p: p["citation_count"], reverse=True)
-        top_papers_final[year_str] = papers_list[:20]
-
     impact = {
         "citation_stats_by_year": citation_stats_by_year,
         "avg_citations_by_year": avg_citations_by_year,
-        "top_papers_by_year": top_papers_final,
         "influential_ratio_by_year": influential_ratio_by_year,
     }
 
@@ -280,16 +309,21 @@ def build_all(data_dir: Path, out_dir: Path) -> None:
         all_papers[conf_id] = papers
         conferences.append(build_manifest_entry(conf_id, papers))
 
-        # Write per-conference JSON file
-        with open(out_dir / f"{conf_id}.json", "w") as f:
-            json.dump(papers, f, ensure_ascii=False)
-
-        # Copy JSONL file for download
+        # Copy JSONL file for download. It is dataset content, so it never
+        # carries build-time fields such as relative_citations.
         enriched = conf_dir / "papers_enriched.jsonl"
         plain = conf_dir / "papers.jsonl"
         source_jsonl = enriched if enriched.exists() else plain
         if source_jsonl.exists():
             shutil.copy2(source_jsonl, out_dir / f"{conf_id}.jsonl")
+
+    announce_months = {prefix: v.announce_month for prefix, v in load_registry().items()}
+    impacts = compute_impact(all_papers, announce_months)
+
+    # Write per-conference JSON files, with each paper's relative citations
+    for conf_id, papers in all_papers.items():
+        with open(out_dir / f"{conf_id}.json", "w") as f:
+            json.dump(with_relative_citations(papers, impacts[conf_id]), f, ensure_ascii=False)
 
     # Sort conferences by year desc, then venue name
     conferences.sort(key=lambda m: (-m["year"], m["venue"]))
@@ -307,6 +341,16 @@ def build_all(data_dir: Path, out_dir: Path) -> None:
 
     with open(out_dir / "trends.json", "w") as f:
         json.dump(build_trends(all_papers), f, ensure_ascii=False, indent=2)
+
+    top = build_top(
+        all_papers,
+        impacts,
+        parse_conference_id,
+        category_of,
+        present_categories(all_papers),
+    )
+    with open(out_dir / "top.json", "w") as f:
+        json.dump(top, f, ensure_ascii=False)
 
     print(f"Built {len(conferences)} conferences -> {out_dir}")
 
