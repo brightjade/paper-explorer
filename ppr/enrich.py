@@ -463,15 +463,18 @@ async def _run_batch(
     record still describes the paper we crawled, or "set" for the DOI path,
     where the identifier is authoritative and no title check applies.
 
-    Returns (papers whose binding was rejected and cleared, count of papers
-    accepted on fuzzy evidence). Chunked at the size the API accepts per
+    Returns (papers the lookup left unsettled, count of papers accepted on
+    fuzzy evidence). Unsettled is a refresh binding rejected and cleared, or a
+    DOI Semantic Scholar answered with nothing. Neither is checkpointed here:
+    the caller retries both (an unbound paper with a DOI tries that first), and
+    only the retry records them. Chunked at the size the API accepts per
     request, so progress is checkpointed a request at a time; this path is
     fast enough that finer granularity would buy nothing.
     """
-    unbound: list[Paper] = []
+    unsettled: list[Paper] = []
     fuzzy = 0
     if not papers:
-        return unbound, fuzzy
+        return unsettled, fuzzy
     abstracts = crawl_abstracts or {}
     for start in range(0, len(papers), BATCH_CHUNK_SIZE):
         chunk = papers[start : start + BATCH_CHUNK_SIZE]
@@ -485,20 +488,26 @@ async def _run_batch(
                 verdict = match_verdict(paper.title, paper.authors, entry)
                 if verdict == REJECT:
                     unbind(paper, abstracts.get(normalize_title(paper.title), ""))
-                    unbound.append(paper)
+                    unsettled.append(paper)
                     continue
                 paper.match_status = verdict
                 if verdict == MATCHED_FUZZY:
                     fuzzy += 1
+            if mode == "set" and entry is None:
+                # Semantic Scholar can hold the paper without this DOI (DBLP
+                # records DOIs it never linked), and a failed chunk is all
+                # Nones too: either way the title path is still worth asking.
+                unsettled.append(paper)
+                continue
             apply_enrichment(paper, entry)
             if mode == "set":
-                paper.match_status = "matched" if entry else "not_found"
+                paper.match_status = "matched"
             settled.append(paper)
-        # Unbound papers are deliberately left out: they are checkpointed only
-        # once their cold retry finishes, so a crash between the two stages
-        # cannot freeze a paper as unbound-but-never-retried.
+        # Unsettled papers are deliberately left out: they are checkpointed
+        # only once their cold retry finishes, so a crash between the two
+        # stages cannot freeze a paper as unsettled-but-never-retried.
         record(settled)
-    return unbound, fuzzy
+    return unsettled, fuzzy
 
 
 async def _run_title_cold(
@@ -598,9 +607,11 @@ async def enrich_conference(
     so a resumed run produces exactly the file an uninterrupted one would.
 
     `batch_only` is the archive mode (see `ppr/archive.py`): the refresh and
-    DOI batches run, title matching does not. Semantic Scholar finished
-    indexing these years long ago, so a title it could not match then it will
-    not match now; those papers are written as routed and counted `untried`.
+    DOI batches run, title matching does not, DOI misses included. A paper
+    reaches the archive already title-tried by a full run (its live years, or
+    the named run that backfilled it), and Semantic Scholar finished indexing
+    these years long ago, so a title it could not match then it will not match
+    now; those papers are written as routed and counted `untried`.
     """
     conf_dir = data_dir / conf_id
     checkpoint = Checkpoint(checkpoint_path(conf_dir))
@@ -673,15 +684,17 @@ async def enrich_conference(
             # where the identifier is authoritative.
             for paper in unbound:
                 (doi_cold if doi_id_of(paper) else title_cold).append(paper)
-            await _run_batch(
+            doi_missed, _ = await _run_batch(
                 client, http, doi_cold, doi_id_of,
                 mode="set", record=checkpoint.record,
             )
+            # Kept out of title_cold so the counts below see each paper once.
+            title_queue = title_cold + doi_missed
             if batch_only:
-                title_cold_fuzzy, untried = 0, len(title_cold)
+                title_cold_fuzzy, untried = 0, len(title_queue)
             else:
                 title_cold_fuzzy, deferred = await _run_title_cold(
-                    client, http, title_cold, conf_id,
+                    client, http, title_queue, conf_id,
                     record=checkpoint.record, deadline=deadline,
                 )
 
