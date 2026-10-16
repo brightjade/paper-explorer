@@ -10,6 +10,7 @@ from ppr.enrich import (
     check_guards,
     normalize_title,
     read_papers,
+    unbind,
     write_enriched,
 )
 from ppr.models import Paper
@@ -1988,3 +1989,14 @@ class TestCmdEnrichArchiveWiring:
         # Review focus 3: --full re-runs every cold path; batch-only would
         # leave non-DOI archive papers unenriched behind the coverage guard.
         assert self._kwargs(monkeypatch, ["enrich", "--all", "--full"])["today"] is None
+
+
+def test_enrichment_never_touches_venue_date():
+    paper = _paper(venue_date="2025-02-03")
+    apply_enrichment(paper, FULL_ENTRY)
+    assert paper.venue_date == "2025-02-03"
+    unbind(paper, "")
+    assert paper.venue_date == "2025-02-03"
+    raw = _paper(venue_date="2025-02-03")
+    carry_over(raw, _paper(venue_date="1999-01-01", citation_count=3))
+    assert raw.venue_date == "2025-02-03"

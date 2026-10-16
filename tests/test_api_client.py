@@ -138,6 +138,7 @@ class TestEmptyCrawlGuard:
         config = MagicMock()
         config.venue_id = "X/2026/Conference"
         config.api_version = 2
+        config.year_from_pdate = False
         config.selections = selections
         config.extra_venue_ids = []
         return OpenReviewAPIClient(config, or_client)
@@ -305,3 +306,58 @@ class TestV1Backfill:
         cfg = v1_config(selections={"datasets": ["R1", "R2"]})
         with pytest.raises(EmptyCrawlError, match="Something Else"):
             OpenReviewAPIClient(cfg, client).fetch_papers()
+
+
+# --- publication-date split (one venueid shared by every year) ---
+
+from datetime import date, datetime, timezone
+
+from ppr.api_client import note_pdate
+
+
+def _ms(iso):  # "2025-12-31T23:30:00" read as UTC
+    return int(datetime.fromisoformat(iso).replace(tzinfo=timezone.utc).timestamp() * 1000)
+
+
+def tmlr_config():
+    return CrawlConfig(name="TMLR", year=2025, venue_id="TMLR",
+                       selections={"main": "Accepted by TMLR"},
+                       conference_id="tmlr_2025", year_from_pdate=True)
+
+
+def test_note_pdate_is_utc():
+    note = make_mock_note()
+    note.pdate = _ms("2025-12-31T23:30:00")
+    assert note_pdate(note) == date(2025, 12, 31)
+
+
+def test_note_pdate_is_none_without_an_int():
+    note = make_mock_note()
+    note.pdate = None
+    assert note_pdate(note) is None
+    assert note_pdate(make_mock_note()) is None  # MagicMock attribute, not an int
+
+
+def test_year_from_pdate_keeps_that_year_and_records_venue_date():
+    notes = []
+    for fid, iso in [("a", "2024-06-01T00:00:00"), ("b", "2025-02-03T10:00:00"),
+                     ("c", "2025-12-31T23:30:00"), ("d", None)]:
+        n = make_mock_note(fid, venue="Accepted by TMLR")
+        n.pdate = _ms(iso) if iso else None
+        notes.append(n)
+    mock = MagicMock()
+    mock.get_all_notes.return_value = notes
+    papers = OpenReviewAPIClient(tmlr_config(), mock).fetch_papers()
+    assert [(p.forum_id, p.venue_date, p.selection) for p in papers] == [
+        ("b", "2025-02-03", "main"), ("c", "2025-12-31", "main")]
+    mock.get_all_notes.assert_called_once_with(invitation="TMLR/-/Submission",
+                                               content={"venueid": "TMLR"})
+
+
+def test_without_year_from_pdate_venue_date_stays_empty():
+    note = make_mock_note("x", venue="ICLR 2025 Oral")
+    note.pdate = _ms("2025-04-01T00:00:00")
+    mock = MagicMock()
+    mock.get_all_notes.return_value = [note]
+    (paper,) = OpenReviewAPIClient(make_config(), mock).fetch_papers()
+    assert paper.venue_date == ""

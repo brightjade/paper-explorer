@@ -194,3 +194,12 @@ class TestWritePapers:
         assert path.read_text(encoding="utf-8").strip().split("\n") == [
             _paper("P1").to_json()
         ]
+
+
+def test_venue_date_round_trips():
+    p = Paper(title="T", link="L", authors=["A"], venue_date="2025-02-03")
+    assert Paper.from_dict(p.to_dict()).venue_date == "2025-02-03"
+
+
+def test_empty_venue_date_is_absent_from_to_dict():
+    assert "venue_date" not in Paper(title="T", link="L", authors=["A"]).to_dict()

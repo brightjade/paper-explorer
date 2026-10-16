@@ -144,3 +144,29 @@ class TestV1BackfillConfig:
             "  decisions: {invitation: A, field: decision}\n  selections: {oral: X}\n"
         with pytest.raises(ValueError, match="api_version"):
             CrawlConfig.from_yaml(_write(tmp_path, body))
+
+
+class TestYearFromPdate:
+    BODY = """conference:
+  name: "TMLR"
+  year: 2025
+  venue_id: "TMLR"
+  selections: {main: "Accepted by TMLR"}
+"""
+
+    def test_year_from_pdate_defaults_to_false(self, tmp_path):
+        assert CrawlConfig.from_yaml(_write(tmp_path, self.BODY)).year_from_pdate is False
+
+    def test_year_from_pdate_is_read(self, tmp_path):
+        body = self.BODY + "  year_from_pdate: true\n"
+        assert CrawlConfig.from_yaml(_write(tmp_path, body)).year_from_pdate is True
+
+    def test_year_from_pdate_must_be_a_bool(self, tmp_path):
+        body = self.BODY + '  year_from_pdate: "yes"\n'
+        with pytest.raises(ValueError, match="year_from_pdate"):
+            CrawlConfig.from_yaml(_write(tmp_path, body))
+
+    def test_year_from_pdate_needs_api_v2(self, tmp_path):
+        body = self.BODY + "  year_from_pdate: true\n  api_version: 1\n"
+        with pytest.raises(ValueError, match="api_version"):
+            CrawlConfig.from_yaml(_write(tmp_path, body))

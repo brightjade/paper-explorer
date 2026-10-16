@@ -1,6 +1,7 @@
 import logging
 import os
 from collections import Counter
+from datetime import date, datetime, timezone
 
 import openreview
 
@@ -9,6 +10,14 @@ from ppr.matching import title_key
 from ppr.models import Paper, write_papers
 
 logger = logging.getLogger(__name__)
+
+
+def note_pdate(note) -> date | None:
+    """The UTC date a note was published (`pdate`, epoch milliseconds), if it has one."""
+    pdate = getattr(note, "pdate", None)
+    if not isinstance(pdate, int):
+        return None
+    return datetime.fromtimestamp(pdate / 1000, timezone.utc).date()
 
 
 class EmptyCrawlError(Exception):
@@ -172,6 +181,9 @@ class OpenReviewAPIClient:
             )
             return []
 
+        if self.config.year_from_pdate and not is_v1:
+            notes = [n for n in notes if (d := note_pdate(n)) is not None and d.year == self.config.year]
+
         logger.info("Found %d notes total", len(notes))
         lookup = self._selection_lookup()
         entries: list[tuple[Paper, int]] = []
@@ -196,6 +208,7 @@ class OpenReviewAPIClient:
                 keywords=content.get("keywords", []),
                 abstract=content.get("abstract", ""),
                 forum_id=note.forum,
+                venue_date=note_pdate(note).isoformat() if self.config.year_from_pdate and not is_v1 else "",
             )
             created = note.tcdate if isinstance(getattr(note, "tcdate", None), int) else 0
             entries.append((paper, created))
