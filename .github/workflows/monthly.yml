@@ -94,6 +94,16 @@ jobs:
           read -ra ids <<< "$RECRAWL"
           uv run ppr crawl "${ids[@]}"
 
+      - name: Rolling recrawl
+        # A rolling venue (TMLR) has no accepted-list date, so its current year
+        # is recrawled every month (last year's too in January). A held or failed
+        # venue keeps its file and goes to the issue; this step does not fail
+        # the run.
+        run: uv run ppr rolling --report rolling.json
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && hashFiles('rolling.json') != '' }}
+        with: {name: report-rolling, path: rolling.json}
+
       - name: Tests
         run: uv run pytest tests/ -q
 
@@ -187,7 +197,7 @@ jobs:
           uv run ppr report issue \
             --discover reports/discover.json --register reports/register.json \
             --enrich reports/enrich.json --state reports/pipeline_state.json \
-            --awards reports/awards.json \
+            --awards reports/awards.json --rolling reports/rolling.json \
             --pipeline-result "${{ needs.pipeline.result }}" --run-url "$RUN_URL" \
             --out action.json
           { echo "## Issue action"; echo '```json'; cat action.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

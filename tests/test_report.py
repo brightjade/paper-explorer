@@ -231,3 +231,31 @@ class TestAwardsInTheIssue:
 
     def test_no_awards_report_changes_nothing(self):
         assert _decide()["action"] == "close"
+
+
+class TestRollingRecrawl:
+    @staticmethod
+    def _rolling(*rows):
+        return {"results": list(rows)}
+
+    def test_a_held_rolling_venue_opens_the_issue(self):
+        out = _decide(rolling=self._rolling({
+            "conf_id": "tmlr_2026", "status": "held", "before": 1686, "after": 3,
+            "reason": "1683 of 1686 papers on disk are missing"}))
+        assert out["action"] == "notify" and "tmlr_2026" in out["body"]
+
+    def test_a_failed_rolling_venue_opens_the_issue(self):
+        out = _decide(rolling=self._rolling({
+            "conf_id": "tmlr_2026", "status": "failed", "reason": "HTTPError: 503"}))
+        assert out["action"] == "notify" and "tmlr_2026" in out["body"]
+
+    def test_a_recrawled_rolling_venue_alone_does_not_open_the_issue(self):
+        out = _decide(rolling=self._rolling({
+            "conf_id": "tmlr_2026", "status": "recrawled", "before": 1686, "after": 1720}))
+        assert out["action"] != "notify"
+
+    def test_a_recrawled_venue_shows_as_context_beside_a_trigger(self):
+        out = _decide(register={"outcomes": [{"conf_id": "x_2026", "status": "held", "reason": "r", "url": "u"}]},
+                      rolling=self._rolling({
+                          "conf_id": "tmlr_2026", "status": "recrawled", "before": 1686, "after": 1720}))
+        assert "`tmlr_2026` — 1686 → 1720 papers" in out["body"]

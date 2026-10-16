@@ -181,7 +181,7 @@ def build_parser() -> argparse.ArgumentParser:
     state_parser.add_argument("--enrich", type=Path, required=True)
     state_parser.add_argument("--state", type=Path, required=True)
     issue_parser = report_sub.add_parser("issue", help="Decide the tracking-issue action")
-    for name in ("discover", "register", "enrich", "state", "awards"):
+    for name in ("discover", "register", "enrich", "state", "awards", "rolling"):
         issue_parser.add_argument(f"--{name}", type=Path, default=None)
     issue_parser.add_argument("--pipeline-result", required=True)
     issue_parser.add_argument("--run-url", required=True)
@@ -464,7 +464,7 @@ def cmd_report(args: argparse.Namespace) -> None:
     action = decide_issue(
         discover=_read_json(args.discover), register=_read_json(args.register),
         enrich=_read_json(args.enrich), state=_read_json(args.state),
-        awards=_read_json(args.awards),
+        awards=_read_json(args.awards), rolling=_read_json(args.rolling),
         pipeline_result=args.pipeline_result, run_url=args.run_url,
         today=date.today().isoformat(),
     )
