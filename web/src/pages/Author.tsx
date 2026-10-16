@@ -4,6 +4,7 @@ import { useAuthors } from "../hooks/useAuthors";
 import { useManifest } from "../hooks/useManifest";
 import { TrackBadge } from "../components/TrackBadge";
 import type { Paper } from "../types";
+import { RELATIVE_TOOLTIP, formatRelative } from "../format";
 import "./Author.css";
 
 export function Author() {
@@ -99,6 +100,11 @@ export function Author() {
                     {p.citation_count != null
                       ? p.citation_count.toLocaleString()
                       : "\u2014"}
+                    {p.relative_citations != null && (
+                      <span className="author-paper-relative" title={RELATIVE_TOOLTIP}>
+                        {formatRelative(p.relative_citations)}
+                      </span>
+                    )}
                   </span>
                 </div>
               ))}
