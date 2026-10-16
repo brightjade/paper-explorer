@@ -174,7 +174,7 @@ class TestYearFromPdate:
 
 def test_tmlr_configs():
     for y in range(2022, 2027):
-        cfg = CrawlConfig.from_yaml(f"configs/tmlr_{y}.yaml")
+        cfg = CrawlConfig.from_yaml(Path(__file__).resolve().parents[1] / "configs" / f"tmlr_{y}.yaml")
         assert cfg.venue_id == "TMLR"
         assert cfg.year == y
         assert cfg.year_from_pdate is True

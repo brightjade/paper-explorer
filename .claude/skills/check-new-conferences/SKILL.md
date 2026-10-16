@@ -117,6 +117,8 @@ The crawled count should be close to the probe's count. If it is far off, stop a
 
 One exception: a venue with extra track venue IDs (`extra_venue_ids` in its config, e.g. NeurIPS Datasets & Benchmarks) is crawled across several venue IDs while the probe queries only one, so the crawl legitimately comes back *higher*. Check the extra tracks' counts add up rather than treating the gap as a fault.
 
+A **held rolling venue** (TMLR; the issue's rolling section, reason "N paper(s) on disk missing from the crawl (crawl returned M): <forum ids>") means a recrawl lost papers already on disk, so its file was kept. Open the named forum ids on OpenReview. If they were retracted or moved, run `uv run ppr crawl tmlr_<year>`, which deliberately bypasses the guard, then enrich and release as for any manual fix. If the crawl returned 0 papers (the whole year "missing"), it was an outage: do nothing, next month's run retries on its own.
+
 Also fill the conference's cell in `README.md` (`ppr.readme_table.update_readme(Path("README.md"), "ICLR", 2027, "oral, poster")` does what autoregister does), and run `uv run pytest tests/`. A new ID needs no test edit: the per-scraper `test_expected_conference_ids` tests check a subset, and `tests/test_registry_seams.py` checks that a registration in every source keeps the suite green.
 
 ## Phase 2b — Decide whether to enrich now or later

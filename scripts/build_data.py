@@ -37,6 +37,7 @@ VENUE_NAMES = {
     "corl": "CoRL",
     "eacl": "EACL",
     "coling": "COLING",
+    "tmlr": "TMLR",
 }
 
 # Display order of the category chips on Home and Top 100 (web/src/categories.ts
