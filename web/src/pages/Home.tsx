@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useManifest } from "../hooks/useManifest";
-import { CATEGORIES, type Category } from "../categories";
+import { CATEGORIES, VENUE_ORDER, type Category } from "../categories";
 import type { ConferenceMeta } from "../types";
 import "./Home.css";
 
@@ -38,15 +38,17 @@ export function Home() {
     const years = [...new Set(filtered.map((c) => c.year))].sort((a, b) => b - a);
     const cells = new Map<string, ConferenceMeta>();
     for (const c of filtered) cells.set(`${c.venue}|${c.year}`, c);
-    // Within a category, the venues with the most papers across all years come
-    // first; categories keep the build's display order.
-    const totals = new Map<string, number>();
-    for (const c of filtered) totals.set(c.venue, (totals.get(c.venue) ?? 0) + c.paper_count);
+    // Within a category, venues follow VENUE_ORDER (unlisted ones last,
+    // alphabetically); categories keep the build's display order.
+    const rank = (venue: string) => {
+      const i = VENUE_ORDER.indexOf(venue);
+      return i === -1 ? VENUE_ORDER.length : i;
+    };
     const groups = present
       .filter((cat) => !hidden.has(cat))
       .map((cat) => {
         const venues = [...new Set(filtered.filter((c) => c.category === cat).map((c) => c.venue))]
-          .sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0) || a.localeCompare(b));
+          .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
         return [cat, venues] as const;
       })
       .filter(([, venues]) => venues.length > 0);
