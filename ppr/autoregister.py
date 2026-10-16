@@ -206,7 +206,7 @@ def _register_openreview(row: dict, venue: Venue, ws: Workspace, snap: _Snapshot
     path = snap.file(ws.configs_dir / f"{row['conf_id']}.yaml")
     path.write_text(
         render_openreview_config(venue.name, row["year"], venue_id, selections,
-                                 extra_venue_ids=extra_ids),
+                                 extra_venue_ids=extra_ids, year_from_pdate=venue.rolling),
         encoding="utf-8",
     )
     return expected
@@ -255,7 +255,9 @@ def register_one(row: dict, venue: Venue, ws: Workspace, *, crawl: Crawl,
         snap.dir(ws.data_dir / conf_id)
         count = crawl(conf_id, venue, ws)
         check_count(count, expected)
-        check_against_prior_year(conf_id, count, ws.data_dir)
+        # January's edition of a rolling venue is always a sliver of last year.
+        if not venue.rolling:
+            check_against_prior_year(conf_id, count, ws.data_dir)
         if venue.source != "dblp":
             status = validate(conf_id)
             if status == "FAIL":

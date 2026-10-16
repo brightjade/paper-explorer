@@ -65,7 +65,10 @@ def test_registering_one_venue_per_source_keeps_the_suite_green(tmp_path):
     register_usenix("usenix_security_2099", "usenixsecurity99", scrapers / "usenix.py")
     (tmp_path / "configs" / "colm_2099.yaml").write_text(render_openreview_config(
         "COLM", 2099, "colmweb.org/COLM/2099/Conference", {"main": "COLM 2099"}))
+    (tmp_path / "configs" / "tmlr_2099.yaml").write_text(render_openreview_config(
+        "TMLR", 2099, "TMLR", {"main": "Accepted by TMLR"}, year_from_pdate=True))
     update_readme(tmp_path / "README.md", "ICSE", 2099, "main")
+    update_readme(tmp_path / "README.md", "TMLR", 2099, "main")
 
     env = {**os.environ, "PYTHONPATH": str(tmp_path)}
     existing = [t for t in CONSISTENCY_TESTS if (tmp_path / t).exists()]

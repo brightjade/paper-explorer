@@ -99,6 +99,7 @@ Conference ID format: `<venue>_<year>` (e.g., `iclr_2025`). Selections indicate 
 | ICLR | oral, poster | oral, spotlight, poster | oral, spotlight, poster | oral, spotlight, poster |
 | NeurIPS | | oral, spotlight, poster | oral, spotlight, poster | oral, spotlight, poster |
 | ICML | main, spotlight | oral, spotlight, poster | oral, spotlight, poster | oral, poster |
+| TMLR | main | main | main | main |
 | AAAI | main | main | main | main |
 | IJCAI | main | main | main | main |
 

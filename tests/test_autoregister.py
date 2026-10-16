@@ -63,6 +63,7 @@ REGISTRY = {
     "icra": _venue("icra", "crossref", "ICRA"),
     "rss": _venue("rss", "roboticsproceedings", "RSS"),
     "colm": _venue("colm", "openreview", "COLM"),
+    "tmlr": _venue("tmlr", "openreview", "TMLR", rolling=True),
     "neurips": _venue("neurips", "openreview", "NeurIPS", extra_tracks=(
         {"venue_id": "NeurIPS.cc/{year}/Datasets_and_Benchmarks_Track", "prefix": "datasets"},
     )),
@@ -226,6 +227,16 @@ class TestPriorYearFloor:
         check_against_prior_year("icse_2026", 1, ws.data_dir)
         _prior(ws, "icse_2025", 0)
         check_against_prior_year("icse_2026", 1, ws.data_dir)
+
+
+class TestRollingVenue:
+    def test_a_rolling_venue_skips_the_prior_year_floor(self, ws):
+        _prior(ws, "tmlr_2026", 1686)
+        row = _row("tmlr_2027", 30, {"venue_id": "TMLR"})
+        outcomes, _ = _run([row], ws, counts={"tmlr_2027": 30},
+                           openreview=_openreview({"TMLR": _notes(*["Accepted by TMLR"] * 30)}))
+        assert outcomes[0].status == "registered", outcomes[0]
+        assert "year_from_pdate: true" in (ws.configs_dir / "tmlr_2027.yaml").read_text()
 
 
 class TestRevert:
