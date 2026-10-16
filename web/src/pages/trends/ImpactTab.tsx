@@ -8,7 +8,6 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import { Link } from "react-router-dom";
 import type { TrendsData, CitationStats } from "../../types";
 import { VENUE_COLORS, formatNumber } from "./constants";
 
@@ -225,7 +224,6 @@ export function ImpactTab({ trends, selectedYear }: ImpactTabProps) {
 
   const citationStats = impact.citation_stats_by_year[selectedYear] ?? {};
   const medianCitations = impact.avg_citations_by_year[selectedYear] ?? {};
-  const topPapers = impact.top_papers_by_year[selectedYear] ?? [];
   const influentialRatio =
     impact.influential_ratio_by_year[selectedYear] ?? {};
 
@@ -303,66 +301,6 @@ export function ImpactTab({ trends, selectedYear }: ImpactTabProps) {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
-      {/* Top Papers Leaderboard */}
-      {topPapers.length > 0 && (
-        <div className="trends-section">
-          <h3>Most Cited Papers</h3>
-          <div className="chart-container" style={{ padding: "0.75rem" }}>
-            <table className="leaderboard-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Paper</th>
-                  <th>Venue</th>
-                  <th style={{ textAlign: "right" }}>Citations</th>
-                  <th style={{ textAlign: "right" }}>
-                    <span className="header-with-tooltip">
-                      Influential
-                      <span className="info-tooltip">
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style={{ verticalAlign: "-2px", marginLeft: "4px", opacity: 0.5 }}>
-                          <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm0 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM8 5a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 5zm-1 3h1.25v3.25H9.5V12.5h-2.5V11h1.25V9.25H7.25V8z"/>
-                        </svg>
-                        <span className="info-tooltip-text">
-                          Citations where the cited work significantly impacted the citing paper, determined by Semantic Scholar.
-                        </span>
-                      </span>
-                    </span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {topPapers.map((paper, i) => (
-                  <tr key={i}>
-                    <td>{i + 1}</td>
-                    <td className="paper-title">
-                      <Link to={`/conference/${paper.conference_id}`}>
-                        {paper.title}
-                      </Link>
-                    </td>
-                    <td>
-                      <span
-                        style={{
-                          color: VENUE_COLORS[paper.venue] ?? "inherit",
-                          fontWeight: 600,
-                        }}
-                      >
-                        {paper.venue}
-                      </span>
-                    </td>
-                    <td className="number">
-                      {paper.citation_count.toLocaleString()}
-                    </td>
-                    <td className="number">
-                      {paper.influential_citation_count.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
       )}

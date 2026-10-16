@@ -1,54 +1,27 @@
 import { useMemo, useState } from "react";
 import { useManifest } from "../hooks/useManifest";
 import { ConferenceCard } from "../components/ConferenceCard";
+import { CATEGORIES, type Category } from "../categories";
 import "./Home.css";
-
-type Category = "ML" | "NLP" | "CV" | "Robotics" | "SE" | "Others";
-
-const VENUE_CATEGORIES: Record<string, Category> = {
-  ICLR: "ML",
-  NeurIPS: "ML",
-  ICML: "ML",
-  AAAI: "ML",
-  IJCAI: "ML",
-  COLM: "NLP",
-  EMNLP: "NLP",
-  ACL: "NLP",
-  NAACL: "NLP",
-  EACL: "NLP",
-  COLING: "NLP",
-  CVPR: "CV",
-  ICCV: "CV",
-  ECCV: "CV",
-  WACV: "CV",
-  ICRA: "Robotics",
-  IROS: "Robotics",
-  RSS: "Robotics",
-  CoRL: "Robotics",
-  ICSE: "SE",
-  FSE: "SE",
-  ASE: "SE",
-  ISSTA: "SE",
-};
-
-const ALL_CATEGORIES: Category[] = ["ML", "NLP", "CV", "Robotics", "SE", "Others"];
-
-function getCategory(venue: string): Category {
-  return VENUE_CATEGORIES[venue] ?? "Others";
-}
 
 export function Home() {
   const { data: manifest, error } = useManifest();
-  const [activeCategories, setActiveCategories] = useState<Set<Category>>(
-    new Set(ALL_CATEGORIES)
+  // Categories switched off. Tracking the hidden ones (not the shown ones) keeps
+  // categories that have no conference out of the bookkeeping.
+  const [hidden, setHidden] = useState<Set<Category>>(new Set());
+
+  const present = useMemo(
+    () => CATEGORIES.filter((cat) => manifest?.some((c) => c.category === cat)),
+    [manifest]
   );
 
   const toggleCategory = (cat: Category) => {
-    setActiveCategories((prev) => {
+    setHidden((prev) => {
       const next = new Set(prev);
       if (next.has(cat)) {
-        if (next.size > 1) next.delete(cat);
-      } else {
+        next.delete(cat);
+      } else if (present.filter((c) => !next.has(c)).length > 1) {
+        // never hide the last visible category
         next.add(cat);
       }
       return next;
@@ -57,8 +30,8 @@ export function Home() {
 
   const filtered = useMemo(() => {
     if (!manifest) return [];
-    return manifest.filter((c) => activeCategories.has(getCategory(c.venue)));
-  }, [manifest, activeCategories]);
+    return manifest.filter((c) => !hidden.has(c.category));
+  }, [manifest, hidden]);
 
   if (error) return <div className="loading">Error: {error}</div>;
   if (!manifest) return <div className="loading">Loading conferences...</div>;
@@ -78,10 +51,10 @@ export function Home() {
         across {filtered.length} conferences
       </p>
       <div className="category-filters">
-        {ALL_CATEGORIES.map((cat) => (
+        {present.map((cat) => (
           <button
             key={cat}
-            className={`category-btn ${activeCategories.has(cat) ? "active" : ""}`}
+            className={`category-btn ${hidden.has(cat) ? "" : "active"}`}
             onClick={() => toggleCategory(cat)}
           >
             {cat}
