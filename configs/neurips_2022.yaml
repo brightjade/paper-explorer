@@ -1,0 +1,10 @@
+conference:
+  name: "NeurIPS"
+  year: 2022
+  venue_id: "NeurIPS.cc/2022/Conference"
+  api_version: 1
+  extra_venue_ids:
+    - "NeurIPS.cc/2022/Track/Datasets_and_Benchmarks"
+  selections:
+    main: "NeurIPS 2022 Accept"
+    datasets: "NeurIPS 2022 Datasets and Benchmarks "

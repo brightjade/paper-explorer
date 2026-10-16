@@ -1,0 +1,8 @@
+conference:
+  name: "CoRL"
+  year: 2022
+  venue_id: "robot-learning.org/CoRL/2022/Conference"
+  api_version: 1
+  selections:
+    oral: "CoRL 2022 Oral"
+    poster: "CoRL 2022 Poster"

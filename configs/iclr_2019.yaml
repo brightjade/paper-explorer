@@ -1,0 +1,11 @@
+conference:
+  name: "ICLR"
+  year: 2019
+  venue_id: "ICLR.cc/2019/Conference"
+  api_version: 1
+  decisions:
+    reply_suffix: Meta_Review
+    field: recommendation
+  selections:
+    oral: "Accept (Oral)"
+    poster: "Accept (Poster)"

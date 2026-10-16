@@ -1,0 +1,12 @@
+conference:
+  name: "ICLR"
+  year: 2020
+  venue_id: "ICLR.cc/2020/Conference"
+  api_version: 1
+  decisions:
+    reply_suffix: Decision
+    field: decision
+  selections:
+    oral: "Accept (Talk)"
+    spotlight: "Accept (Spotlight)"
+    poster: "Accept (Poster)"

@@ -1,0 +1,9 @@
+conference:
+  name: "ICLR"
+  year: 2022
+  venue_id: "ICLR.cc/2022/Conference"
+  api_version: 1
+  selections:
+    oral: "ICLR 2022 Oral"
+    spotlight: "ICLR 2022 Spotlight"
+    poster: "ICLR 2022 Poster"

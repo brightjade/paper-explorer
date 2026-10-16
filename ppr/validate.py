@@ -35,6 +35,17 @@ DBLP_VALIDATION_KEYS: dict[str, list[str]] = {
     # colm_2024, colm_2025: not in DBLP
     "corl_2023": ["db/conf/corl/corl2023.bht"],
     "corl_2024": ["db/conf/corl/corl2024.bht"],
+    # --- Backfill: OpenReview years (the DBLP years are DBLP-sourced and skip) ---
+    "iclr_2017": ["db/conf/iclr/iclr2017.bht"],
+    "iclr_2018": ["db/conf/iclr/iclr2018.bht"],
+    "iclr_2019": ["db/conf/iclr/iclr2019.bht"],
+    "iclr_2020": ["db/conf/iclr/iclr2020.bht"],
+    "iclr_2021": ["db/conf/iclr/iclr2021.bht"],
+    "iclr_2022": ["db/conf/iclr/iclr2022.bht"],
+    "neurips_2021": ["db/conf/nips/neurips2021.bht", "db/conf/nips/neurips2021db.bht"],
+    "neurips_2022": ["db/conf/nips/neurips2022.bht"],  # one volume, D&B included (2,834)
+    "corl_2021": ["db/conf/corl/corl2021.bht"],
+    "corl_2022": ["db/conf/corl/corl2022.bht"],
     # --- ACL conferences (multi-volume) ---
     "emnlp_2023": [
         "db/conf/emnlp/emnlp2023.bht",      # main

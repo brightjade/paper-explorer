@@ -1,0 +1,15 @@
+conference:
+  name: "NeurIPS"
+  year: 2021
+  venue_id: "NeurIPS.cc/2021/Conference"
+  api_version: 1
+  extra_venue_ids:
+    - "NeurIPS.cc/2021/Track/Datasets_and_Benchmarks/Round1"
+    - "NeurIPS.cc/2021/Track/Datasets_and_Benchmarks/Round2"
+  selections:
+    oral: "NeurIPS 2021 Oral"
+    spotlight: "NeurIPS 2021 Spotlight"
+    poster: "NeurIPS 2021 Poster"
+    datasets:
+      - "NeurIPS 2021 Datasets and Benchmarks Track (Round 1)"
+      - "NeurIPS 2021 Datasets and Benchmarks Track (Round 2)"

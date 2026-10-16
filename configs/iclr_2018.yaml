@@ -1,0 +1,11 @@
+conference:
+  name: "ICLR"
+  year: 2018
+  venue_id: "ICLR.cc/2018/Conference"
+  api_version: 1
+  decisions:
+    invitation: "ICLR.cc/2018/Conference/-/Acceptance_Decision"
+    field: decision
+  selections:
+    oral: "Accept (Oral)"
+    poster: "Accept (Poster)"

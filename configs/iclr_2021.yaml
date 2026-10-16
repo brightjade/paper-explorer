@@ -1,0 +1,9 @@
+conference:
+  name: "ICLR"
+  year: 2021
+  venue_id: "ICLR.cc/2021/Conference"
+  api_version: 1
+  selections:
+    oral: "ICLR 2021 Oral"
+    spotlight: "ICLR 2021 Spotlight"
+    poster: "ICLR 2021 Poster"

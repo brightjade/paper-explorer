@@ -1,0 +1,9 @@
+conference:
+  name: "ICLR"
+  year: 2017
+  venue_id: "ICLR.cc/2017/conference"
+  api_version: 1
+  submission_invitation: "ICLR.cc/2017/conference/-/submission"
+  selections:
+    oral: "ICLR 2017 Oral"
+    poster: "ICLR 2017 Poster"
