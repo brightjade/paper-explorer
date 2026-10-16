@@ -18,9 +18,19 @@ from typing import NamedTuple
 
 # New-style arXiv ids (YYMM.NNNNN) carry the month the paper first went up.
 ARXIV_ID = re.compile(r"^(\d{2})(\d{2})\.\d{4,5}(v\d+)?$")
+# Some S2 records carry the arXiv id only inside arXiv's DataCite DOI or the
+# DBLP CoRR key.
+ARXIV_DOI = re.compile(r"^10\.48550/arxiv\.(\d{2})(\d{2})\.\d{4,5}", re.IGNORECASE)
+DBLP_CORR = re.compile(r"^journals/corr/abs-(\d{2})(\d{2})-\d{4,5}")
 ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # For a prefix missing from configs/venues.yaml.
 DEFAULT_ANNOUNCE_MONTH = 6
+# Venues whose accepted list goes up the calendar year before the conference
+# (AAAI 2026 in Nov 2025, WACV 2026 in Oct 2025, COLING 2025 in Nov 2024), so
+# their announce_month belongs to year - 1. Measured on 2026-10-15: their arXiv
+# preprints precede date(year, announce_month) by a median 11-13 months, every
+# other venue's by 0-8.
+ANNOUNCED_YEAR_BEFORE = frozenset({"aaai", "coling", "wacv"})
 # A quarter with fewer cited papers than this joins the cohort before it: the
 # quarter in progress, and the sparse quarters before the dataset's first year.
 MIN_COHORT = 300
@@ -41,10 +51,12 @@ def first_public(paper: dict, year: int, announce_month: int) -> date:
     """
     candidates = [date(year, announce_month, 15)]
 
-    arxiv = (paper.get("external_ids") or {}).get("ArXiv")
-    match = ARXIV_ID.match(arxiv) if isinstance(arxiv, str) else None
-    if match and 1 <= int(match.group(2)) <= 12:
-        candidates.append(date(2000 + int(match.group(1)), int(match.group(2)), 15))
+    ids = paper.get("external_ids") or {}
+    for key, pattern in (("ArXiv", ARXIV_ID), ("DOI", ARXIV_DOI), ("DBLP", DBLP_CORR)):
+        value = ids.get(key)
+        match = pattern.match(value) if isinstance(value, str) else None
+        if match and 1 <= int(match.group(2)) <= 12:
+            candidates.append(date(2000 + int(match.group(1)), int(match.group(2)), 15))
 
     published = paper.get("publication_date")
     if isinstance(published, str) and ISO_DATE.match(published):
@@ -97,7 +109,8 @@ def compute_impact(
     dated: dict[str, list[tuple[date, int] | None]] = {}
     counts: dict[tuple[int, int], int] = defaultdict(int)
     for conf_id, papers in all_papers.items():
-        prefix, year = conf_id.rsplit("_", 1)
+        prefix, conf_year = conf_id.rsplit("_", 1)
+        year = int(conf_year) - (prefix in ANNOUNCED_YEAR_BEFORE)
         month = announce_months.get(prefix, DEFAULT_ANNOUNCE_MONTH)
         rows: list[tuple[date, int] | None] = []
         for paper in papers:
@@ -105,7 +118,7 @@ def compute_impact(
             if cites is None:
                 rows.append(None)
                 continue
-            when = first_public(paper, int(year), month)
+            when = first_public(paper, year, month)
             counts[cohort_of(when)] += 1
             rows.append((when, cites))
         dated[conf_id] = rows

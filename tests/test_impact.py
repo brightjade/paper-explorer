@@ -27,6 +27,19 @@ class TestFirstPublic:
         paper = {"external_ids": {"ArXiv": "2401.00001v3"}}
         assert first_public(paper, 2025, 5) == date(2024, 1, 15)
 
+    def test_arxiv_month_from_datacite_doi(self):
+        # MiniGPT-5's S2 record has no ArXiv id; arXiv's DataCite DOI still names it.
+        paper = {"external_ids": {"DOI": "10.48550/arXiv.2310.02239"}}
+        assert first_public(paper, 2026, 10) == date(2023, 10, 15)
+
+    def test_arxiv_month_from_dblp_corr_key(self):
+        paper = {"external_ids": {"DBLP": "journals/corr/abs-2310-02239"}}
+        assert first_public(paper, 2026, 10) == date(2023, 10, 15)
+
+    def test_publisher_doi_is_not_an_arxiv_id(self):
+        paper = {"external_ids": {"DOI": "10.1109/ICRA.2023.10160001", "DBLP": "conf/icra/X23"}}
+        assert first_public(paper, 2023, 7) == date(2023, 7, 15)
+
     def test_venue_date_when_nothing_else(self):
         assert first_public({}, 2025, 9) == date(2025, 9, 15)
 
@@ -166,6 +179,13 @@ class TestComputeImpact:
         all_papers = {"newconf_2025": [{"title": "a", "citation_count": 5}]}
         impacts = compute_impact(all_papers, {}, min_cohort=1)
         assert impacts["newconf_2025"][0].first_public == date(2025, 6, 15)
+
+    @pytest.mark.parametrize("prefix", ["aaai", "coling", "wacv"])
+    def test_venues_announcing_the_year_before_date_from_that_year(self, prefix):
+        # AAAI 2026's accepted list went up in Nov 2025, not Dec 2026.
+        all_papers = {f"{prefix}_2026": [{"title": "a", "citation_count": 5}]}
+        impacts = compute_impact(all_papers, {prefix: 11}, min_cohort=1)
+        assert impacts[f"{prefix}_2026"][0].first_public == date(2025, 11, 15)
 
     def test_multiword_prefix(self):
         all_papers = {"usenix_security_2024": [{"title": "a", "citation_count": 5}]}
