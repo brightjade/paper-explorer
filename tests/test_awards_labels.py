@@ -27,6 +27,7 @@ OBSERVED = {
     "Test of Time Honorable Mention": "test_of_time",
     # ICLR blog headings
     "Outstanding Papers": "award",
+    "Award Winners": "award",
     "Honorable Mentions": "honorable",
     # CVF registry sections
     "Best Student Paper": "award",

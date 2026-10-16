@@ -34,7 +34,7 @@ _DEFAULT_RULES = [(re.compile(p, re.I), kind) for p, kind in (
     (r"artifact", "artifact"),
     (r"candidate|finalist", "candidate"),
     (r"honou?rable mention|runner[- ]?up", "honorable"),
-    (r"best|outstanding|distinguished paper|marr prize|internet defense prize|^award winner$", "award"),
+    (r"best|outstanding|distinguished paper|marr prize|internet defense prize|^award winners?$", "award"),
 )]
 
 # Venue-specific rules, consulted before the defaults. Tranche 1 needs none;
