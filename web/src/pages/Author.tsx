@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthors } from "../hooks/useAuthors";
 import { useManifest } from "../hooks/useManifest";
+import { MetricsLegend } from "../components/MetricsLegend";
 import { TrackBadge } from "../components/TrackBadge";
 import type { Paper } from "../types";
 import { RELATIVE_TOOLTIP, formatRelative } from "../format";
@@ -72,6 +73,7 @@ export function Author() {
           <span className="stat-label">venues</span>
         </div>
       </div>
+      <MetricsLegend influential={false} />
 
       {loadingConfs && <div className="loading">Loading papers...</div>}
 

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import type { Paper } from "../types";
 import { TrackBadge } from "./TrackBadge";
 import { VENUE_COLORS } from "../pages/trends/constants";
-import { RELATIVE_TOOLTIP, formatRelative } from "../format";
+import { INFLUENTIAL_TOOLTIP, RELATIVE_TOOLTIP, formatRelative } from "../format";
 import "./PaperRow.css";
 
 interface PaperRowProps {
@@ -67,7 +67,7 @@ export function PaperRow({ paper, rank, conference, emphasis = "citations" }: Pa
             </span>
           )}
           {paper.influential_citation_count != null && paper.influential_citation_count > 0 && (
-            <span className="paper-influential">
+            <span className="paper-influential" title={INFLUENTIAL_TOOLTIP}>
               {paper.influential_citation_count} influential
             </span>
           )}

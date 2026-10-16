@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import { useTop } from "../hooks/useTop";
+import { MetricsLegend } from "../components/MetricsLegend";
 import { PaperRow } from "../components/PaperRow";
-import { RELATIVE_TOOLTIP } from "../format";
 import type { TopSort } from "../types";
 import "./Top.css";
 
@@ -37,14 +37,10 @@ export function Top() {
     <div className="top-page">
       <h2 className="page-title">Top 100</h2>
       <p className="page-subtitle">
-        The most cited papers across every conference here.{" "}
-        <span className="top-help" title={RELATIVE_TOOLTIP}>
-          Age-adjusted
-        </span>{" "}
-        compares each paper with papers first made public in the same quarter, so new papers rank
-        fairly against old ones.
+        The most cited papers across every conference here, ranked age-adjusted by default so new
+        papers compete fairly with old ones.
       </p>
-
+      <MetricsLegend />
       <div className="top-controls">
         <div className="top-chip-row" role="group" aria-label="Year">
           {["all", ...data.years].map((y) => (

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useConferenceData } from "../hooks/useConferenceData";
 import { useManifest } from "../hooks/useManifest";
+import { MetricsLegend } from "../components/MetricsLegend";
 import { PaperRow } from "../components/PaperRow";
 import { SearchInput } from "../components/SearchInput";
 import "./Conference.css";
@@ -71,6 +72,7 @@ export function Conference() {
           Download
         </a>
       </p>
+      <MetricsLegend />
 
       <div className="conference-controls">
         <SearchInput

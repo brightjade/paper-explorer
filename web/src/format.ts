@@ -1,7 +1,10 @@
 export const RELATIVE_TOOLTIP =
-  "Citations relative to the average paper in this dataset first made public in the same quarter.";
+  "Age-adjusted: citations relative to the average paper in this dataset first made public in the same quarter.";
 
-/** ×281 from 10 up, ×2.4 below. */
+export const INFLUENTIAL_TOOLTIP =
+  "Citations where the citing paper builds substantially on this one, per Semantic Scholar.";
+
+/** 281× avg from 10 up, 2.4× avg below. */
 export function formatRelative(value: number): string {
-  return value >= 10 ? `×${Math.round(value)}` : `×${value.toFixed(1)}`;
+  return value >= 10 ? `${Math.round(value)}× avg` : `${value.toFixed(1)}× avg`;
 }
