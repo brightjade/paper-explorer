@@ -244,99 +244,6 @@
   border-color: var(--accent);
 }
 
-/* Leaderboard table */
-.leaderboard-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-}
-
-.leaderboard-table th,
-.leaderboard-table td {
-  padding: 0.6rem 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-.leaderboard-table th {
-  font-weight: 600;
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.leaderboard-table td {
-  color: var(--text-primary);
-}
-
-.leaderboard-table .paper-title {
-  max-width: 400px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.leaderboard-table .paper-title a {
-  color: var(--text-primary);
-  text-decoration: none;
-}
-
-.leaderboard-table .paper-title a:hover {
-  color: var(--accent);
-}
-
-.leaderboard-table th:first-child,
-.leaderboard-table td:first-child,
-.leaderboard-table th:nth-child(3),
-.leaderboard-table td:nth-child(3),
-.leaderboard-table th:nth-child(4),
-.leaderboard-table td:nth-child(4),
-.leaderboard-table th:nth-child(5),
-.leaderboard-table td:nth-child(5) {
-  width: 1%;
-  white-space: nowrap;
-}
-
-.leaderboard-table td.number {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.header-with-tooltip {
-  display: inline-flex;
-  align-items: center;
-}
-
-.info-tooltip {
-  position: relative;
-  cursor: help;
-}
-
-.info-tooltip-text {
-  display: none;
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 8px);
-  width: 240px;
-  padding: 0.5rem 0.65rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  font-size: 0.78rem;
-  font-weight: 400;
-  line-height: 1.45;
-  color: var(--text-secondary);
-  white-space: normal;
-  text-align: left;
-  z-index: 20;
-}
-
-.info-tooltip:hover .info-tooltip-text {
-  display: block;
-}
-
 /* Box plot */
 .box-plot-container {
   background: var(--bg-card);
@@ -406,10 +313,5 @@
 @media (max-width: 480px) {
   .sparkline-grid {
     grid-template-columns: 1fr;
-  }
-
-  .leaderboard-table {
-    display: block;
-    overflow-x: auto;
   }
 }

@@ -76,3 +76,14 @@
 .paper-list {
   margin-bottom: 3rem;
 }
+
+@media (max-width: 600px) {
+  .paper-table-header {
+    grid-template-columns: 2rem 1fr 4.5rem;
+    gap: 0.6rem;
+  }
+
+  .paper-table-header .col-track {
+    display: none;
+  }
+}

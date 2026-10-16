@@ -2,11 +2,23 @@ import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useConferenceData } from "../hooks/useConferenceData";
 import { useManifest } from "../hooks/useManifest";
+import { MetricsLegend } from "../components/MetricsLegend";
 import { PaperRow } from "../components/PaperRow";
 import { SearchInput } from "../components/SearchInput";
+import type { Paper } from "../types";
 import "./Conference.css";
 
 type SortKey = "citations" | "title";
+
+// Fields scripts/build_data.py adds for the page (see scripts/impact.py). The
+// download is dataset content, so they are dropped from it.
+const BUILD_FIELDS = ["relative_citations"] as const;
+
+function datasetRecord(paper: Paper): Record<string, unknown> {
+  const record: Record<string, unknown> = { ...paper };
+  for (const field of BUILD_FIELDS) delete record[field];
+  return record;
+}
 
 export function Conference() {
   const { id } = useParams<{ id: string }>();
@@ -19,9 +31,9 @@ export function Conference() {
   const meta = manifest?.find((c) => c.id === id);
   const downloadJsonl = () => {
     if (!papers || !id) return;
-    // Built from the JSON the page already loaded: the same records the old
-    // copied .jsonl held, one per line, without shipping the data twice.
-    const body = papers.map((p) => JSON.stringify(p)).join("\n") + "\n";
+    // Built from the JSON the page already loaded, minus the build-time fields:
+    // the same records data/ holds, one per line, without shipping them twice.
+    const body = papers.map((p) => JSON.stringify(datasetRecord(p))).join("\n") + "\n";
     const url = URL.createObjectURL(new Blob([body], { type: "application/x-ndjson" }));
     const link = document.createElement("a");
     link.href = url;
@@ -83,6 +95,7 @@ export function Conference() {
           Download
         </button>
       </p>
+      <MetricsLegend />
 
       <div className="conference-controls">
         <SearchInput

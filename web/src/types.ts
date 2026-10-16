@@ -1,3 +1,5 @@
+import type { Category } from "./categories";
+
 export interface Paper {
   title: string;
   authors: string[];
@@ -7,6 +9,7 @@ export interface Paper {
   link?: string;
   forum_id?: string;
   citation_count?: number;
+  relative_citations?: number;
   influential_citation_count?: number;
   reference_count?: number;
   tldr?: string;
@@ -20,6 +23,7 @@ export interface ConferenceMeta {
   id: string;
   venue: string;
   year: number;
+  category: Category;
   paper_count: number;
   has_citations: boolean;
   total_citations: number;
@@ -58,14 +62,6 @@ export interface CitationStats {
   outliers: number[];
 }
 
-export interface TopPaper {
-  title: string;
-  venue: string;
-  citation_count: number;
-  influential_citation_count: number;
-  conference_id: string;
-}
-
 export interface TrendsData {
   overview: {
     venue_counts_by_year: Record<string, Record<string, number>>;
@@ -87,7 +83,6 @@ export interface TrendsData {
   impact: {
     citation_stats_by_year: Record<string, Record<string, CitationStats>>;
     avg_citations_by_year: Record<string, Record<string, number>>;
-    top_papers_by_year: Record<string, TopPaper[]>;
     influential_ratio_by_year: Record<string, Record<string, number>>;
   };
   composition: {
@@ -98,4 +93,24 @@ export interface TrendsData {
     venue_counts_all_years: Record<string, Record<string, number>>;
     growth_rates_by_year: Record<string, Record<string, number>>;
   };
+}
+
+export type TopSort = "relative" | "citations";
+
+/** A paper in top.json's pool: enough to render a PaperRow, plus its venue. */
+export interface TopEntry extends Paper {
+  venue: string;
+  year: number;
+  conference_id: string;
+  citation_count: number;
+  relative_citations: number;
+  first_public: string;
+}
+
+export interface TopData {
+  categories: Category[];
+  years: string[];
+  papers: TopEntry[];
+  /** period ("all" | year) -> category ("all" | Category) -> sort -> indices into papers */
+  lists: Record<string, Record<string, Record<TopSort, number[]>>>;
 }

@@ -9,6 +9,8 @@ from scripts.build_data import (
     build_author_index,
     build_trends,
     build_all,
+    category_of,
+    present_categories,
 )
 
 
@@ -126,6 +128,33 @@ class TestParseConferenceId:
         assert parse_conference_id("coling_2024") == ("COLING", 2024)
 
 
+class TestCategories:
+    @pytest.mark.parametrize(
+        "conf_id, expected",
+        [
+            ("iclr_2025", "ML"),
+            ("aaai_2025", "ML"),
+            ("colm_2024", "NLP"),
+            ("coling_2025", "NLP"),
+            ("wacv_2026", "CV"),
+            ("corl_2025", "Robotics"),
+            ("rss_2026", "Robotics"),
+            ("issta_2026", "SE"),
+            ("usenix_security_2025", "Security"),
+            ("somethingnew_2026", "Others"),
+        ],
+    )
+    def test_category_of(self, conf_id, expected):
+        assert category_of(conf_id) == expected
+
+    def test_present_categories_keep_display_order_and_skip_empty(self):
+        assert present_categories(["usenix_security_2025", "cvpr_2025", "iclr_2025"]) == [
+            "ML",
+            "CV",
+            "Security",
+        ]
+
+
 class TestLoadPapers:
     def test_prefers_enriched(self, sample_outputs):
         papers = load_papers(sample_outputs / "iclr_2025")
@@ -145,6 +174,7 @@ class TestBuildManifestEntry:
         assert entry["id"] == "iclr_2025"
         assert entry["venue"] == "ICLR"
         assert entry["year"] == 2025
+        assert entry["category"] == "ML"
         assert entry["paper_count"] == 3
         assert entry["has_citations"] is True
         assert sorted(entry["tracks"]) == ["oral", "poster"]
@@ -212,16 +242,13 @@ class TestBuildTrends:
         assert "q1" in stats
         assert "q3" in stats
 
-    def test_impact_top_papers(self, sample_outputs):
+    def test_impact_has_no_top_papers(self, sample_outputs):
+        """The top-20 table moved to top.json (the Top 100 page)."""
         all_papers = {
             "iclr_2025": load_papers(sample_outputs / "iclr_2025"),
         }
         trends = build_trends(all_papers)
-        top = trends["impact"]["top_papers_by_year"]["2025"]
-        assert len(top) <= 20
-        assert top[0]["citation_count"] == 100
-        assert top[0]["venue"] == "ICLR"
-        assert top[0]["conference_id"] == "iclr_2025"
+        assert "top_papers_by_year" not in trends["impact"]
 
     def test_composition_track_breakdown(self, sample_outputs):
         all_papers = {
@@ -278,9 +305,52 @@ class TestBuildAll:
         assert (out_dir / "acl_2025.json").exists()
         assert (out_dir / "authors.json").exists()
         assert (out_dir / "trends.json").exists()
+        assert (out_dir / "top.json").exists()
 
         manifest = json.loads((out_dir / "manifest.json").read_text())
         assert len(manifest["conferences"]) == 2
 
         iclr_data = json.loads((out_dir / "iclr_2025.json").read_text())
         assert len(iclr_data) == 3
+
+    def test_per_conference_json_carries_relative_citations(self, sample_outputs, tmp_path):
+        out_dir = tmp_path / "web_data"
+        build_all(sample_outputs, out_dir)
+        iclr = json.loads((out_dir / "iclr_2025.json").read_text())
+        # One cohort (iclr_2025 has no dates -> 2025-01-15): mean (100+50+10)/3
+        assert [p["relative_citations"] for p in iclr] == [1.88, 0.94, 0.19]
+        acl = json.loads((out_dir / "acl_2025.json").read_text())
+        assert all("relative_citations" not in p for p in acl)
+
+    def test_relative_citations_never_reach_data(self, sample_outputs, tmp_path):
+        """relative_citations is build output only. The download is built in the
+        browser and drops it (web/src/pages/Conference.tsx), so the one place
+        left to guard is data/ itself: the build must not write it back."""
+        sources = sorted(sample_outputs.glob("*/*.jsonl"))
+        assert sources  # the fixture's iclr_2025 and acl_2025 files
+        before = {p: p.read_bytes() for p in sources}
+        build_all(sample_outputs, tmp_path / "web_data")
+        assert {p: p.read_bytes() for p in sources} == before
+        for p in sources:
+            assert all("relative_citations" not in json.loads(line)
+                       for line in p.read_text().splitlines() if line.strip())
+
+    def test_writes_top_json(self, sample_outputs, tmp_path):
+        out_dir = tmp_path / "web_data"
+        build_all(sample_outputs, out_dir)
+        top = json.loads((out_dir / "top.json").read_text())
+        assert top["categories"] == ["ML", "NLP"]
+        assert top["years"] == ["2025"]
+        ranked = [top["papers"][i]["title"] for i in top["lists"]["all"]["all"]["relative"]]
+        assert ranked == ["Paper A", "Paper B", "Paper C"]
+        # acl_2025 is NLP but never enriched: the list exists and is empty
+        assert top["lists"]["2025"]["NLP"]["relative"] == []
+
+    def test_manifest_carries_category(self, sample_outputs, tmp_path):
+        out_dir = tmp_path / "web_data"
+        build_all(sample_outputs, out_dir)
+        manifest = json.loads((out_dir / "manifest.json").read_text())
+        assert {c["id"]: c["category"] for c in manifest["conferences"]} == {
+            "iclr_2025": "ML",
+            "acl_2025": "NLP",
+        }

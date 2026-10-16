@@ -1,0 +1,80 @@
+.metrics-legend {
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Tuck it under the page subtitle, whose bottom margin is sized for content. */
+.page-subtitle + .metrics-legend,
+.author-stats + .metrics-legend {
+  margin-top: -1.25rem;
+}
+
+.metrics-legend summary {
+  width: fit-content;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.metrics-legend summary:hover {
+  color: var(--accent);
+}
+
+.metrics-legend dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+}
+
+/* Each term is drawn the way the row draws it. */
+.metrics-legend dt {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.metrics-legend .legend-citations {
+  font-weight: 700;
+  color: var(--citation-color);
+}
+
+.metrics-legend .legend-relative {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.metrics-legend .legend-influential {
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.metrics-legend dd {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.metrics-legend a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .metrics-legend dl {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+
+  .metrics-legend dt {
+    text-align: left;
+  }
+
+  .metrics-legend dd + dt {
+    margin-top: 0.6rem;
+  }
+}

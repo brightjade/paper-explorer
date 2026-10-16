@@ -2,9 +2,20 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Paper } from "../types";
 import { TrackBadge } from "./TrackBadge";
+import { VENUE_COLORS } from "../pages/trends/constants";
+import { INFLUENTIAL_TOOLTIP, RELATIVE_TOOLTIP, formatRelative } from "../format";
 import "./PaperRow.css";
 
-export function PaperRow({ paper, rank }: { paper: Paper; rank: number }) {
+interface PaperRowProps {
+  paper: Paper;
+  rank: number;
+  /** Shown as a venue chip linking to the conference (Top 100 rows). */
+  conference?: { id: string; venue: string; year: number };
+  /** Which number the list is sorted by, drawn larger. */
+  emphasis?: "citations" | "relative";
+}
+
+export function PaperRow({ paper, rank, conference, emphasis = "citations" }: PaperRowProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -28,15 +39,35 @@ export function PaperRow({ paper, rank }: { paper: Paper; rank: number }) {
             ))}
           </div>
         </div>
-        <TrackBadge track={paper.selection} />
+        <div className="paper-badges">
+          {conference && (
+            <Link
+              to={`/conference/${conference.id}`}
+              className="venue-chip"
+              style={{ "--venue-color": VENUE_COLORS[conference.venue] ?? "#6b7280" } as React.CSSProperties}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {conference.venue} {conference.year}
+            </Link>
+          )}
+          <TrackBadge track={paper.selection} />
+        </div>
         <div className="paper-citations-col">
-          <span className="paper-citations">
+          <span className={`paper-citations ${emphasis === "relative" ? "deemphasized" : ""}`}>
             {paper.citation_count != null
               ? paper.citation_count.toLocaleString()
               : "\u2014"}
           </span>
+          {paper.relative_citations != null && (
+            <span
+              className={`paper-relative ${emphasis === "relative" ? "emphasized" : ""}`}
+              title={RELATIVE_TOOLTIP}
+            >
+              {formatRelative(paper.relative_citations)}
+            </span>
+          )}
           {paper.influential_citation_count != null && paper.influential_citation_count > 0 && (
-            <span className="paper-influential">
+            <span className="paper-influential" title={INFLUENTIAL_TOOLTIP}>
               {paper.influential_citation_count} influential
             </span>
           )}

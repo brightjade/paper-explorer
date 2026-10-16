@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthors } from "../hooks/useAuthors";
 import { useManifest } from "../hooks/useManifest";
+import { MetricsLegend } from "../components/MetricsLegend";
 import { TrackBadge } from "../components/TrackBadge";
 import type { Paper } from "../types";
+import { RELATIVE_TOOLTIP, formatRelative } from "../format";
 import "./Author.css";
 
 export function Author() {
@@ -71,6 +73,7 @@ export function Author() {
           <span className="stat-label">venues</span>
         </div>
       </div>
+      <MetricsLegend influential={false} />
 
       {loadingConfs && <div className="loading">Loading papers...</div>}
 
@@ -99,6 +102,11 @@ export function Author() {
                     {p.citation_count != null
                       ? p.citation_count.toLocaleString()
                       : "\u2014"}
+                    {p.relative_citations != null && (
+                      <span className="author-paper-relative" title={RELATIVE_TOOLTIP}>
+                        {formatRelative(p.relative_citations)}
+                      </span>
+                    )}
                   </span>
                 </div>
               ))}

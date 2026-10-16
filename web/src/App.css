@@ -123,6 +123,23 @@ a:hover {
   color: var(--text-primary);
 }
 
+/* On a phone the nav no longer fits beside the title: it moves under it. */
+@media (max-width: 600px) {
+  .app-header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .app-header nav {
+    flex-wrap: wrap;
+    gap: 0.9rem;
+  }
+
+  .app-header nav a {
+    white-space: nowrap;
+  }
+}
+
 .loading {
   text-align: center;
   padding: 4rem;
