@@ -29,21 +29,60 @@
   color: #fff;
 }
 
-.year-section {
-  margin-bottom: 2.5rem;
+.venue-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
 }
 
-.year-heading {
-  font-size: 1.1rem;
-  color: var(--text-muted);
-  font-weight: 600;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
+.venue-table {
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.venue-table th,
+.venue-table td {
+  padding: 0.4rem 0.6rem;
+  text-align: right;
   border-bottom: 1px solid var(--border);
 }
 
-.conference-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1rem;
+.venue-table thead th {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.venue-table .venue-col {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  text-align: left;
+  background: var(--bg-card);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.venue-table .category-row th {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--bg-secondary);
+}
+
+.venue-table .category-row td {
+  background: var(--bg-secondary);
+}
+
+.venue-table td a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.venue-table td a:hover {
+  text-decoration: underline;
 }

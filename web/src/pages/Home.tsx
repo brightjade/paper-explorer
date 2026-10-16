@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useManifest } from "../hooks/useManifest";
-import { ConferenceCard } from "../components/ConferenceCard";
+import type { ConferenceMeta } from "../types";
 import "./Home.css";
 
 type Category = "ML" | "NLP" | "CV" | "Robotics" | "SE" | "Others";
@@ -60,15 +61,22 @@ export function Home() {
     return manifest.filter((c) => activeCategories.has(getCategory(c.venue)));
   }, [manifest, activeCategories]);
 
+  const table = useMemo(() => {
+    const years = [...new Set(filtered.map((c) => c.year))].sort((a, b) => b - a);
+    const cells = new Map<string, ConferenceMeta>();
+    for (const c of filtered) cells.set(`${c.venue}|${c.year}`, c);
+    const order = Object.keys(VENUE_CATEGORIES);
+    const rank = (v: string) => (order.includes(v) ? order.indexOf(v) : order.length);
+    const groups = ALL_CATEGORIES.map((cat) => {
+      const venues = [...new Set(filtered.filter((c) => getCategory(c.venue) === cat).map((c) => c.venue))]
+        .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+      return [cat, venues] as const;
+    }).filter(([, venues]) => venues.length > 0);
+    return { years, cells, groups };
+  }, [filtered]);
+
   if (error) return <div className="loading">Error: {error}</div>;
   if (!manifest) return <div className="loading">Loading conferences...</div>;
-
-  const byYear = new Map<number, typeof filtered>();
-  for (const conf of filtered) {
-    if (!byYear.has(conf.year)) byYear.set(conf.year, []);
-    byYear.get(conf.year)!.push(conf);
-  }
-  const years = [...byYear.keys()].sort((a, b) => b - a);
 
   return (
     <div className="home">
@@ -88,16 +96,50 @@ export function Home() {
           </button>
         ))}
       </div>
-      {years.map((year) => (
-        <section key={year} className="year-section">
-          <h3 className="year-heading">{year}</h3>
-          <div className="conference-grid">
-            {byYear.get(year)!.map((conf) => (
-              <ConferenceCard key={conf.id} conf={conf} />
-            ))}
-          </div>
-        </section>
-      ))}
+      <div className="venue-table-wrap">
+        <table className="venue-table">
+          <thead>
+            <tr>
+              <th className="venue-col" scope="col">Conference</th>
+              {table.years.map((y) => (
+                <th key={y} scope="col">{y}</th>
+              ))}
+            </tr>
+          </thead>
+          {table.groups.map(([cat, venues]) => (
+            <tbody key={cat}>
+              <tr className="category-row">
+                <th className="venue-col" scope="rowgroup">{cat}</th>
+                <td colSpan={table.years.length} />
+              </tr>
+              {venues.map((venue) => (
+                <tr key={venue}>
+                  <th className="venue-col" scope="row">{venue}</th>
+                  {table.years.map((y) => {
+                    const conf = table.cells.get(`${venue}|${y}`);
+                    return (
+                      <td key={y}>
+                        {conf && (
+                          <Link
+                            to={`/conference/${conf.id}`}
+                            title={`${venue} ${y}: ${conf.paper_count.toLocaleString()} papers`}
+                          >
+                            {formatCount(conf.paper_count)}
+                          </Link>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          ))}
+        </table>
+      </div>
     </div>
   );
+}
+
+function formatCount(n: number): string {
+  return n < 1000 ? String(n) : `${(n / 1000).toFixed(1)}k`;
 }
