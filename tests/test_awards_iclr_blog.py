@@ -195,3 +195,17 @@ class TestTestOfTime:
                             MagicMock(return_value=MagicMock(status_code=200, json=MagicMock(return_value=posts))))
         with pytest.raises(ValueError):
             iclr_blog.iclr_test_of_time("iclr_2027", 2027, [])
+
+    def test_an_openreview_forum_link_is_a_paper_with_its_forum_id(self):
+        out = parse_tot_post('<h2>Test of Time Award</h2>'
+                             '<p><a href="https://openreview.net/forum?id=abc123"><em>Some 2017 Paper</em></a></p>', "u")
+        assert [(a.title, a.forum_id, a.url) for a in out] == [
+            ("Some 2017 Paper", "abc123", "https://openreview.net/forum?id=abc123")]
+
+    def test_the_first_matching_post_that_names_a_paper_wins(self, monkeypatch):
+        monkeypatch.setattr(iclr_blog, "_cache", {})
+        posts = [_dated("Test of Time nominations", "<p>Nominate now.</p>", "2027-05-01T00:00:00"),
+                 _dated("ICLR 2027 Test of Time Award", TOT_2026, "2027-04-01T00:00:00")]
+        monkeypatch.setattr(iclr_blog.fetch, "get",
+                            MagicMock(return_value=MagicMock(status_code=200, json=MagicMock(return_value=posts))))
+        assert len(iclr_blog.iclr_test_of_time("iclr_2027", 2027, [])) == 2

@@ -153,6 +153,10 @@ def _merge_and_write(conf_id: str, data_dir: Path, results: dict[str, list[Award
     previous = read_awards(path) or []
     papers = _papers(data_dir, conf_id)
     replaced = manual.replaced_titles(conf_id)
+    for kind, key in sorted(replaced):
+        if not any((a.kind, title_key(a.title)) == (kind, key)
+                   for name, got in results.items() if name != "manual" for a in got or []):
+            logger.warning("%s: manual 'replaces' %r (%s) matched no entry from any other source", conf_id, key, kind)
     kept = [got if name == "manual" else [a for a in got if (a.kind, title_key(a.title)) not in replaced]
             for name, got in results.items() if got]
     merged = merge([_retitle(got, papers) for got in kept])

@@ -1,8 +1,8 @@
 """Scraper for USENIX Security conference accepted papers.
 
 USENIX publishes accepted papers on their Drupal-based website. The
-technical-sessions page lists every paper as a `.node-paper` node -- an
-`article` since 2017, a `div` teaser in 2013-16 -- with the title in `h2 a` and
+technical-sessions page lists every paper as an `article.node-paper` (2017 on) or a
+`div.node-paper.node-teaser` (2013-16) -- with the title in `h2 a` and
 a people-text block whose first <p> names the authors: names as plain text,
 each group's affiliation in an <em>. Award notes, which the awards collector
 reads (`ppr/awards/usenix_notes.py`), are later <p>s (2019 on) or a <strong>
@@ -66,7 +66,7 @@ def parse_sessions(markup: str | bytes) -> list[dict]:
     """One {"title", "link", "authors", "notes"} per paper node on the page."""
     soup = BeautifulSoup(markup, "html.parser")
     rows = []
-    for node in soup.select(".node-paper"):
+    for node in soup.select("article.node-paper, div.node-paper.node-teaser"):
         link_tag = node.select_one("h2 a")
         title = link_tag.get_text(strip=True) if link_tag else ""
         if not title:

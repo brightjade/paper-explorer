@@ -82,13 +82,15 @@ def iclr_blog(conf_id: str, year: int, earlier: list[Award]) -> list[Award]:
     return []
 
 
-_ARXIV = re.compile(r"^https?://arxiv\.org/")
+_ARXIV = re.compile(r"^https?://(?:arxiv\.org/|openreview\.net/forum\?)")
 
 
 def _clean(text: str) -> str:
     return " ".join(text.split())
 
 
+# Labels are composed, not printed verbatim: a bare "Runner Up" heading would classify as
+# `honorable`, while "Test of Time Runner Up" keeps the prize a test-of-time kind (controller ruling).
 def _tot_label(heading) -> str:
     text = _clean(heading.get_text(" ")) if heading else ""
     if not text or re.fullmatch(r"test of time(?: award)?", text, re.I):
@@ -118,17 +120,22 @@ def parse_tot_post(content: str, url: str) -> list[Award]:
         if not title:
             continue
         label = _tot_label(a.find_previous(["h2", "h3"]))
+        forum_id = (parse_qs(urlparse(a["href"]).query).get("id", [""])[0]
+                    if a["href"].startswith(FORUM_PREFIX) else "")
         awards.append(Award(label=label, kind=classify(label, "iclr"), title=title.rstrip("."),
-                            via="iclr_tot", source=url, url=a["href"]))
+                            via="iclr_tot", source=url, url=a["href"], forum_id=forum_id))
     return awards
 
 
 def iclr_test_of_time(conf_id: str, year: int, earlier: list[Award]) -> list[Award]:
+    seen = None
     for post in _posts(TOT_SEARCH_URL):
         title = html_lib.unescape(post["title"]["rendered"])
         if re.search(r"test of time", title, re.I) and post.get("date", "").startswith(str(year)):
+            seen = seen or post["link"]
             awards = parse_tot_post(post["content"]["rendered"], post["link"])
-            if not awards:
-                raise ValueError(f"{post['link']}: a test-of-time post names no paper -- did the markup change?")
-            return awards
+            if awards:
+                return awards
+    if seen:
+        raise ValueError(f"{seen}: a test-of-time post names no paper -- did the markup change?")
     return []

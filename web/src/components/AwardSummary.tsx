@@ -42,7 +42,7 @@ export function AwardSummary({
               {t.url && (
                 <>
                   {" "}
-                  <a href={t.url} target="_blank" rel="noopener noreferrer" aria-label="Paper page">
+                  <a href={t.url} target="_blank" rel="noopener noreferrer" aria-label={`Paper page: ${t.title}`}>
                     ↗
                   </a>
                 </>

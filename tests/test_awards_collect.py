@@ -266,3 +266,16 @@ class TestManualFirst:
             ("honorable", "Pose-NDF: Modeling Poses", "manual"),
         ]
         assert (out.matched, out.unmatched) == (1, ["Pose-NDF: Modelling Poses"])
+
+    def test_a_replaces_that_drops_nothing_is_logged(self, monkeypatch, tmp_path, caplog):
+        conf_dir = tmp_path / "demo_2025"
+        conf_dir.mkdir()
+        (conf_dir / "papers.jsonl").write_text(json.dumps({"title": "Won"}) + "\n", encoding="utf-8")
+        _manual_file(monkeypatch, tmp_path, 'source: https://m.test/\nretrieved: 2026-10-17\nawards:\n'
+                                            '  - {label: "Honorable Mention", title: "Won", replaces: "Typo Title"}\n')
+        monkeypatch.setitem(SOURCES_BY_PREFIX, "demo", [
+            ("manual", manual_module.manual), ("b", _src([_a("Best Paper", "award", "Other", "b")]))])
+        with caplog.at_level("WARNING", logger="ppr.awards.collect"):
+            out = collect_conference("demo_2025", tmp_path)
+        assert out.status == "collected"
+        assert any("demo_2025" in r.message and "typotitle" in r.message for r in caplog.records)
