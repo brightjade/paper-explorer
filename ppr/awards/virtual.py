@@ -27,8 +27,9 @@ HOSTS = {
 }
 
 _EVENT_HREF = re.compile(r"^/virtual/\d{4}/")
-# NeurIPS 2023 titles its test-of-time card "Test of Time Award Talk:<paper>".
-_TALK_PREFIX = re.compile(r"^test of time award talk:\s*", re.I)
+# Test-of-time cards prefix the paper's title: "Test of Time Award Talk:<paper>"
+# (NeurIPS 2023), "Test of Time: <paper>" (NeurIPS 2019, ICML 2020).
+_TOT_PREFIX = re.compile(r"^test of time(?: award)?(?: talk)?:\s*", re.I)
 # NeurIPS 2025 titles it just "Test of Time Award"; the paper is a markdown link in the abstract.
 _MD_LINK = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)\)")
 _TOT_SUFFIX = re.compile(r"\s*\(test of time award\)\s*$", re.I)
@@ -39,14 +40,16 @@ def _text(el) -> str:
     return " ".join(el.get_text(" ").split())
 
 
-def _test_of_time(card, title: str, href: str, page_url: str) -> tuple[str, str]:
-    """The paper a test-of-time card is for, and the link to show with it."""
-    title = _TALK_PREFIX.sub("", title)
+def _test_of_time(card, title: str, href: str, page_url: str) -> tuple[str, str] | None:
+    """The paper a test-of-time card is for and the link to show with it, or None
+    when the card names no paper (ICML 2022 names it in prose; a manual file has it)."""
+    title = _TOT_PREFIX.sub("", title)
     if title.lower() in _GENERIC_TOT:
         details = card.find("details")
         m = _MD_LINK.search(details.get_text(" ")) if details else None
-        if m:
-            return _TOT_SUFFIX.sub("", " ".join(m.group(1).split())), m.group(2)
+        if m is None:
+            return None
+        return _TOT_SUFFIX.sub("", " ".join(m.group(1).split())), m.group(2)
     return title, (urljoin(page_url, href) if href else "")
 
 
@@ -70,7 +73,10 @@ def parse_awards_detail(html: str, url: str, prefix: str) -> list[Award]:
                 continue
             title, extra = _text(link), ""
             if kind == "test_of_time":
-                title, extra = _test_of_time(card, title, link.get("href", ""), url)
+                resolved = _test_of_time(card, title, link.get("href", ""), url)
+                if resolved is None:
+                    continue
+                title, extra = resolved
             if title:
                 awards.append(Award(label=label, kind=kind, title=title, via="virtual",
                                     source=url, url=extra))

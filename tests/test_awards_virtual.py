@@ -99,6 +99,25 @@ class TestParseAwardsDetail:
         assert a.title == "Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks"
         assert a.url == "https://papers.neurips.cc/paper_files/paper/2015/hash/14bf-Abstract.html"
 
+    @pytest.mark.parametrize("raw", [
+        "Test of Time: Dual Averaging Method for Regularized Stochastic Learning",        # NeurIPS 2019
+        "Test of Time Award: Dual Averaging Method for Regularized Stochastic Learning",
+        "Test of Time Award Talk:Dual Averaging Method for Regularized Stochastic Learning",
+    ])
+    def test_every_test_of_time_prefix_is_dropped(self, raw):
+        html = _page(_row("Test of Time Award", _classic(15950, raw, path="invited-talk")))
+        [a] = parse_awards_detail(html, "https://neurips.cc/virtual/2019/awards_detail", "neurips")
+        assert a.title == "Dual Averaging Method for Regularized Stochastic Learning"
+
+    def test_a_generic_test_of_time_card_without_a_paper_link_is_skipped(self):
+        # ICML 2022: the card is titled "Test of Time Award" and names the paper in prose only.
+        abstract = "The award goes to Poisoning Attacks Against Support Vector Machines by Biggio et al."
+        html = _page(_row("Test of Time Award", _classic(20803, "Test of Time Award", path="award",
+                                                          abstract=abstract)),
+                     _row("Outstanding Paper", _classic(1, "P")))
+        out = parse_awards_detail(html, "https://icml.cc/virtual/2022/awards_detail", "icml")
+        assert [(a.kind, a.title) for a in out] == [("award", "P")]
+
 
 class TestParseAwardCandidates:
     def test_reads_every_event_card(self):
