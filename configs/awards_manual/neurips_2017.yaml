@@ -1,0 +1,8 @@
+# NIPS 2017 Awards page (static Drupal page): 3 best papers and the test of time award (a NIPS 2007 paper, plain text with no link); the demonstration and reviewer awards are left out
+source: https://neurips.cc/Conferences/2017/Awards
+retrieved: 2026-10-16
+awards:
+  - {label: "Best paper awards", title: "Safe and Nested Subgame Solving for Imperfect-Information Games"}
+  - {label: "Best paper awards", title: "Variance-based Regularization with Convex Objectives"}
+  - {label: "Best paper awards", title: "A Linear-Time Kernel Goodness-of-Fit Test"}
+  - {label: "Test of time award", title: "Random Features for Large-Scale Kernel Machines"}

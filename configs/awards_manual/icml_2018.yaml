@@ -1,0 +1,10 @@
+# ICML 2018 Awards page (static page): 2 Best Paper Awards, 3 Best Paper Runner Up Awards, and the Test of Time Award (an ICML 2008 paper)
+source: https://icml.cc/Conferences/2018/Awards
+retrieved: 2026-10-16
+awards:
+  - {label: "Best Paper Awards", title: "Obfuscated Gradients Give a False Sense of Security: Circumventing Defenses to Adversarial Examples"}
+  - {label: "Best Paper Awards", title: "Delayed Impact of Fair Machine Learning"}
+  - {label: "Best Paper Runner Up Awards", title: "The Mechanics of n-Player Differentiable Games"}
+  - {label: "Best Paper Runner Up Awards", title: "Near Optimal Frequent Directions for Sketching Dense and Sparse Matrices"}
+  - {label: "Best Paper Runner Up Awards", title: "Fairness Without Demographics in Repeated Loss Minimization"}
+  - {label: "Test of Time Award", title: "A Unified Architecture for Natural Language Processing: Deep Neural Networks with Multitask Learning"}

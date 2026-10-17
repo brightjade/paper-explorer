@@ -1,0 +1,8 @@
+# NeurIPS 2018 Awards page (static Drupal page): 4 Best Papers; the page lists no test of time award, and the demonstration awards are left out
+source: https://neurips.cc/Conferences/2018/Awards
+retrieved: 2026-10-16
+awards:
+  - {label: "Best Papers", title: "Non-delusional Q-learning and Value-iteration"}
+  - {label: "Best Papers", title: "Optimal Algorithms for Non-Smooth Distributed Optimization in Networks"}
+  - {label: "Best Papers", title: "Nearly Tight Sample Complexity Bounds for Learning Mixtures of Gaussians via Sample Compression Schemes"}
+  - {label: "Best Papers", title: "Neural Ordinary Differential Equations"}

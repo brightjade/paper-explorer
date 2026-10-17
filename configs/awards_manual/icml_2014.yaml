@@ -1,0 +1,8 @@
+# ICML 2014 Awards page (sponsored by Baidu): Best Paper, Runner Up for Best Paper, Application Paper, and the 10 Year Paper (an ICML 2004 paper, no link)
+source: https://icml.cc/Conferences/2014/index/article/26.htm
+retrieved: 2026-10-16
+awards:
+  - {label: "Best Paper", title: "Understanding the Limiting Factors of Topic Modeling via Posterior Contraction Analysis"}
+  - {label: "Runner Up for Best Paper", title: "Discrete Chebyshev Classifiers"}
+  - {label: "Application Paper", title: "Compositional Morphology for Word Representations and Language Modelling"}
+  - {label: "10 Year Paper", title: "Multiple kernel learning, conic duality, and the SMO algorithm"}

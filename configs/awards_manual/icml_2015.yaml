@@ -1,0 +1,7 @@
+# ICML 2015 Awards section of the conference site: 2 Best Paper Awards and the Test of Time Award (an ICML 2005 paper)
+source: https://icml.cc/2015/index.html%3Fp=51.html
+retrieved: 2026-10-16
+awards:
+  - {label: "Best Paper Awards", title: "Optimal and Adaptive Algorithms for Online Boosting"}
+  - {label: "Best Paper Awards", title: "A Nearly-Linear Time Framework for Graph-Structured Sparsity"}
+  - {label: "Test of Time Award", title: "Learning to Rank Using Gradient Descent", url: "https://icml.cc/2015/wp-content/uploads/2015/06/icml_ranking.pdf"}

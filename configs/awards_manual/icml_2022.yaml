@@ -1,0 +1,7 @@
+# ICML 2022 awards_detail, the body of the "Test of Time Award" card (the parser reads only the card's bare title): the test of time paper and 2 honorable mentions
+source: https://icml.cc/virtual/2022/awards_detail
+retrieved: 2026-10-16
+awards:
+  - {label: "Test of Time Award", title: "Poisoning Attacks Against Support Vector Machines", url: "https://icml.cc/virtual/2022/award/20803"}
+  - {label: "Test of Time Honorable Mention", title: "Building high-level features using large scale unsupervised learning", url: "https://icml.cc/virtual/2022/award/20803"}
+  - {label: "Test of Time Honorable Mention", title: "On causal and anticausal learning", url: "https://icml.cc/virtual/2022/award/20803"}

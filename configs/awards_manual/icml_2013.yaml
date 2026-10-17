@@ -1,0 +1,10 @@
+# ICML 2013 Awards page (free prose with author e-mails and submission numbers before the titles, dropped here): best paper shared by 2, best paper runner up shared by 2, two classic paper prizes for ICML 2003 papers
+source: https://icml.cc/Conferences/2013/index.html%3Fpage_id=21.html
+retrieved: 2026-10-16
+awards:
+  - {label: "Best paper", title: "Fast Semidifferential-based Submodular Function Optimization"}
+  - {label: "Best paper", title: "Vanishing Component Analysis"}
+  - {label: "Best paper runner up", title: "Smooth Sparse Coding via Marginal Regression for Learning Sparse Representations"}
+  - {label: "Best paper runner up", title: "Sparse coding for multitask and transfer learning"}
+  - {label: "Classic Paper Prize", title: "Semi-Supervised Learning Using Gaussian Fields and Harmonic Functions"}
+  - {label: "Classic Paper Prize", title: "Online Convex Programming and Generalized Infinitesimal Gradient Ascent"}

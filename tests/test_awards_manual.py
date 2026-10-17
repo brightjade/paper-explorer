@@ -8,6 +8,9 @@ from ppr.matching import title_key
 EXPECTED = {
     "wacv_2023": 17, "fse_2023": 15, "fse_2026": 10, "cvpr_2023": 12,
     "usenix_security_2025": 25, "usenix_security_2026": 22, "neurips_2024": 2,
+    "neurips_2013": 4, "neurips_2014": 2, "neurips_2015": 2, "neurips_2016": 2, "neurips_2017": 4,
+    "neurips_2018": 4, "icml_2013": 6, "icml_2014": 4, "icml_2015": 3, "icml_2017": 7, "icml_2018": 6,
+    "icml_2022": 3, "iclr_2021": 8,
 }
 
 

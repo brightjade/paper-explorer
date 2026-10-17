@@ -1,0 +1,8 @@
+# NIPS 2013 Awards page (static Drupal page): 3 Outstanding Paper Awards and the NIPS Classic Paper Award (a 2000 paper); the reviewer awards are left out
+source: https://neurips.cc/Conferences/2013/Awards
+retrieved: 2026-10-16
+awards:
+  - {label: "Outstanding Paper Awards", title: "A memory frontier for complex synapses"}
+  - {label: "Outstanding Paper Awards", title: "Submodular Optimization with Submodular Cover and Submodular Knapsack Constraints"}
+  - {label: "Outstanding Paper Awards", title: "Scalable Influence Estimation in Continuous-Time Diffusion Networks"}
+  - {label: "NIPS Classic Paper Award", title: "Algorithms for non-negative matrix factorization", url: "http://papers.nips.cc/paper/1861-algorithms-for-non-negative-matrix-factorization"}

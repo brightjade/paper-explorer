@@ -1,0 +1,11 @@
+# ICML 2017 Awards page (static page): one "Honorable Mentions" heading follows the Test of Time Award and another follows the Best Paper Award, so the position decides which kind each is
+source: https://icml.cc/Conferences/2017/Awards
+retrieved: 2026-10-16
+awards:
+  - {label: "Test of Time Award", title: "Combining Online and Offline Knowledge in UCT"}
+  - {label: "Test of Time Honorable Mention", title: "Pegasos: Primal estimated sub-gradient solver for SVM"}
+  - {label: "Test of Time Honorable Mention", title: "A Bound on the Label Complexity of Agnostic Active Learning"}
+  - {label: "Best Paper Award", title: "Understanding Black-box Predictions via Influence Functions"}
+  - {label: "Best Paper Honorable Mention", title: "Lost Relatives of the Gumbel Trick"}
+  - {label: "Best Paper Honorable Mention", title: "Modular Multitask Reinforcement Learning with Policy Sketches"}
+  - {label: "Best Paper Honorable Mention", title: "A Unified Maximum Likelihood Approach for Estimating Symmetric Properties of Discrete Distributions"}

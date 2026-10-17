@@ -1,0 +1,6 @@
+# NIPS 2014 Awards page (static Drupal page): 2 Outstanding Paper Awards; the reviewer awards are left out
+source: https://neurips.cc/Conferences/2014/Awards
+retrieved: 2026-10-16
+awards:
+  - {label: "Outstanding Paper Award", title: "Asymmetric LSH (ALSH) for Sublinear Time Maximum Inner Product Search (MIPS)"}
+  - {label: "Outstanding Paper Award", title: "A* Sampling"}

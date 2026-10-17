@@ -1,0 +1,6 @@
+# NIPS 2016 Awards page (static Drupal page): best paper and best student paper; the demonstration award and the reviewer awards are left out
+source: https://neurips.cc/Conferences/2016/Awards
+retrieved: 2026-10-16
+awards:
+  - {label: "Best paper award", title: "Value Iteration Networks"}
+  - {label: "Best student paper award", title: "Matrix Completion has No Spurious Local Minimum"}

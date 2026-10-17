@@ -1,0 +1,12 @@
+# ICLR 2021 Fact Sheet (press PDF): its "Paper Award Winners" list is the 8 Outstanding Paper Awards. Titles are the dataset's (the PDF shortens one: "Fully-Connected Layers with Quaternions")
+source: https://iclr.cc/media/Press/ICLR_2021_Fact_Sheet.pdf
+retrieved: 2026-10-16
+awards:
+  - {label: "Outstanding Paper Award", title: "Beyond Fully-Connected Layers with Quaternions: Parameterization of Hypercomplex Multiplications with $1/n$ Parameters", forum_id: "rcQdycl0zyk"}
+  - {label: "Outstanding Paper Award", title: "Complex Query Answering with Neural Link Predictors", forum_id: "Mos9F9kDwkz"}
+  - {label: "Outstanding Paper Award", title: "EigenGame: PCA as a Nash Equilibrium", forum_id: "NzTU59SYbNq"}
+  - {label: "Outstanding Paper Award", title: "Learning Mesh-Based Simulation with Graph Networks", forum_id: "roNqYL0_XP"}
+  - {label: "Outstanding Paper Award", title: "Neural Synthesis of Binaural Speech From Mono Audio", forum_id: "uAX8q61EVRu"}
+  - {label: "Outstanding Paper Award", title: "Optimal Rates for Averaged Stochastic Gradient Descent under Neural Tangent Kernel Regime", forum_id: "PULSD5qI2N1"}
+  - {label: "Outstanding Paper Award", title: "Rethinking Architecture Selection in Differentiable NAS", forum_id: "PKubaeJkw3"}
+  - {label: "Outstanding Paper Award", title: "Score-Based Generative Modeling through Stochastic Differential Equations", forum_id: "PxTIG12RRHS"}
