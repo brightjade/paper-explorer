@@ -1,8 +1,10 @@
-# ICLR 2018 best papers: no official page found; two independent write-ups (Synced, Analytics Vidhya) both name these three
+# ICLR 2018 best papers: no official page found. Synced's report names all three; each paper has its own independent second source from an author's institution (Adam: Google Research blog "Google at ICLR 2018"; Spherical CNNs: Qualcomm blog; Continuous Adaptation: Pieter Abbeel's publication list). Analytics Vidhya is not used: it rewrites the Synced report.
 source: https://syncedreview.com/2018/04/16/iclr-2018s-best-papers-variant-adam-spherical-cnns-and-meta-learning/
 official: false
 also:
-  - https://www.analyticsvidhya.com/blog/2018/05/best-iclr-2018-leading-machine-learning-deep-learning-global-conference/
+  - https://research.google/blog/google-at-iclr-2018/
+  - https://www.qualcomm.com/news/onq/2018/04/exploring-whats-possible-when-machine-sight-evolves
+  - https://people.eecs.berkeley.edu/~pabbeel/publications-learning-to-learn.html
 retrieved: 2026-10-17
 awards:
   - {label: "Best Paper Award", title: "On the Convergence of Adam and Beyond", forum_id: "ryQu7f-RZ"}
