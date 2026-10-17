@@ -6,6 +6,11 @@ its robots.txt asks for Crawl-Delay 20) lists winners per conference under
 colons of their own ("Mystique: Automated ..."); author lists never do, so the
 split is at the first ": ". The list is curated and lags by months, so it runs
 only when no earlier source found winners.
+
+Before 2015 an entry reads "Authors, Title" instead ("A, B, and C, Title:
+Subtitle"): a section is in that form when one of its entries has no ": " at
+all, and its titles start after the first ", " that follows the authors'
+"and <name>". Every 2013-2014 entry has one (checked against the 2026-10-15 page).
 """
 
 import re
@@ -19,6 +24,14 @@ from ppr.awards.model import Award
 SIGSOFT_URL = "https://www2.sigsoft.org/awards/distinguishedpaper/"
 LABEL = "ACM SIGSOFT Distinguished Paper Award"
 _VENUE = re.compile(r"\((?:ESEC/)?(ICSE|FSE|ASE|ISSTA) (\d{4})\)")
+_OLD_FORM = re.compile(r"^.*?\band\s+[^,]+,\s+(.+)$")
+
+
+def _titles(items: list[str]) -> list[str]:
+    if any(": " not in item for item in items):
+        return [m.group(1) for item in items if (m := _OLD_FORM.match(item))]
+    return [title for item in items if (title := item.partition(": ")[2])]
+
 
 _cache: dict[str, dict[str, list[Award]]] = {}
 
@@ -38,11 +51,10 @@ def parse_sigsoft(html: str, url: str) -> dict[str, list[Award]]:
         if ul is None or ul.find_previous_sibling("h3") is not h3:
             continue
         conf_id = f"{m.group(1).lower()}_{m.group(2)}"
-        for li in ul.find_all("li", recursive=False):
-            _, sep, title = " ".join(li.get_text(" ").split()).partition(": ")
-            if sep and title:
-                out.setdefault(conf_id, []).append(
-                    Award(label=LABEL, kind=kind, title=title, via="sigsoft", source=url))
+        items = [" ".join(li.get_text(" ").split()) for li in ul.find_all("li", recursive=False)]
+        for title in _titles(items):
+            out.setdefault(conf_id, []).append(
+                Award(label=LABEL, kind=kind, title=title, via="sigsoft", source=url))
     return out
 
 

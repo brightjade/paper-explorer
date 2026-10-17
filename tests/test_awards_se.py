@@ -100,3 +100,43 @@ class TestSigsoft:
         assert len(sigsoft.sigsoft_backfill("fse_2025", 2025, artifact_only)) == 2
         assert sigsoft.sigsoft_backfill("issta_2026", 2026, []) == []
         get.assert_called_once_with(SIGSOFT_URL)
+
+
+OLD_FORM_PAGE = (
+    '<html><body><h2 id="winners">Winners</h2>'
+    '<h3>International Conference on Software Engineering (ICSE 2015)</h3><ul>'
+    '<li>Janet Siegmund, Norbert Siegmund, and Sven Apel: Views on Internal and External Validity</li></ul>'
+    '<h3>Foundations of Software Engineering (FSE 2014)</h3><ul>'
+    '<li>Klaus-Benedikt Schultis, Christoph Elsner, and Daniel Lohmann, Architecture Challenges for Internal '
+    'Software Ecosystems: A Large-Scale Industry Case Study</li>'
+    '<li>Annie T.T. Ying and Martin P. Robillard, Selection and Presentation Practices for Code Example '
+    'Summarization</li>'
+    '<li>Mingxing Zhang, Yongwei Wu, and Weimin Zheng, AI: A Lightweight System for Tolerating Concurrency '
+    'Bugs</li></ul>'
+    '<h3>International Conference on Software Engineering (ICSE 2014)</h3><ul>'
+    '<li>Emerson Murphy-Hill, Thomas Zimmermann, and Nachiappan Nagappan, Cowboys, Ankle Sprains, and Keepers '
+    'of Quality: How is Video Game Development Different from Software Development?</li>'
+    '<li>Jonathan Bell and Gail Kaiser, Unit Test Virtualization with VMVM</li></ul>'
+    '<h3>Foundations of Software Engineering (FSE 2013)</h3><ul>'
+    '<li>No distinguished paper awards were given.</li></ul>'
+    '</body></html>'
+)
+
+
+class TestSigsoftOldForm:
+    def test_before_2015_the_title_follows_the_last_author(self):
+        out = parse_sigsoft(OLD_FORM_PAGE, SIGSOFT_URL)
+        assert [a.title for a in out["fse_2014"]] == [
+            "Architecture Challenges for Internal Software Ecosystems: A Large-Scale Industry Case Study",
+            "Selection and Presentation Practices for Code Example Summarization",
+            "AI: A Lightweight System for Tolerating Concurrency Bugs",
+        ]
+        assert [a.title for a in out["icse_2014"]] == [
+            "Cowboys, Ankle Sprains, and Keepers of Quality: How is Video Game Development Different from "
+            "Software Development?",
+            "Unit Test Virtualization with VMVM"]
+
+    def test_the_new_form_is_unchanged_and_a_no_award_note_is_nothing(self):
+        out = parse_sigsoft(OLD_FORM_PAGE, SIGSOFT_URL)
+        assert [a.title for a in out["icse_2015"]] == ["Views on Internal and External Validity"]
+        assert "fse_2013" not in out
