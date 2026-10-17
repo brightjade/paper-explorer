@@ -268,6 +268,16 @@ class TestCleaning:
     def test_title_entities_and_trailing_period(self):
         assert clean_title("Bugs &amp; Fixes.") == "Bugs & Fixes"
 
+    @pytest.mark.parametrize("raw,clean", [
+        ("Copy and Paste Redeemed (T).", "Copy and Paste Redeemed"),
+        ("GRT: Program-Analysis-Guided Random Testing (T).", "GRT: Program-Analysis-Guided Random Testing"),
+        ("Tracking Load-time Configuration Options (N).", "Tracking Load-time Configuration Options"),
+        ("Sorting in O(N).", "Sorting in O(N)"),          # not a track marker: no space before it
+        ("Learning (T) Models.", "Learning (T) Models"),   # only at the end
+    ])
+    def test_clean_title_drops_ase_2015_track_markers(self, raw, clean):
+        assert clean_title(raw) == clean
+
 
 class TestPacing:
     def test_min_interval_is_the_endpoint_crawl_delay(self):

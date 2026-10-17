@@ -164,10 +164,16 @@ def clean_author(name: str) -> str:
     return re.sub(r"\s+\d{4}$", "", name)
 
 
+# ASE 2015 suffixes each title with its track, " (T)" technical or " (N)" new
+# ideas; no other venue-year in the dataset does (checked 2026-10-17).
+_TRACK_MARKER = re.compile(r"\s+\([TN]\)$")
+
+
 def clean_title(title: str) -> str:
-    """Unescape entities and drop the trailing period DBLP puts on every title."""
+    """Unescape entities, drop the trailing period DBLP puts on every title, and ASE 2015's track marker."""
     title = html.unescape(title)
-    return title[:-1] if title.endswith(".") else title
+    title = title[:-1] if title.endswith(".") else title
+    return _TRACK_MARKER.sub("", title)
 
 
 def _pick_link(links: set[str]) -> str:
