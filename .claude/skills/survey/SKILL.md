@@ -24,7 +24,7 @@ Conference IDs follow the pattern `<venue>_<year>` (e.g., `iclr_2025`, `emnlp_20
 
 | Category | Venues |
 |----------|--------|
-| ML | ICLR, NeurIPS, ICML, AAAI, IJCAI |
+| ML | ICLR, NeurIPS, ICML, TMLR, AAAI, IJCAI |
 | NLP | ACL, EMNLP, NAACL, COLM, EACL, COLING |
 | CV | CVPR, ICCV, ECCV, WACV |
 | Robotics | CoRL, ICRA, IROS, RSS |
