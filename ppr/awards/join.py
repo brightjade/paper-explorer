@@ -1,9 +1,10 @@
 """Bind awards.json entries to the papers they name.
 
 Shared by the collector's report and scripts/build_data.py, so "this award is
-on that paper" is decided in one place. Test-of-time prizes go to papers from
-a decade earlier, which the dataset does not hold, so they are never joined:
-they stay conference-level.
+on that paper" is decided in one place. A test-of-time prize is conference-level where it was given; when the
+dataset holds the paper it honors -- an earlier edition of the same venue --
+`attach_test_of_time` also puts it on that paper, labeled with the awarding
+conference ("Test of Time Award (NeurIPS 2023)").
 """
 
 import json
@@ -55,3 +56,72 @@ def load_entries(conf_dir: Path) -> list[dict]:
     if not path.exists():
         return []
     return json.loads(path.read_text(encoding="utf-8"))["awards"]
+
+
+@dataclass
+class TestOfTimeLinks:
+    papers: dict[str, list[dict]]        # every conference's papers, prizes added (changed papers are copies)
+    test_of_time: dict[str, list[dict]]  # each awarding conference's entries, "conference" added where found
+    warnings: list[str]
+    found: int
+    total: int
+
+
+def _venue_year(conf_id: str) -> tuple[str, int | None]:
+    prefix, _, year = conf_id.rpartition("_")
+    return prefix, int(year) if year.isdigit() else None
+
+
+def attach_test_of_time(papers_by_conf: dict[str, list[dict]], tot_by_conf: dict[str, list[dict]],
+                        names: dict[str, str]) -> TestOfTimeLinks:
+    """Give each test-of-time prize to the paper it honors, when the dataset holds it.
+
+    Every prize in scope honors a paper of its own venue (Longuet-Higgins a CVPR
+    paper, ICSE's Most Influential Paper an ICSE paper), so the paper is looked
+    for by title_key in the awarding venue's earlier conferences. Found in one,
+    it gains {"label": "<label> (<names[awarding id]>)", "kind": "test_of_time"};
+    found in two, nothing is attached and a warning names them; not found -- a
+    prize for a pre-2013 paper -- is the usual case and silent.
+    """
+    index: dict[str, dict[str, list[tuple[str, int]]]] = {}
+    for conf_id, papers in papers_by_conf.items():
+        prefix, year = _venue_year(conf_id)
+        if year is None:
+            continue
+        by_title = index.setdefault(prefix, {})
+        for i, paper in enumerate(papers):
+            hits = by_title.setdefault(title_key(paper["title"]), [])
+            if all(c != conf_id for c, _ in hits):
+                hits.append((conf_id, i))
+
+    added: dict[str, dict[int, list[dict]]] = {}
+    linked: dict[str, list[dict]] = {}
+    warnings: list[str] = []
+    found = total = 0
+    for conf_id, entries in tot_by_conf.items():
+        prefix, year = _venue_year(conf_id)
+        out = []
+        for entry in entries:
+            total += 1
+            hits = [(c, i) for c, i in index.get(prefix, {}).get(title_key(entry["title"]), [])
+                    if year is not None and (_venue_year(c)[1] or year) < year]
+            if len(hits) == 1:
+                c, i = hits[0]
+                added.setdefault(c, {}).setdefault(i, []).append(
+                    {"label": f"{entry['label']} ({names[conf_id]})", "kind": "test_of_time"})
+                entry = {**entry, "conference": c}
+                found += 1
+            elif len(hits) > 1:
+                warnings.append(f"{conf_id}: test of time {entry['title']!r} is in "
+                                f"{', '.join(sorted(c for c, _ in hits))}; attached to none")
+            out.append(entry)
+        linked[conf_id] = out
+
+    papers_out: dict[str, list[dict]] = {}
+    for conf_id, papers in papers_by_conf.items():
+        extra = added.get(conf_id, {})
+        papers_out[conf_id] = [
+            {**p, "awards": sorted(p.get("awards", []) + extra[i], key=lambda a: KIND_ORDER[a["kind"]])}
+            if i in extra else p
+            for i, p in enumerate(papers)]
+    return TestOfTimeLinks(papers=papers_out, test_of_time=linked, warnings=warnings, found=found, total=total)

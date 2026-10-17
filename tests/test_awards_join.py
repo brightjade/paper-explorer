@@ -1,6 +1,6 @@
 import json
 
-from ppr.awards.join import attach, load_entries
+from ppr.awards.join import attach, attach_test_of_time, load_entries
 
 
 def _e(label, kind, title, **kw):
@@ -72,3 +72,51 @@ def test_load_entries(tmp_path):
     (tmp_path / "awards.json").write_text(
         json.dumps({"conf_id": "x_2024", "awards": [_e("Best Paper", "award", "P")]}), encoding="utf-8")
     assert load_entries(tmp_path) == [_e("Best Paper", "award", "P")]
+
+
+NAMES = {"neurips_2013": "NeurIPS 2013", "neurips_2014": "NeurIPS 2014", "neurips_2023": "NeurIPS 2023",
+         "cvpr_2013": "CVPR 2013"}
+
+
+def _tot(title, label="Test of Time Award", **kw):
+    return {"label": label, "title": title, **kw}
+
+
+class TestAttachTestOfTime:
+    def test_the_prize_lands_on_the_earlier_paper_of_the_same_venue(self):
+        papers = {"neurips_2013": [{"title": "Distributed Representations of Words"}, {"title": "Other"}],
+                  "neurips_2023": [{"title": "New"}]}
+        out = attach_test_of_time(papers, {"neurips_2023": [_tot("Distributed representations of words.",
+                                                                 url="https://x.test/w2v")]}, NAMES)
+        assert out.papers["neurips_2013"][0]["awards"] == [
+            {"label": "Test of Time Award (NeurIPS 2023)", "kind": "test_of_time"}]
+        assert "awards" not in out.papers["neurips_2013"][1]
+        assert out.test_of_time["neurips_2023"] == [
+            {"label": "Test of Time Award", "title": "Distributed representations of words.",
+             "url": "https://x.test/w2v", "conference": "neurips_2013"}]
+        assert (out.found, out.total, out.warnings) == (1, 1, [])
+
+    def test_another_venue_or_a_later_year_is_never_searched(self):
+        papers = {"cvpr_2013": [{"title": "Same Title"}], "neurips_2023": [{"title": "Same Title"}]}
+        out = attach_test_of_time(papers, {"neurips_2023": [_tot("Same Title")]}, NAMES)
+        assert all("awards" not in p for ps in out.papers.values() for p in ps)
+        assert "conference" not in out.test_of_time["neurips_2023"][0]
+        assert (out.found, out.total) == (0, 1)
+
+    def test_a_title_in_two_earlier_years_is_attached_to_neither(self):
+        papers = {"neurips_2013": [{"title": "Twice"}], "neurips_2014": [{"title": "Twice"}]}
+        out = attach_test_of_time(papers, {"neurips_2023": [_tot("Twice")]}, NAMES)
+        assert all("awards" not in p for ps in out.papers.values() for p in ps)
+        assert out.warnings == ["neurips_2023: test of time 'Twice' is in neurips_2013, neurips_2014; attached to none"]
+
+    def test_the_papers_own_awards_stay_and_the_list_is_resorted(self):
+        papers = {"neurips_2013": [{"title": "P", "awards": [
+            {"label": "Spotlight Candidate", "kind": "candidate"}, {"label": "Outstanding Paper", "kind": "award"}]}]}
+        out = attach_test_of_time(papers, {"neurips_2023": [_tot("P")]}, NAMES)
+        assert [a["kind"] for a in out.papers["neurips_2013"][0]["awards"]] == ["award", "test_of_time", "candidate"]
+
+    def test_inputs_are_not_mutated(self):
+        papers = {"neurips_2013": [{"title": "P"}]}
+        tot = {"neurips_2023": [_tot("P")]}
+        attach_test_of_time(papers, tot, NAMES)
+        assert papers == {"neurips_2013": [{"title": "P"}]} and tot == {"neurips_2023": [_tot("P")]}

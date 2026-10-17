@@ -401,3 +401,40 @@ class TestAwards:
 
 def test_tmlr_is_ml():
     assert category_of("tmlr_2025") == "ML"
+
+
+class TestTestOfTimeOnTheOriginalPaper:
+    @pytest.fixture
+    def data(self, tmp_path):
+        root = tmp_path / "data"
+        for conf_id, papers in {
+            "neurips_2013": [{"title": "Word Vectors", "authors": ["A"], "selection": "main", "citation_count": 900},
+                             {"title": "Other", "authors": ["B"], "selection": "main", "citation_count": 10}],
+            "neurips_2023": [{"title": "New Paper", "authors": ["C"], "selection": "poster", "citation_count": 5}],
+        }.items():
+            (root / conf_id).mkdir(parents=True)
+            (root / conf_id / "papers_enriched.jsonl").write_text(
+                "".join(json.dumps(p) + "\n" for p in papers), encoding="utf-8")
+        (root / "neurips_2023" / "awards.json").write_text(json.dumps({"conf_id": "neurips_2023", "awards": [
+            {"label": "Test of Time Award", "kind": "test_of_time", "title": "Word Vectors",
+             "url": "https://x.test/w2v", "via": "virtual", "source": "s"}]}), encoding="utf-8")
+        return root
+
+    def test_the_original_paper_carries_the_prize_and_the_manifest_links_it(self, data, tmp_path, capsys):
+        out = tmp_path / "web"
+        build_all(data, out)
+        papers = {p["title"]: p for p in json.loads((out / "neurips_2013.json").read_text())}
+        assert papers["Word Vectors"]["awards"] == [
+            {"label": "Test of Time Award (NeurIPS 2023)", "kind": "test_of_time"}]
+        by_id = {c["id"]: c for c in json.loads((out / "manifest.json").read_text())["conferences"]}
+        assert by_id["neurips_2023"]["test_of_time"] == [
+            {"label": "Test of Time Award", "title": "Word Vectors", "url": "https://x.test/w2v",
+             "conference": "neurips_2013"}]
+        assert "test of time: 1 of 1 prizes found their paper" in capsys.readouterr().out
+
+    def test_top_100_carries_the_prize(self, data, tmp_path):
+        out = tmp_path / "web"
+        build_all(data, out)
+        top = json.loads((out / "top.json").read_text())
+        [w2v] = [p for p in top["papers"] if p["title"] == "Word Vectors"]
+        assert w2v["awards"] == [{"label": "Test of Time Award (NeurIPS 2023)", "kind": "test_of_time"}]

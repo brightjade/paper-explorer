@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 from collections.abc import Iterable
 from pathlib import Path
 
-from ppr.awards.join import attach, load_entries
+from ppr.awards.join import attach, attach_test_of_time, load_entries
 from ppr.venues import load_registry
 from scripts.impact import build_top, compute_impact, with_relative_citations
 from scripts.ngrams import build_ngram_data
@@ -317,6 +317,21 @@ def build_all(data_dir: Path, out_dir: Path) -> None:
         if attached.test_of_time:
             manifest_entry["test_of_time"] = attached.test_of_time
         conferences.append(manifest_entry)
+
+    # A test-of-time prize is listed where it was given; when the dataset holds
+    # the paper it honors (an earlier edition of the same venue), that paper
+    # carries it too. Before impact and top.json, so Top 100 shows it.
+    names = {c["id"]: f"{c['venue']} {c['year']}" for c in conferences}
+    links = attach_test_of_time(
+        all_papers, {c["id"]: c["test_of_time"] for c in conferences if c.get("test_of_time")}, names)
+    all_papers = links.papers
+    for manifest_entry in conferences:
+        if manifest_entry["id"] in links.test_of_time:
+            manifest_entry["test_of_time"] = links.test_of_time[manifest_entry["id"]]
+    for warning in links.warnings:
+        print(f"warning: {warning}")
+    if links.total:
+        print(f"test of time: {links.found} of {links.total} prizes found their paper")
 
     announce_months = {prefix: v.announce_month for prefix, v in load_registry().items()}
     impacts = compute_impact(all_papers, announce_months)
