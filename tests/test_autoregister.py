@@ -16,17 +16,10 @@ from ppr.autoregister import (
 )
 from ppr.venues import Venue
 
-README = """### NLP
-
-| Conference | 2026 | 2025 |
-|---|---|---|
-| COLM | | main |
-
-### SE
-
-| Conference | 2026 | 2025 |
-|---|---|---|
-| ICSE | | main |
+README = """| Field | Venue | ID | Years | Tracks |
+|---|---|---|---|---|
+| NLP | COLM | `colm` | 2024–2025 | main |
+| SE | ICSE | `icse` | 2013–2025 | main |
 """
 
 DBLP_SRC = 'DBLP_CONFERENCES = {\n    "icse_2025": {"key": "db/conf/icse/icse2025.bht"},\n}\n'
@@ -155,7 +148,7 @@ class TestDblpVenue:
         o = outcomes[0]
         assert (o.status, o.count, o.expected) == ("registered", 250, 250)
         assert '"icse_2026": {"key": "db/conf/icse/icse2026.bht"}' in ws.dblp_module.read_text()
-        assert "| ICSE | main | main |" in ws.readme.read_text()
+        assert "| SE | ICSE | `icse` | 2013–2026 | main |" in ws.readme.read_text()
         assert commits == [(
             sorted([str(ws.dblp_module), str(ws.readme)]),
             "feat(registry): register icse_2026 (250 papers)",
@@ -307,7 +300,7 @@ class TestOpenReview:
              openreview=_openreview({"colmweb.org/COLM/2026/Conference": _notes(*["COLM 2026"] * 856)}))
         text = (ws.configs_dir / "colm_2026.yaml").read_text()
         assert 'main: "COLM 2026"' in text
-        assert "| COLM | main | main |" in ws.readme.read_text()
+        assert "| NLP | COLM | `colm` | 2024–2026 | main |" in ws.readme.read_text()
 
     def test_unknown_track_name_holds(self, ws):
         row = _row("colm_2026", 4, {"venue_id": "v"})
