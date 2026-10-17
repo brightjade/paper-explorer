@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ppr.awards import ase_mip, icse_mip, issta_impact
+from ppr.awards import ase_mip, icse_mip, issta_impact, usenix_tot
 from ppr.awards.collect import SOURCES_BY_PREFIX
 
 ICSE_PAGE = (
@@ -116,3 +116,49 @@ def test_se_venues_read_their_test_of_time_page_last():
     assert SOURCES_BY_PREFIX["ase"][-1][0] == "ase_mip"
     assert SOURCES_BY_PREFIX["issta"][-1][0] == "issta_impact"
     assert [n for n, _ in SOURCES_BY_PREFIX["fse"]] == ["manual", "researchr", "sigsoft"]
+
+
+USENIX_PAGE = (
+    '<html><body><div class="field-item odd"><p>The USENIX Test of Time Awards recognize ...</p>'
+    '<h2>2024</h2><h3><a href="/conference/usenixsecurity24">USENIX Security \'24</a></h3>'
+    '<div class="test"><p class="title"><a href="/conference/usenixsecurity14/technical-sessions/presentation/'
+    'fredrikson_matthew">Privacy in Pharmacogenetics: An End-to-End Case Study of Personalized Warfarin Dosing'
+    '</a></p><p class="author">Matthew Fredrikson</p></div>'
+    '<h3><a href="/conference/nsdi24">NSDI \'24</a></h3>'
+    '<div class="test"><p class="title"><a href="/x">An NSDI Paper</a></p></div>'
+    '<h2>2022</h2><h3><a href="/conference/usenixsecurity22">USENIX Security \'22</a></h3>'
+    '<div class="test"><p class="title"><a href="https://archive.org/details/x">Kerberos: An Authentication '
+    'Service for Open Network Systems</a></p></div>'
+    '<div class="test"><p class="title"><a href="/conference/usenixsecurity12/technical-sessions/presentation/'
+    'heninger">Mining Your Ps and Qs: Detection of Widespread Weak Keys in Network Devices</a></p></div>'
+    '</div></body></html>'
+)
+
+
+class TestUsenixTot:
+    def test_security_entries_by_the_headings_year(self):
+        out = usenix_tot.parse_tot(USENIX_PAGE, usenix_tot.TOT_URL)
+        assert sorted(out) == ["usenix_security_2022", "usenix_security_2024"]  # NSDI ignored
+        [a] = out["usenix_security_2024"]
+        assert (a.label, a.kind, a.via) == ("Test of Time Award", "test_of_time", "usenix_tot")
+        assert a.url == ("https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/"
+                         "fredrikson_matthew")
+        assert len(out["usenix_security_2022"]) == 2
+        assert out["usenix_security_2022"][0].url == "https://archive.org/details/x"
+
+    def test_a_page_without_security_entries_raises(self):
+        with pytest.raises(ValueError):
+            usenix_tot.parse_tot("<html><body><h3>NSDI '24</h3></body></html>", usenix_tot.TOT_URL)
+
+    def test_one_fetch_serves_every_year(self, monkeypatch):
+        monkeypatch.setattr(usenix_tot, "_cache", {})
+        get = MagicMock(return_value=MagicMock(status_code=200, text=USENIX_PAGE))
+        monkeypatch.setattr(usenix_tot.fetch, "get", get)
+        assert len(usenix_tot.usenix_tot("usenix_security_2024", 2024, [])) == 1
+        assert usenix_tot.usenix_tot("usenix_security_2023", 2023, []) == []
+        get.assert_called_once_with(usenix_tot.TOT_URL)
+
+
+def test_usenix_and_iclr_read_their_test_of_time_source_last():
+    assert SOURCES_BY_PREFIX["usenix_security"][-1][0] == "usenix_tot"
+    assert SOURCES_BY_PREFIX["iclr"][-1][0] == "iclr_tot"

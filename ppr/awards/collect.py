@@ -22,7 +22,7 @@ from datetime import date
 from pathlib import Path
 from typing import Callable
 
-from ppr.awards import ase_mip, cvf_registry, iclr_blog, icse_mip, issta_impact, manual, researchr_badges, sigsoft, tmlr_certifications, usenix_notes, virtual
+from ppr.awards import ase_mip, cvf_registry, iclr_blog, icse_mip, issta_impact, manual, researchr_badges, sigsoft, tmlr_certifications, usenix_notes, usenix_tot, virtual
 from ppr.awards.join import attach
 from ppr.awards.labels import UnknownAwardLabel
 from ppr.awards.model import Award, awards_path, merge, read_awards, write_awards
@@ -48,7 +48,8 @@ _SE: list[tuple[str, Source]] = [
 SOURCES_BY_PREFIX: dict[str, list[tuple[str, Source]]] = {
     "neurips": [("manual", manual.manual), ("virtual", virtual.awards_detail)],
     "icml": [("manual", manual.manual), ("virtual", virtual.awards_detail)],
-    "iclr": [("manual", manual.manual), ("iclr_blog", iclr_blog.iclr_blog), ("virtual", virtual.awards_detail)],
+    "iclr": [("manual", manual.manual), ("iclr_blog", iclr_blog.iclr_blog), ("virtual", virtual.awards_detail),
+             ("iclr_tot", iclr_blog.iclr_test_of_time)],
     "cvpr": [("manual", manual.manual), ("cvf_registry", cvf_registry.cvf_registry),
              ("virtual", virtual.cvpr_candidates)],
     "iccv": [("manual", manual.manual), ("cvf_registry", cvf_registry.cvf_registry)],
@@ -59,7 +60,8 @@ SOURCES_BY_PREFIX: dict[str, list[tuple[str, Source]]] = {
     "fse": _SE,
     "ase": _SE + [("ase_mip", ase_mip.ase_mip)],
     "issta": _SE + [("issta_impact", issta_impact.issta_impact)],
-    "usenix_security": [("manual", manual.manual), ("usenix", usenix_notes.usenix_awards)],
+    "usenix_security": [("manual", manual.manual), ("usenix", usenix_notes.usenix_awards),
+                        ("usenix_tot", usenix_tot.usenix_tot)],
     "tmlr": [("tmlr", tmlr_certifications.tmlr_certifications)],
 }
 
