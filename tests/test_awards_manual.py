@@ -11,7 +11,20 @@ EXPECTED = {
     "neurips_2013": 4, "neurips_2014": 2, "neurips_2015": 2, "neurips_2016": 2, "neurips_2017": 4,
     "neurips_2018": 4, "icml_2013": 6, "icml_2014": 4, "icml_2015": 3, "icml_2017": 7, "icml_2018": 6,
     "icml_2022": 3, "iclr_2021": 8,
+    "cvpr_2019": 45, "cvpr_2020": 27, "cvpr_2021": 35, "cvpr_2022": 2, "iccv_2019": 7, "eccv_2022": 1,
+    "wacv_2022": 4, "icse_2013": 6, "icse_2014": 9, "icse_2021": 1, "icse_2022": 1,
 }
+
+
+@pytest.mark.parametrize("conf_id,replaced", [
+    ("eccv_2022", "Pose-NDF: Modelling Human Pose Manifolds with Neural Distance Fields"),
+    ("icse_2021", "ATVHunter: Reliable Version Detection of Third-Party Libraries for Vulnerability "
+                  "Identification in Android Apps"),
+    ("icse_2022", "Lessons from Eight Years of Operational Data from a Continuous Integration Service: "
+                  "A Case Study of CircleCI"),
+])
+def test_title_corrections(conf_id, replaced):
+    assert title_key(replaced) in {key for _, key in replaced_titles(conf_id)}
 
 
 def test_the_committed_files_are_the_expected_ones():

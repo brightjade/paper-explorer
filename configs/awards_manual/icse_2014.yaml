@@ -1,0 +1,13 @@
+# SIGSOFT distinguished-paper page, ICSE 2014 block. note: partial (9 of 10; the SIGSOFT annual report counts 10). A manual file is needed for one title; a file with winners suppresses SIGSOFT, so it carries all 9
+source: https://www2.sigsoft.org/awards/distinguishedpaper/
+retrieved: 2026-10-17
+awards:
+  - {label: "ACM SIGSOFT Distinguished Paper Award", title: "Cowboys, Ankle Sprains, and Keepers of Quality: How is Video Game Development Different from Software Development?"}
+  - {label: "ACM SIGSOFT Distinguished Paper Award", title: "Characterizing and Detecting Performance Bugs for Smartphone Applications"}
+  - {label: "ACM SIGSOFT Distinguished Paper Award", title: "Improving Automated Source Code Summarization via an Eye-Tracking Study of Programmers"}
+  - {label: "ACM SIGSOFT Distinguished Paper Award", title: "Unit Test Virtualization with VMVM"}
+  - {label: "ACM SIGSOFT Distinguished Paper Award", title: "Understanding JavaScript event-based interactions"}  # the page prints "Understanding JavaScript Event-Based Interaction"
+  - {label: "ACM SIGSOFT Distinguished Paper Award", title: "Coverage Is Not Strongly Correlated with Test Suite Effectiveness"}
+  - {label: "ACM SIGSOFT Distinguished Paper Award", title: "Enhancing Symbolic Execution with Veritesting"}
+  - {label: "ACM SIGSOFT Distinguished Paper Award", title: "Trading Robustness for Maintainability: An Empirical Study of Evolving C# Programs"}
+  - {label: "ACM SIGSOFT Distinguished Paper Award", title: "A Study and Toolkit for Asynchronous Programming in C#"}

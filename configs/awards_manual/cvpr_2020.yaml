@@ -1,0 +1,31 @@
+# CVPR 2020 awards page (node/817): the "Paper Award Nominees" list, plus the Best Student Paper Honorable Mention (DeepCap, which is also a nominee)
+source: https://cvpr2020.thecvf.com/node/817
+retrieved: 2026-10-17
+awards:
+  - {label: "Paper Award Nominee", title: "Weakly-supervised Domain Adaptation via GAN and Mesh Model for Estimating 3D Hand Poses Interacting Objects"}
+  - {label: "Paper Award Nominee", title: "Unsupervised Learning of Probably Symmetric Deformable 3D Objects from Images in the Wild"}
+  - {label: "Paper Award Nominee", title: "Bridging the Gap Between Anchor-based and Anchor-free Detection via Adaptive Training Sample Selection"}
+  - {label: "Paper Award Nominee", title: "Momentum Contrast for Unsupervised Visual Representation Learning"}
+  - {label: "Paper Award Nominee", title: "BSP-Net: Generating Compact Meshes via Binary Space Partitioning"}
+  - {label: "Paper Award Nominee", title: "Disentangled image generation through structured noise injection"}
+  - {label: "Paper Award Nominee", title: "UC-Net: Uncertainty Inspired RGB-D Saliency Detection via Conditional Variational Autoencoders"}
+  - {label: "Paper Award Nominee", title: "TextureFusion: High-Quality Texture Acquisition for Real-Time RGB-D Scanning"}
+  - {label: "Paper Award Nominee", title: "Controllable Orthogonalization in Training DNNs"}
+  - {label: "Paper Award Nominee", title: "DeepCap: Monocular Human Performance Capture Using Weak Supervision"}
+  - {label: "Paper Award Nominee", title: "Total3DUnderstanding: Joint Layout, Object Pose and Mesh Reconstruction for Indoor Scenes from a Single Image"}
+  - {label: "Paper Award Nominee", title: "Transferring Cross-domain Knowledge for Video Sign Language Recognition"}
+  - {label: "Paper Award Nominee", title: "Computing the Testing Error without a Testing Set"}
+  - {label: "Paper Award Nominee", title: "Visual Chirality"}
+  - {label: "Paper Award Nominee", title: "CvxNet: Learnable Convex Decomposition"}
+  - {label: "Paper Award Nominee", title: "The Secret Revealer: Generative Model-Inversion Attacks Against Deep Neural Networks"}
+  - {label: "Paper Award Nominee", title: "Optimizing Rank-based Metrics with Blackbox Differentiation"}
+  - {label: "Paper Award Nominee", title: "High-Performance Long-Term Tracking with Meta-Updater"}
+  - {label: "Paper Award Nominee", title: "Deep Iterative Surface Normal Estimation"}
+  - {label: "Paper Award Nominee", title: "Predicting Goal-directed Human Attention Using Inverse Reinforcement Learning"}
+  - {label: "Paper Award Nominee", title: "Classifying, Segmenting, and Tracking Object Instances in Video with Mask Propagation"}
+  - {label: "Paper Award Nominee", title: "Robust Learning Through Cross-Task Consistency"}
+  - {label: "Paper Award Nominee", title: "Deep Geometric Functional Maps: RobustFeature Learning for Shape Correspondence"}
+  - {label: "Paper Award Nominee", title: "Weakly-Supervised Mesh-Convolutional Hand Reconstruction in the Wild"}
+  - {label: "Paper Award Nominee", title: "Cross-Batch Memory for Embedding Learning"}
+  - {label: "Paper Award Nominee", title: "Correction Filter for Single Image Super-Resolution: Robustifying Off-the-Shelf Deep Super-Resolvers"}
+  - {label: "Best Student Paper Honorable Mention", title: "DeepCap: Monocular Human Performance Capture Using Weak Supervision"}

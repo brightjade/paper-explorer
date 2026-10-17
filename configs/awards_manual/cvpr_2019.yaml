@@ -1,0 +1,49 @@
+# CVPR 2019 welcome slides (PDF), the two "Best paper finalists" slides (two columns each): all 45 finalists, titles as printed (DeepCO3 is typeset with math italics there)
+source: https://cvpr2019.thecvf.com/files/CVPR%202019%20-%20Welcome%20Slides%20Final.pdf
+retrieved: 2026-10-17
+awards:
+  - {label: "Best Paper Finalist", title: "Probabilistic Permutation Synchronization using the Riemannian Structure of the Birkhoff Polytope"}
+  - {label: "Best Paper Finalist", title: "DeepCO3: Deep Instance Co-segmentation by Co-peak Search and Co-saliency Detection"}
+  - {label: "Best Paper Finalist", title: "SelFlow: Self-Supervised Learning of Optical Flow"}
+  - {label: "Best Paper Finalist", title: "SDRSAC: Semidefinite-Based Randomized Approach for Robust Point Cloud Registration without Correspondences"}
+  - {label: "Best Paper Finalist", title: "Deep Tree Learning for Zero-shot Face Anti-Spoofing"}
+  - {label: "Best Paper Finalist", title: "Neural RGB(r)D Sensing: Depth and Uncertainty From a Video Camera"}  # the slide prints "Neural RGB -> D Sensing: Depth and Uncertainty from a Video Camera"
+  - {label: "Best Paper Finalist", title: "Self-supervised 3D hand pose estimation through training by fitting"}
+  - {label: "Best Paper Finalist", title: "Neural Illumination: Lighting Prediction for Indoor Environments"}
+  - {label: "Best Paper Finalist", title: "Shapes and Context: In-the-wild Image Synthesis & Manipulation"}
+  - {label: "Best Paper Finalist", title: "SiCloPe: Silhouette-based Clothed People"}
+  - {label: "Best Paper Finalist", title: "A General and Adaptive Robust Loss Function"}
+  - {label: "Best Paper Finalist", title: "2.5D Visual Sound"}
+  - {label: "Best Paper Finalist", title: "Incremental Object Learning from Contiguous Views"}
+  - {label: "Best Paper Finalist", title: "Text2Scene: Generating Compositional Scenes from Textual Descriptions"}
+  - {label: "Best Paper Finalist", title: "Relational Action Forecasting"}
+  - {label: "Best Paper Finalist", title: "Shifting More Attention to Video Salient Object Detection"}
+  - {label: "Best Paper Finalist", title: "GA-Net: Guided Aggregation Net for End-to-end Stereo Matching"}
+  - {label: "Best Paper Finalist", title: "A Skeleton-bridged Deep Learning Approach for Generating Meshes of Complex Topologies from Single RGB Images"}
+  - {label: "Best Paper Finalist", title: "Semantic Image Synthesis with Spatially-Adaptive Normalization"}
+  - {label: "Best Paper Finalist", title: "ContactDB: Analyzing and Predicting Grasp Contact via Thermal Imaging"}
+  - {label: "Best Paper Finalist", title: "Revealing Scenes by Inverting Structure from Motion Reconstructions"}
+  - {label: "Best Paper Finalist", title: "A Theory of Fermat Paths for Non-Line-of-Sight Shape Reconstruction"}
+  - {label: "Best Paper Finalist", title: "Relation-Shape Convolutional Neural Network for Point Cloud Analysis"}
+  - {label: "Best Paper Finalist", title: "BubbleNets: Learning to Select the Guidance Frame in Video Object Segmentation by Deep Sorting Frames"}
+  - {label: "Best Paper Finalist", title: "Image Deformation Meta-Networks for One-Shot Learning"}
+  - {label: "Best Paper Finalist", title: "Estimating 3D Motion and Forces of Person-Object Interactions from Monocular Video"}
+  - {label: "Best Paper Finalist", title: "A Style-Based Generator Architecture for Generative Adversarial Networks"}
+  - {label: "Best Paper Finalist", title: "Unsupervised Part-Based Disentangling of Object Shape and Appearance"}
+  - {label: "Best Paper Finalist", title: "Pushing the Boundaries of View Extrapolation with Multiplane Images"}
+  - {label: "Best Paper Finalist", title: "Path-Invariant Map Networks"}
+  - {label: "Best Paper Finalist", title: "Learning the Depths of Moving People by Watching Frozen People"}
+  - {label: "Best Paper Finalist", title: "Efficient Online Multi-Person 2D Pose Tracking with Recurrent Spatio-Temporal Affinity Fields"}
+  - {label: "Best Paper Finalist", title: "Learning to Compose Dynamic Tree Structures for Visual Contexts"}
+  - {label: "Best Paper Finalist", title: "Cascaded Projection: End-to-End Network Compression and Acceleration"}
+  - {label: "Best Paper Finalist", title: "Taking a Deeper Look at the Inverse Compositional Algorithm"}
+  - {label: "Best Paper Finalist", title: "Occupancy Networks: Learning 3D Reconstruction in Function Space"}
+  - {label: "Best Paper Finalist", title: "Geometry-Consistent Generative Adversarial Networks for One-Sided Unsupervised Domain Mapping"}
+  - {label: "Best Paper Finalist", title: "Convolutional Mesh Regression for Single-Image Human Shape Reconstruction"}
+  - {label: "Best Paper Finalist", title: "Neural Rerendering in the Wild"}
+  - {label: "Best Paper Finalist", title: "Content Authentication for Neural Imaging Pipelines: End-to-end Optimization of Photo Provenance in Complex Distribution Channels"}
+  - {label: "Best Paper Finalist", title: "Reinforced Cross-Modal Matching and Self-Supervised Imitation Learning for Vision-Language Navigation"}
+  - {label: "Best Paper Finalist", title: "FilterReg: Robust and Efficient Probabilistic Point-Set Registration using Gaussian Filter and Twist Parameterization"}
+  - {label: "Best Paper Finalist", title: "Locating Objects Without Bounding Boxes"}
+  - {label: "Best Paper Finalist", title: "DeepSDF: Learning Continuous Signed Distance Functions for Shape Representation"}
+  - {label: "Best Paper Finalist", title: "CollaGAN: Collaborative GAN for Missing Image Data Imputation"}

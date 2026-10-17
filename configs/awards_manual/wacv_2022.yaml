@@ -1,0 +1,8 @@
+# WACV 2022 awards page (node/108): the four paper awards
+source: https://wacv2022.thecvf.com/node/108
+retrieved: 2026-10-17
+awards:
+  - {label: "Best Student Paper", title: "Agree to Disagree: When Deep Learning Models With Identical Architectures Produce Distinct Explanations"}
+  - {label: "Best Algorithm Paper", title: "Hole-robust wireframe Detection"}
+  - {label: "Best Paper, Honorable Mention", title: "Strumming to the Beat: Audio-Conditioned Contrastive Video Textures"}
+  - {label: "Best Application Paper", title: "CharacterGAN: Few-Shot Keypoint Character Animation and Reposing"}

@@ -1,0 +1,5 @@
+# Correction: researchr prints "A Case Study of CircleCI", the dataset "An Exploratory Case Study of CircleCI"; same nomination, dataset's title
+source: https://conf.researchr.org/track/icse-2022/icse-2022-papers
+retrieved: 2026-10-17
+awards:
+  - {label: "Nominated for Distinguished Paper", title: "Lessons from Eight Years of Operational Data from a Continuous Integration Service: An Exploratory Case Study of CircleCI", replaces: "Lessons from Eight Years of Operational Data from a Continuous Integration Service: A Case Study of CircleCI"}

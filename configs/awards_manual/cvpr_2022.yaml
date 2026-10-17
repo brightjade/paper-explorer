@@ -1,0 +1,6 @@
+# CVPR 2022 paper-awards page: Ref-NeRF is the Best Student Paper Honorable Mention. The Longuet-Higgins Prize (KITTI, 2012 paper) is from the PAMI TC page https://tc.computer.org/tcpami/awards/longuet-higgins-prize/
+source: https://cvpr2022.thecvf.com/cvpr-2022-paper-awards
+retrieved: 2026-10-17
+awards:
+  - {label: "Best Student Paper Honorable Mention", title: "Ref-NeRF: Structured View-Dependent Appearance for Neural Radiance Fields"}
+  - {label: "Longuet-Higgins Prize", title: "Are We Ready for Autonomous Driving? The KITTI Vision Benchmark Suite", url: "https://tc.computer.org/tcpami/awards/longuet-higgins-prize/"}

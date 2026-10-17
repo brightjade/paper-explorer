@@ -1,0 +1,39 @@
+# CVPR 2021 "Best Paper Candidates" table (node/290, 32 papers); the 3 Best Student Paper Honorable Mentions come from the paper-awards page https://cvpr2021.thecvf.com/node/329
+source: https://cvpr2021.thecvf.com/node/290
+retrieved: 2026-10-17
+awards:
+  - {label: "Best Paper Candidate", title: "Privacy-Preserving Image Features via Adversarial Affine Subspace Embeddings"}
+  - {label: "Best Paper Candidate", title: "Learning Calibrated Medical Image Segmentation via Multi-Rater Agreement Modeling"}
+  - {label: "Best Paper Candidate", title: "Diffusion Probabilistic Models for 3D Point Cloud Generation"}
+  - {label: "Best Paper Candidate", title: "Task Programming: Learning Data Efficient Behavior Representations"}
+  - {label: "Best Paper Candidate", title: "PoseAug: A Differentiable Pose Augmentation Framework for 3D Human Pose Estimation"}
+  - {label: "Best Paper Candidate", title: "SCANimate: Weakly Supervised Learning of Skinned Clothed Avatar Networks"}
+  - {label: "Best Paper Candidate", title: "On Self-Contact and Human Pose"}
+  - {label: "Best Paper Candidate", title: "Binary TTC: A Temporal Geofence for Autonomous Navigation"}
+  - {label: "Best Paper Candidate", title: "Rethinking and Improving the Robustness of Image Style Transfer"}
+  - {label: "Best Paper Candidate", title: "Audio-Visual Instance Discrimination with Cross-Modal Agreement"}
+  - {label: "Best Paper Candidate", title: "Point2Skeleton: Learning Skeletal Representations from Point Clouds"}
+  - {label: "Best Paper Candidate", title: "Human POSEitioning System (HPS): 3D Human Pose Estimation and Self-Localization in Large Scenes From Body-Mounted Sensors"}
+  - {label: "Best Paper Candidate", title: "Where and What? Examining Interpretable Disentangled Representations"}
+  - {label: "Best Paper Candidate", title: "Learning To Recover 3D Scene Shape From a Single Image"}
+  - {label: "Best Paper Candidate", title: "GIRAFFE: Representing Scenes As Compositional Generative Neural Feature Fields"}
+  - {label: "Best Paper Candidate", title: "Polygonal Building Extraction by Frame Field Learning"}
+  - {label: "Best Paper Candidate", title: "NeuralRecon: Real-Time Coherent 3D Reconstruction From Monocular Video"}
+  - {label: "Best Paper Candidate", title: "CoCosNet v2: Full-Resolution Correspondence Learning for Image Translation"}
+  - {label: "Best Paper Candidate", title: "Less Is More: ClipBERT for Video-and-Language Learning via Sparse Sampling"}
+  - {label: "Best Paper Candidate", title: "Neural Body: Implicit Neural Representations With Structured Latent Codes for Novel View Synthesis of Dynamic Humans"}
+  - {label: "Best Paper Candidate", title: "Exploring Simple Siamese Representation Learning"}
+  - {label: "Best Paper Candidate", title: "Guided Interactive Video Object Segmentation Using Reliability-Based Attention Maps"}
+  - {label: "Best Paper Candidate", title: "GeoSim: Realistic Video Simulation via Geometry-Aware Composition for Self-Driving"}
+  - {label: "Best Paper Candidate", title: "Neural Lumigraph Rendering"}
+  - {label: "Best Paper Candidate", title: "Event-Based Synthetic Aperture Imaging With a Hybrid Network"}
+  - {label: "Best Paper Candidate", title: "Energy-Based Learning for Scene Graph Generation"}
+  - {label: "Best Paper Candidate", title: "Learning High Fidelity Depths of Dressed Humans by Watching Social Media Dance Videos"}
+  - {label: "Best Paper Candidate", title: "MP3: A Unified Model To Map, Perceive, Predict and Plan"}
+  - {label: "Best Paper Candidate", title: "NeX: Real-Time View Synthesis With Neural Basis Expansion"}
+  - {label: "Best Paper Candidate", title: "NewtonianVAE: Proportional Control and Goal Identification From Pixels via Physical Latent Spaces"}
+  - {label: "Best Paper Candidate", title: "Fast End-to-End Learning on Protein Surfaces"}
+  - {label: "Best Paper Candidate", title: "Real-Time High-Resolution Background Matting"}
+  - {label: "Best Student Paper Honorable Mention", title: "Less is More: ClipBERT for Video-and-Language Learning via Sparse Sampling"}
+  - {label: "Best Student Paper Honorable Mention", title: "Binary TTC: A Temporal Geofence for Autonomous Navigation"}
+  - {label: "Best Student Paper Honorable Mention", title: "Real-Time High-Resolution Background Matting"}

@@ -1,0 +1,5 @@
+# Correction: researchr prints "... in Android Apps", the dataset "ATVHUNTER ... in Android Applications"; same prize, dataset's title
+source: https://conf.researchr.org/track/icse-2021/icse-2021-papers
+retrieved: 2026-10-17
+awards:
+  - {label: "ACM SIGSOFT Distinguished Paper", title: "ATVHUNTER: Reliable Version Detection of Third-Party Libraries for Vulnerability Identification in Android Applications", replaces: "ATVHunter: Reliable Version Detection of Third-Party Libraries for Vulnerability Identification in Android Apps"}

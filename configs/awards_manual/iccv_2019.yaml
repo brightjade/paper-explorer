@@ -1,0 +1,11 @@
+# ICCV 2019 main-conference program page: the "Best Paper Nominations" list
+source: https://iccv2019.thecvf.com/program/main_conference
+retrieved: 2026-10-17
+awards:
+  - {label: "Best Paper Nomination", title: "Larger Norm More Transferable: An Adaptive Feature Norm Approach for Unsupervised Domain Adaptation"}
+  - {label: "Best Paper Nomination", title: "Deep Hough Voting for 3D Object Detection in Point Clouds"}
+  - {label: "Best Paper Nomination", title: "Unsupervised Deep Learning for Structured Shape Matching"}
+  - {label: "Best Paper Nomination", title: "Gated2Depth: Real-time Dense Lidar from Gated Images"}
+  - {label: "Best Paper Nomination", title: "Local Aggregation for Unsupervised Learning of Visual Embeddings"}
+  - {label: "Best Paper Nomination", title: "Habitat: A Platform for Embodied AI Research"}
+  - {label: "Best Paper Nomination", title: "Robust Change Captioning"}

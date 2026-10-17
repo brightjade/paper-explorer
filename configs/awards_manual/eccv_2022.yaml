@@ -1,0 +1,5 @@
+# Correction: the CVF registry prints "Pose-NDF: Modelling ...", the dataset says "Modeling"; same prize, dataset's title
+source: https://www.thecvf.com/?page_id=413
+retrieved: 2026-10-17
+awards:
+  - {label: "Best Paper Honorable Mention", title: "Pose-NDF: Modeling Human Pose Manifolds with Neural Distance Fields", replaces: "Pose-NDF: Modelling Human Pose Manifolds with Neural Distance Fields"}

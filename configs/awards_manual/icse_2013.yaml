@@ -1,0 +1,10 @@
+# ICSE 2013 awards page: the six "SIGSOFT Distinguished Paper Awards" (the page leaves the opening quote off the fifth title)
+source: https://2013.icse-conferences.org/content/icse2013-awards.html
+retrieved: 2026-10-17
+awards:
+  - {label: "SIGSOFT Distinguished Paper Award", title: "Data Clone Detection and Visualization in Spreadsheets"}
+  - {label: "SIGSOFT Distinguished Paper Award", title: "Interaction-Based Test-Suite Minimization"}
+  - {label: "SIGSOFT Distinguished Paper Award", title: "Assisting Developers of Big Data Analytics Applications When Deploying on Hadoop Clouds"}
+  - {label: "SIGSOFT Distinguished Paper Award", title: "UML in Practice"}
+  - {label: "SIGSOFT Distinguished Paper Award", title: "Dual Ecological Measures of Focus in Software Development"}
+  - {label: "SIGSOFT Distinguished Paper Award", title: "Automatic Patch Generation Learned from Human-written Patches"}
