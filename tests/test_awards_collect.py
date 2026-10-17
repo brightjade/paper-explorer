@@ -1,4 +1,5 @@
 import json
+from datetime import date
 
 import pytest
 import requests
@@ -164,13 +165,6 @@ class TestRegistry:
             prefix = path.stem.rpartition("_")[0]
             assert "manual" in [name for name, _ in SOURCES_BY_PREFIX[prefix]], path.name
 
-    def test_conference_ids_are_the_data_dirs_of_venues_with_rules(self, tmp_path):
-        for name in ("iclr_2025", "acl_2025", "usenix_security_2025", "iclr_2019"):
-            (tmp_path / name).mkdir()
-        (tmp_path / "pipeline_state.json").write_text("{}")
-        assert conference_ids(tmp_path) == ["iclr_2025", "usenix_security_2025"]
-        assert conference_ids(tmp_path / "missing") == []
-
 
 class TestTailFailures:
     def test_a_corrupt_awards_file_fails_and_stays_untouched(self, demo, tmp_path):
@@ -201,7 +195,28 @@ class TestLostSource:
         assert {a.via for a in read_awards(awards_path(tmp_path, "demo_2025"))} == {"b"}
 
 
-def test_conference_ids_start_tmlr_at_2022(tmp_path):
-    for d in ("tmlr_2022", "iclr_2022", "iclr_2023"):
-        (tmp_path / d).mkdir()
-    assert conference_ids(tmp_path) == ["iclr_2023", "tmlr_2022"]
+class TestConferenceIds:
+    @staticmethod
+    def _dirs(tmp_path, *names):
+        for name in names:
+            (tmp_path / name).mkdir()
+        (tmp_path / "pipeline_state.json").write_text("{}")
+
+    def test_this_year_and_last_year_of_venues_with_rules(self, tmp_path):
+        self._dirs(tmp_path, "iclr_2024", "iclr_2025", "iclr_2026", "acl_2026", "usenix_security_2025")
+        assert conference_ids(tmp_path, date(2026, 10, 17)) == ["iclr_2025", "iclr_2026", "usenix_security_2025"]
+
+    def test_the_window_moves_with_the_year(self, tmp_path):
+        self._dirs(tmp_path, "iclr_2025", "iclr_2026", "iclr_2027")
+        assert conference_ids(tmp_path, date(2027, 1, 5)) == ["iclr_2026", "iclr_2027"]
+
+    def test_tmlr_keeps_every_year_from_2022(self, tmp_path):
+        self._dirs(tmp_path, "tmlr_2021", "tmlr_2022", "tmlr_2023", "iclr_2022")
+        assert conference_ids(tmp_path, date(2026, 10, 17)) == ["tmlr_2022", "tmlr_2023"]
+
+    def test_all_years_drops_the_year_test(self, tmp_path):
+        self._dirs(tmp_path, "cvpr_2013", "iclr_2024", "acl_2013")
+        assert conference_ids(tmp_path, date(2026, 10, 17), all_years=True) == ["cvpr_2013", "iclr_2024"]
+
+    def test_missing_data_dir(self, tmp_path):
+        assert conference_ids(tmp_path / "missing") == []

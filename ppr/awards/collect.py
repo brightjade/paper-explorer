@@ -18,6 +18,7 @@ data, and an unreachable awards page must not stop the month's citation release.
 import json
 import logging
 from dataclasses import asdict, dataclass, field, replace
+from datetime import date
 from pathlib import Path
 from typing import Callable
 
@@ -28,9 +29,6 @@ from ppr.awards.model import Award, awards_path, merge, read_awards, write_award
 from ppr.matching import title_key
 
 logger = logging.getLogger(__name__)
-
-# Tranche 1 covers 2023 onward; older years are not collected by --all.
-FIRST_YEAR = 2023
 
 # (conf_id, year, earlier) -> awards, or None when the source chose not to run.
 Source = Callable[[str, int, list[Award]], list[Award] | None]
@@ -64,7 +62,15 @@ SOURCES_BY_PREFIX: dict[str, list[tuple[str, Source]]] = {
     "tmlr": [("tmlr", tmlr_certifications.tmlr_certifications)],
 }
 
-# A venue that starts earlier than FIRST_YEAR.
+# The monthly run collects this year and last year. Awards arrive at or after a
+# conference and keep arriving in stages (candidates, then winners; SIGSOFT's
+# list months later), and twelve-plus months after a conference has covered
+# every late source seen. Older years are final: `all_years` collects them on
+# request (`ppr awards --all --all-years`, the workflow's awards_all_years).
+RECENT_YEARS = 2
+
+# A venue whose older years stay in the monthly run, from this year on: a TMLR
+# certification can land on a paper published years earlier.
 FIRST_YEAR_BY_PREFIX = {"tmlr": 2022}
 
 
@@ -93,15 +99,22 @@ def _retitle(awards: list[Award], papers: list[dict]) -> list[Award]:
     return [replace(a, title=titles[a.forum_id]) if a.forum_id in titles else a for a in awards]
 
 
-def conference_ids(data_dir: Path) -> list[str]:
-    """Every data/<id> whose venue has an awards rule and whose year is its venue's first year
-    (FIRST_YEAR_BY_PREFIX, else FIRST_YEAR) or later, sorted."""
+def conference_ids(data_dir: Path, today: date | None = None, all_years: bool = False) -> list[str]:
+    """Every data/<id> whose venue has an awards rule and whose awards can still change, sorted.
+
+    That is this year and last year (RECENT_YEARS), plus every year from a
+    venue's FIRST_YEAR_BY_PREFIX on. `all_years` drops the year test.
+    """
     if not data_dir.exists():
         return []
+    first_recent = (today or date.today()).year - RECENT_YEARS + 1
     out = []
     for d in data_dir.iterdir():
         prefix, _, year = d.name.rpartition("_")
-        if d.is_dir() and prefix in SOURCES_BY_PREFIX and year.isdigit() and int(year) >= FIRST_YEAR_BY_PREFIX.get(prefix, FIRST_YEAR):
+        if not (d.is_dir() and prefix in SOURCES_BY_PREFIX and year.isdigit()):
+            continue
+        first = min(first_recent, FIRST_YEAR_BY_PREFIX.get(prefix, first_recent))
+        if all_years or int(year) >= first:
             out.append(d.name)
     return sorted(out)
 

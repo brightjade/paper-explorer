@@ -125,6 +125,9 @@ def build_parser() -> argparse.ArgumentParser:
     awards_parser.add_argument("conferences", nargs="*", help="Conference IDs (e.g. neurips_2024)")
     awards_parser.add_argument("--all", action="store_true",
                                help="Every data/<id> whose venue has an awards rule")
+    awards_parser.add_argument("--all-years", action="store_true",
+                               help="With --all: also every older year, whose awards are final "
+                                    "(--all alone collects this year and last year)")
     awards_parser.add_argument("--report", type=Path, default=None,
                                help="Write per-conference outcomes as JSON")
 
@@ -294,7 +297,9 @@ def cmd_enrich(args: argparse.Namespace) -> None:
 def cmd_awards(args: argparse.Namespace) -> None:
     from ppr.awards.collect import collect_all, conference_ids, format_summary, results_to_json
 
-    conf_ids = conference_ids(DATA_DIR) if args.all else args.conferences
+    if args.all_years and not args.all:
+        raise SystemExit("--all-years goes with --all.")
+    conf_ids = conference_ids(DATA_DIR, all_years=args.all_years) if args.all else args.conferences
     if not conf_ids:
         raise SystemExit("No conferences given. Pass conference IDs or use --all.")
     outcomes = collect_all(conf_ids, DATA_DIR)

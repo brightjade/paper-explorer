@@ -16,6 +16,10 @@ on:
         description: "Space-separated conference IDs to re-crawl before enrich (e.g. icse_2025 ase_2024)"
         type: string
         default: ""
+      awards_all_years:
+        description: "Also collect awards for every older year (final; use after adding or fixing a past year's source)"
+        type: boolean
+        default: false
 
 concurrency:
   group: data-pipeline
@@ -24,6 +28,7 @@ concurrency:
 env:
   DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
   RECRAWL: ${{ inputs.recrawl || '' }}
+  AWARDS_ALL_YEARS: ${{ inputs.awards_all_years && 'true' || 'false' }}
   RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
 jobs:
@@ -109,8 +114,13 @@ jobs:
 
       - name: Awards
         # Held or failed conferences keep their previous awards.json and go to
-        # the issue; this step does not fail the run.
-        run: uv run ppr awards --all --report awards.json
+        # the issue; this step does not fail the run. This year and last year
+        # every month; awards_all_years adds every older year, once.
+        run: |
+          set -euo pipefail
+          extra=()
+          if [ "$AWARDS_ALL_YEARS" = "true" ]; then extra+=(--all-years); fi
+          uv run ppr awards --all --report awards.json "${extra[@]}"
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() && hashFiles('awards.json') != '' }}
         with: {name: report-awards, path: awards.json}

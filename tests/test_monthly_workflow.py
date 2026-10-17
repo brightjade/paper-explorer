@@ -62,8 +62,22 @@ def test_awards_run_after_tests_and_before_enrich():
     assert names.index("Tests") < names.index("Awards") < names.index("Enrich")
 
 
-def test_awards_collect_everything_and_write_a_report():
-    assert _named("Awards")["run"] == "uv run ppr awards --all --report awards.json"
+def test_dispatch_takes_an_all_years_switch_that_defaults_to_off():
+    flag = _triggers(_wf())["workflow_dispatch"]["inputs"]["awards_all_years"]
+    assert flag["type"] == "boolean"
+    assert flag["default"] is False
+
+
+def test_all_years_reaches_the_steps_as_true_or_false():
+    """'false' on schedule: `inputs` is null there."""
+    assert _wf()["env"]["AWARDS_ALL_YEARS"] == "${{ inputs.awards_all_years && 'true' || 'false' }}"
+
+
+def test_awards_collect_the_recent_years_and_all_years_only_when_asked():
+    run = _named("Awards")["run"]
+    assert "uv run ppr awards --all --report awards.json" in run
+    assert '[ "$AWARDS_ALL_YEARS" = "true" ]' in run
+    assert "extra+=(--all-years)" in run
 
 
 def test_the_awards_report_is_uploaded_even_after_a_failure():

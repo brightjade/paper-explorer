@@ -110,7 +110,7 @@ cp .env.example .env    # then fill it in
 data/<conference_id>/
 ├── papers.jsonl             # the crawl: title, authors, link, track
 ├── papers_enriched.jsonl    # + Semantic Scholar metadata, sorted by citation count
-└── awards.json              # paper awards, for venues that publish them (from 2023)
+└── awards.json              # paper awards, for venues that publish them
 ```
 
 A conference ID is `<venue>_<year>`, with the venue IDs listed under [Conferences](#conferences): `iclr_2025`, `emnlp_2024`, `usenix_security_2023`. Each line of `papers_enriched.jsonl` is one paper; empty fields are left out.
@@ -182,6 +182,7 @@ uv run ppr crawl iclr_2025 neurips_2025      # fetch accepted papers -> data/<id
 uv run ppr enrich iclr_2025 neurips_2025     # add Semantic Scholar metadata -> papers_enriched.jsonl
 uv run ppr enrich --all --time-budget 4h     # refresh every conference in data/ within a time budget
 uv run ppr awards neurips_2024               # collect paper awards -> data/<id>/awards.json
+uv run ppr awards --all --all-years     # every venue-year, including the final older ones
 uv run ppr validate iclr_2025                # compare paper counts with DBLP (10% tolerance)
 
 # Keep it current (what the monthly pipeline runs)

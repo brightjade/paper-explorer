@@ -46,11 +46,14 @@ class TestSavePapers:
 
 class TestAwardsCommand:
     def test_all_collects_every_venue_with_a_rule_and_writes_the_report(self, tmp_path, monkeypatch):
+        from datetime import date
+
         from ppr.awards import collect
 
+        this_year = f"icml_{date.today().year}"
         monkeypatch.setattr(cli, "DATA_DIR", tmp_path)
-        (tmp_path / "icml_2025").mkdir()
-        (tmp_path / "acl_2025").mkdir()
+        for name in (this_year, "acl_2025", "icml_2013"):
+            (tmp_path / name).mkdir()
         seen = []
         monkeypatch.setattr(collect, "collect_conference",
                             lambda conf_id, data_dir: seen.append(conf_id) or collect.Outcome(conf_id, "not-yet"))
@@ -58,8 +61,27 @@ class TestAwardsCommand:
 
         cli.cmd_awards(cli.build_parser().parse_args(["awards", "--all", "--report", str(report)]))
 
-        assert seen == ["icml_2025"]
+        assert seen == [this_year]
         assert json.loads(report.read_text(encoding="utf-8"))["results"][0]["status"] == "not-yet"
+
+    def test_all_years_adds_the_final_years(self, tmp_path, monkeypatch):
+        from datetime import date
+
+        from ppr.awards import collect
+
+        monkeypatch.setattr(cli, "DATA_DIR", tmp_path)
+        for name in (f"icml_{date.today().year}", "icml_2013"):
+            (tmp_path / name).mkdir()
+        seen = []
+        monkeypatch.setattr(collect, "collect_conference",
+                            lambda conf_id, data_dir: seen.append(conf_id) or collect.Outcome(conf_id, "not-yet"))
+        cli.cmd_awards(cli.build_parser().parse_args(["awards", "--all", "--all-years"]))
+        assert seen == sorted(["icml_2013", f"icml_{date.today().year}"])
+
+    def test_all_years_without_all_is_a_usage_error(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(cli, "DATA_DIR", tmp_path)
+        with pytest.raises(SystemExit):
+            cli.cmd_awards(cli.build_parser().parse_args(["awards", "--all-years", "icml_2013"]))
 
     def test_held_and_failed_conferences_do_not_fail_the_command(self, tmp_path, monkeypatch):
         from ppr.awards import collect
