@@ -1,8 +1,9 @@
 import pytest
 
 from ppr.awards.labels import UnknownAwardLabel
-from ppr.awards.manual import MANUAL_DIR, load_manual
+from ppr.awards.manual import MANUAL_DIR, load_manual, replaced_titles
 from ppr.discover import known_conference_ids
+from ppr.matching import title_key
 
 EXPECTED = {
     "wacv_2023": 17, "fse_2023": 15, "fse_2026": 10, "cvpr_2023": 12,
@@ -53,3 +54,41 @@ def test_a_non_award_label_raises(tmp_path):
 
 def test_the_directory_is_never_mistaken_for_a_conference_config():
     assert "awards_manual" not in known_conference_ids()
+
+
+def _file(tmp_path, body, name="x_2024"):
+    (tmp_path / f"{name}.yaml").write_text(body, encoding="utf-8")
+
+
+def test_entries_carry_forum_id_and_url(tmp_path):
+    _file(tmp_path, 'source: https://x.test/\nretrieved: 2026-10-17\nawards:\n'
+                    '  - {label: "Best Paper", title: "P", forum_id: "abc123", url: "https://x.test/p"}\n')
+    [a] = load_manual("x_2024", tmp_path)
+    assert (a.forum_id, a.url) == ("abc123", "https://x.test/p")
+
+
+def test_a_secondary_list_needs_its_corroboration(tmp_path):
+    _file(tmp_path, 'source: https://x.test/\nofficial: false\nretrieved: 2026-10-17\n'
+                    'awards:\n  - {label: "Best Paper", title: "P"}\n')
+    with pytest.raises(ValueError, match="also"):
+        load_manual("x_2024", tmp_path)
+    _file(tmp_path, 'source: https://x.test/\nofficial: false\nalso: [https://y.test/]\nretrieved: 2026-10-17\n'
+                    'awards:\n  - {label: "Best Paper", title: "P"}\n')
+    assert len(load_manual("x_2024", tmp_path)) == 1
+
+
+def test_replaced_titles_are_kind_and_title_key(tmp_path):
+    _file(tmp_path, 'source: https://x.test/\nretrieved: 2026-10-17\nawards:\n'
+                    '  - {label: "Best Paper Honorable Mention", title: "Pose-NDF: Modeling Poses",'
+                    ' replaces: "Pose-NDF: Modelling Poses"}\n'
+                    '  - {label: "Best Paper", title: "Q"}\n')
+    assert replaced_titles("x_2024", tmp_path) == {("honorable", title_key("Pose-NDF: Modelling Poses"))}
+    assert replaced_titles("x_2031", tmp_path) == set()
+
+
+@pytest.mark.parametrize("conf_id", sorted(EXPECTED))
+def test_every_committed_secondary_list_names_its_corroboration(conf_id):
+    import yaml
+    raw = yaml.safe_load((MANUAL_DIR / f"{conf_id}.yaml").read_text(encoding="utf-8"))
+    if raw.get("official", True) is False:
+        assert raw["also"] and all(u.startswith("https://") for u in raw["also"])

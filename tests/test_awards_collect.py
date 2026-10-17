@@ -12,6 +12,7 @@ from ppr.awards.collect import (
     format_summary,
     results_to_json,
 )
+from ppr.awards import manual as manual_module
 from ppr.awards.labels import UnknownAwardLabel
 from ppr.awards.manual import MANUAL_DIR
 from ppr.awards.model import Award, awards_path, read_awards, write_awards
@@ -156,10 +157,6 @@ class TestRegistry:
             names = [name for name, _ in sources]
             assert len(names) == len(set(names)), prefix
 
-    def test_se_venues_consult_manual_before_sigsoft(self):
-        for prefix in ("icse", "fse", "ase", "issta"):
-            assert [name for name, _ in SOURCES_BY_PREFIX[prefix]] == ["researchr", "manual", "sigsoft"]
-
     def test_every_manual_file_belongs_to_a_venue_that_reads_manual_files(self):
         for path in MANUAL_DIR.glob("*.yaml"):
             prefix = path.stem.rpartition("_")[0]
@@ -220,3 +217,52 @@ class TestConferenceIds:
 
     def test_missing_data_dir(self, tmp_path):
         assert conference_ids(tmp_path / "missing") == []
+
+
+def _manual_file(monkeypatch, tmp_path, body):
+    manual_dir = tmp_path / "manual"
+    manual_dir.mkdir()
+    (manual_dir / "demo_2025.yaml").write_text(body, encoding="utf-8")
+    monkeypatch.setattr(manual_module, "MANUAL_DIR", manual_dir)
+
+
+class TestManualFirst:
+    def test_every_venue_reads_its_manual_file_first(self):
+        for prefix, sources in SOURCES_BY_PREFIX.items():
+            if prefix != "tmlr":
+                assert sources[0][0] == "manual", prefix
+
+    def test_se_venues_consult_researchr_then_sigsoft_after_manual(self):
+        for prefix in ("icse", "fse", "ase", "issta"):
+            assert [name for name, _ in SOURCES_BY_PREFIX[prefix]][:3] == ["manual", "researchr", "sigsoft"]
+
+    def test_a_manual_entry_wins_a_duplicate_and_corrects_its_label(self, monkeypatch, tmp_path):
+        conf_dir = tmp_path / "demo_2025"
+        conf_dir.mkdir()
+        (conf_dir / "papers.jsonl").write_text(json.dumps({"title": "Won"}) + "\n", encoding="utf-8")
+        _manual_file(monkeypatch, tmp_path, 'source: https://m.test/\nretrieved: 2026-10-17\nawards:\n'
+                                            '  - {label: "Best Student Paper Honorable Mention", title: "Won"}\n')
+        monkeypatch.setitem(SOURCES_BY_PREFIX, "demo", [
+            ("manual", manual_module.manual), ("b", _src([_a("Best Paper Honorable Mention", "honorable", "Won", "b")]))])
+        collect_conference("demo_2025", tmp_path)
+        assert [(a.label, a.via) for a in read_awards(awards_path(tmp_path, "demo_2025"))] == [
+            ("Best Student Paper Honorable Mention", "manual")]
+
+    def test_replaces_drops_another_sources_spelling_of_the_same_kind(self, monkeypatch, tmp_path):
+        conf_dir = tmp_path / "demo_2025"
+        conf_dir.mkdir()
+        (conf_dir / "papers.jsonl").write_text(json.dumps({"title": "Pose-NDF: Modeling Poses"}) + "\n",
+                                               encoding="utf-8")
+        _manual_file(monkeypatch, tmp_path, 'source: https://m.test/\nretrieved: 2026-10-17\nawards:\n'
+                                            '  - {label: "Honorable Mention", title: "Pose-NDF: Modeling Poses",'
+                                            ' replaces: "Pose-NDF: Modelling Poses"}\n')
+        monkeypatch.setitem(SOURCES_BY_PREFIX, "demo", [
+            ("manual", manual_module.manual),
+            ("b", _src([_a("Honorable Mention", "honorable", "Pose-NDF: Modelling Poses", "b"),
+                        _a("Best Paper", "award", "Pose-NDF: Modelling Poses", "b")]))])
+        out = collect_conference("demo_2025", tmp_path)
+        assert [(a.kind, a.title, a.via) for a in read_awards(awards_path(tmp_path, "demo_2025"))] == [
+            ("award", "Pose-NDF: Modelling Poses", "b"),
+            ("honorable", "Pose-NDF: Modeling Poses", "manual"),
+        ]
+        assert (out.matched, out.unmatched) == (1, ["Pose-NDF: Modelling Poses"])

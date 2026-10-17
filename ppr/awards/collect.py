@@ -33,11 +33,12 @@ logger = logging.getLogger(__name__)
 # (conf_id, year, earlier) -> awards, or None when the source chose not to run.
 Source = Callable[[str, int, list[Award]], list[Award] | None]
 
-# A manual file before SIGSOFT: a reviewed list counts as "winners already
-# found", so SIGSOFT's lagging copy never duplicates it.
+# Every venue reads its reviewed manual file first, so the file wins any
+# duplicate (correcting another source's label) and, being "winners already
+# found", keeps SIGSOFT's lagging copy from duplicating it.
 _SE: list[tuple[str, Source]] = [
-    ("researchr", researchr_badges.researchr_badges),
     ("manual", manual.manual),
+    ("researchr", researchr_badges.researchr_badges),
     ("sigsoft", sigsoft.sigsoft_backfill),
 ]
 
@@ -45,20 +46,20 @@ _SE: list[tuple[str, Source]] = [
 # (merge), and each name is the `via` its source writes, which the lost-source
 # guard compares against the file on disk.
 SOURCES_BY_PREFIX: dict[str, list[tuple[str, Source]]] = {
-    "neurips": [("virtual", virtual.awards_detail), ("manual", manual.manual)],
-    "icml": [("virtual", virtual.awards_detail), ("manual", manual.manual)],
-    "iclr": [("iclr_blog", iclr_blog.iclr_blog), ("virtual", virtual.awards_detail), ("manual", manual.manual)],
-    "cvpr": [("cvf_registry", cvf_registry.cvf_registry), ("virtual", virtual.cvpr_candidates),
-             ("manual", manual.manual)],
-    "iccv": [("cvf_registry", cvf_registry.cvf_registry), ("manual", manual.manual)],
-    "eccv": [("virtual", virtual.awards_detail), ("cvf_registry", cvf_registry.cvf_registry),
-             ("manual", manual.manual)],
+    "neurips": [("manual", manual.manual), ("virtual", virtual.awards_detail)],
+    "icml": [("manual", manual.manual), ("virtual", virtual.awards_detail)],
+    "iclr": [("manual", manual.manual), ("iclr_blog", iclr_blog.iclr_blog), ("virtual", virtual.awards_detail)],
+    "cvpr": [("manual", manual.manual), ("cvf_registry", cvf_registry.cvf_registry),
+             ("virtual", virtual.cvpr_candidates)],
+    "iccv": [("manual", manual.manual), ("cvf_registry", cvf_registry.cvf_registry)],
+    "eccv": [("manual", manual.manual), ("virtual", virtual.awards_detail),
+             ("cvf_registry", cvf_registry.cvf_registry)],
     "wacv": [("manual", manual.manual)],
     "icse": _SE,
     "fse": _SE,
     "ase": _SE,
     "issta": _SE,
-    "usenix_security": [("usenix", usenix_notes.usenix_awards), ("manual", manual.manual)],
+    "usenix_security": [("manual", manual.manual), ("usenix", usenix_notes.usenix_awards)],
     "tmlr": [("tmlr", tmlr_certifications.tmlr_certifications)],
 }
 
@@ -149,7 +150,10 @@ def _merge_and_write(conf_id: str, data_dir: Path, results: dict[str, list[Award
     path = awards_path(data_dir, conf_id)
     previous = read_awards(path) or []
     papers = _papers(data_dir, conf_id)
-    merged = merge([_retitle(got, papers) for got in results.values() if got])
+    replaced = manual.replaced_titles(conf_id)
+    kept = [got if name == "manual" else [a for a in got if (a.kind, title_key(a.title)) not in replaced]
+            for name, got in results.items() if got]
+    merged = merge([_retitle(got, papers) for got in kept])
     if not merged:
         if previous:
             return Outcome(conf_id, "held", count=len(previous),
