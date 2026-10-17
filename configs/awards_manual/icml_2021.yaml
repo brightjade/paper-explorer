@@ -1,0 +1,5 @@
+# ICML 2021 virtual site, Test of Time Award page (the awards_detail page lists no test of time card)
+source: https://icml.cc/virtual/2021/test-of-time/11808
+retrieved: 2026-10-17
+awards:
+  - {label: "Test of Time Award", title: "Bayesian Learning via Stochastic Gradient Langevin Dynamics", url: "https://icml.cc/virtual/2021/test-of-time/11808"}

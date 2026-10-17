@@ -1,0 +1,7 @@
+# ICLR 2017 archive schedule page (iclr.cc/archive/www): the three contributed talks marked "BEST PAPER AWARD"
+source: https://iclr.cc/archive/www/doku.php%3Fid=iclr2017:schedule.html
+retrieved: 2026-10-17
+awards:
+  - {label: "Best Paper Award", title: "Understanding deep learning requires rethinking generalization", forum_id: "Sy8gdB9xx"}
+  - {label: "Best Paper Award", title: "Semi-supervised Knowledge Transfer for Deep Learning from Private Training Data", forum_id: "HkwoSDPgg"}
+  - {label: "Best Paper Award", title: "Making Neural Programming Architectures Generalize via Recursion", forum_id: "BkbY4psgg"}

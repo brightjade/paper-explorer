@@ -1,0 +1,6 @@
+# ICLR 2019 Awards page (iclr.cc/Conferences/2019/Awards): 2 Best Paper winners
+source: https://iclr.cc/Conferences/2019/Awards
+retrieved: 2026-10-17
+awards:
+  - {label: "Best Paper Award", title: "Ordered Neurons: Integrating Tree Structures into Recurrent Neural Networks", forum_id: "B1l6qiR5F7"}
+  - {label: "Best Paper Award", title: "The Lottery Ticket Hypothesis: Finding Sparse, Trainable Neural Networks", forum_id: "rJl-b3RcF7"}

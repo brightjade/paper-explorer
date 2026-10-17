@@ -1,0 +1,7 @@
+# ICLR 2016 archive main page (iclr.cc/archive/www): "two Best Paper Awards"
+source: https://iclr.cc/archive/www/doku.php%3Fid=iclr2016:main.html
+retrieved: 2026-10-17
+awards:
+  - {label: "Best Paper Award", title: "Neural Programmer-Interpreters"}
+  # the page spells it "Deep Neural Networks"; the data titles the paper "Deep Neural Network"
+  - {label: "Best Paper Award", title: "Deep Compression: Compressing Deep Neural Network with Pruning, Trained Quantization and Huffman Coding"}

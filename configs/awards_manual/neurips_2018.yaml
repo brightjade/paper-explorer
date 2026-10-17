@@ -1,8 +1,13 @@
-# NeurIPS 2018 Awards page (static Drupal page): 4 Best Papers; the page lists no test of time award, and the demonstration awards are left out
+# NeurIPS 2018 Awards page (static Drupal page): 4 Best Papers; the demonstration awards are left out. The page lists no test of time award, so that entry comes from two independent posts (Google AI Blog, Meta Research), which makes this file a secondary list (the 4 best papers are on the official page).
 source: https://neurips.cc/Conferences/2018/Awards
-retrieved: 2026-10-16
+official: false
+also:
+  - https://research.google/blog/the-neurips-2018-test-of-time-award-the-trade-offs-of-large-scale-learning/
+  - https://research.facebook.com/blog/2018/12/leon-bottou-facebook-ai-and-olivier-bousquet-google-ai-win-the-test-of-time-award-at-neurips-2018
+retrieved: 2026-10-17
 awards:
   - {label: "Best Papers", title: "Non-delusional Q-learning and Value-iteration"}
   - {label: "Best Papers", title: "Optimal Algorithms for Non-Smooth Distributed Optimization in Networks"}
   - {label: "Best Papers", title: "Nearly Tight Sample Complexity Bounds for Learning Mixtures of Gaussians via Sample Compression Schemes"}
   - {label: "Best Papers", title: "Neural Ordinary Differential Equations"}
+  - {label: "Test of Time Award", title: "The Tradeoffs of Large Scale Learning", url: "https://research.google/blog/the-neurips-2018-test-of-time-award-the-trade-offs-of-large-scale-learning/"}

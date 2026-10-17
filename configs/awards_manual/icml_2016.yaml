@@ -1,0 +1,8 @@
+# ICML 2016 site awards page (index.html?p=2009): test of time paper and 3 best papers
+source: https://icml.cc/Conferences/2016/index.html%3Fp=2009.html
+retrieved: 2026-10-17
+awards:
+  - {label: "Test of time", title: "Dynamic Topic Models", url: "https://icml.cc/Conferences/2016/awards/dtm.pdf"}
+  - {label: "Best paper", title: "Dueling Network Architectures for Deep Reinforcement Learning"}
+  - {label: "Best paper", title: "Pixel Recurrent Neural Networks"}
+  - {label: "Best paper", title: "Ensuring Rapid Mixing and Low Bias for Asynchronous Gibbs Sampling"}

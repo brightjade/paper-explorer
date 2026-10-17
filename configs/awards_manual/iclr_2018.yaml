@@ -1,0 +1,10 @@
+# ICLR 2018 best papers: no official page found; two independent write-ups (Synced, Analytics Vidhya) both name these three
+source: https://syncedreview.com/2018/04/16/iclr-2018s-best-papers-variant-adam-spherical-cnns-and-meta-learning/
+official: false
+also:
+  - https://www.analyticsvidhya.com/blog/2018/05/best-iclr-2018-leading-machine-learning-deep-learning-global-conference/
+retrieved: 2026-10-17
+awards:
+  - {label: "Best Paper Award", title: "On the Convergence of Adam and Beyond", forum_id: "ryQu7f-RZ"}
+  - {label: "Best Paper Award", title: "Spherical CNNs", forum_id: "Hkbd5xZRb"}
+  - {label: "Best Paper Award", title: "Continuous Adaptation via Meta-Learning in Nonstationary and Competitive Environments", forum_id: "Sk2u1g-0-"}

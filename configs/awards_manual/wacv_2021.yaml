@@ -1,0 +1,11 @@
+# WACV 2021 awards: the official site lists none. The curated README (Best-Papers-Top-Venues, GitHub) names 5 winners; only the 2 with an independent source (MERL news, UCSB news) are kept. Left out for lack of a second source: Best Paper Algorithms (DeepCSR), Best Paper Applications (3D Human Pose and Shape Estimation...), Best Student Paper (A Pose Proposal and Refinement Network...)
+source: https://raw.githubusercontent.com/SarahRastegar/Best-Papers-Top-Venues/main/README.md
+official: false
+also:
+  - https://merl.com/news/award-20210106-1345
+  - https://cs.ucsb.edu/happenings/news/wenhu-chen-phd-receives-best-paper-award-honorable-mention-wacv-2021
+note: partial (2 of 5)
+retrieved: 2026-10-17
+awards:
+  - {label: "Best Paper Honorable Mention", title: "Generative Patch Priors for Practical Compressive Image Recovery"}
+  - {label: "Best Student Paper Honorable Mention", title: "Meta Module Network for Compositional Visual Reasoning"}

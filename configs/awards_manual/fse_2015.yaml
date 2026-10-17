@@ -1,0 +1,9 @@
+# ESEC/FSE 2015 Distinguished Paper Awards: the official list was not found; one winner is named by two independent sources (William & Mary news, Gabriele Bavota's awards page)
+source: https://www.wm.edu/as/graduate/news/archived-news/2015-archive/distinguished-paper-award-fse.php
+official: false
+also:
+  - https://people.lu.usi.ch/bavotg/pages/professional.html
+note: partial (1 known)
+retrieved: 2026-10-17
+awards:
+  - {label: "Distinguished Paper Award", title: "Optimizing energy consumption of GUIs in Android apps: a multi-objective approach"}

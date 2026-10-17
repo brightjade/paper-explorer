@@ -1,0 +1,5 @@
+# NeurIPS 2022 awards announcement (blog.neurips.cc): only the Test of Time paper; the outstanding papers come from awards_detail
+source: https://blog.neurips.cc/2022/11/21/announcing-the-neurips-2022-awards/
+retrieved: 2026-10-17
+awards:
+  - {label: "Test of Time Award", title: "ImageNet Classification with Deep Convolutional Neural Networks", url: "https://blog.neurips.cc/2022/11/21/announcing-the-neurips-2022-awards/"}
