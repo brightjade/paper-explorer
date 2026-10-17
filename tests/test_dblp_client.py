@@ -272,6 +272,8 @@ class TestCleaning:
         ("Copy and Paste Redeemed (T).", "Copy and Paste Redeemed"),
         ("GRT: Program-Analysis-Guided Random Testing (T).", "GRT: Program-Analysis-Guided Random Testing"),
         ("Tracking Load-time Configuration Options (N).", "Tracking Load-time Configuration Options"),
+        ("Automated Test Input Generation for Android: Are We There Yet? (E).",
+         "Automated Test Input Generation for Android: Are We There Yet?"),
         ("Sorting in O(N).", "Sorting in O(N)"),          # not a track marker: no space before it
         ("Learning (T) Models.", "Learning (T) Models"),   # only at the end
     ])

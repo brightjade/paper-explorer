@@ -164,9 +164,10 @@ def clean_author(name: str) -> str:
     return re.sub(r"\s+\d{4}$", "", name)
 
 
-# ASE 2015 suffixes each title with its track, " (T)" technical or " (N)" new
-# ideas; no other venue-year in the dataset does (checked 2026-10-17).
-_TRACK_MARKER = re.compile(r"\s+\([TN]\)$")
+# ASE 2015 suffixes each title with its track: " (T)" technical, " (N)" new
+# ideas, " (E)" experience. No other venue-year in the dataset has such a
+# marker (checked 2026-10-17).
+_TRACK_MARKER = re.compile(r"\s+\([TNE]\)$")
 
 
 def clean_title(title: str) -> str:
