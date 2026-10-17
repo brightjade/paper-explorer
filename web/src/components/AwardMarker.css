@@ -21,6 +21,11 @@
   --award-color: var(--award-gold);
 }
 
+/* A prize given a decade later: distinct from the gold of the paper's own conference. */
+.award-test_of_time {
+  --award-color: var(--award-tot);
+}
+
 .award-honorable {
   --award-color: var(--text-secondary);
 }

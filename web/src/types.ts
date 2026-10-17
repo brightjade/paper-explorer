@@ -11,6 +11,8 @@ export interface TestOfTimeEntry {
   label: string;
   title: string;
   url?: string;
+  /** The earlier edition that holds the honored paper, when the dataset has it. */
+  conference?: string;
 }
 
 export interface Paper {

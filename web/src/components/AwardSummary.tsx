@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { AwardChip } from "../awards";
 import type { TestOfTimeEntry } from "../types";
 import { TrophyIcon } from "./AwardMarker";
@@ -35,7 +36,19 @@ export function AwardSummary({
       {testOfTime?.map((t) => (
         <span key={`${t.label}-${t.title}`} className="award-tot">
           {t.label}:{" "}
-          {t.url ? (
+          {t.conference ? (
+            <>
+              <Link to={`/conference/${t.conference}`}>{t.title}</Link>
+              {t.url && (
+                <>
+                  {" "}
+                  <a href={t.url} target="_blank" rel="noopener noreferrer" aria-label="Paper page">
+                    ↗
+                  </a>
+                </>
+              )}
+            </>
+          ) : t.url ? (
             <a href={t.url} target="_blank" rel="noopener noreferrer">
               {t.title} ↗
             </a>

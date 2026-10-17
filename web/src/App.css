@@ -19,6 +19,7 @@
   --font-body: 'Source Sans 3', -apple-system, sans-serif;
   --citation-color: #b45309;
   --award-gold: #a16207;
+  --award-tot: #7c3aed;
 }
 
 [data-theme="dark"] {
@@ -36,6 +37,7 @@
   --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.3);
   --citation-color: #e09422;
   --award-gold: #d4a72c;
+  --award-tot: #a78bfa;
 }
 
 * {
