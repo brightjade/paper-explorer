@@ -1,11 +1,12 @@
 """Scraper for USENIX Security conference accepted papers.
 
 USENIX publishes accepted papers on their Drupal-based website. The
-technical-sessions page lists every paper as an `article.node-paper`: the title
-in `h2 a`, and a people-text block whose first <p> names the authors -- names
-as plain text, each group's affiliation in an <em> -- and whose later <p>s are
-notes such as "Distinguished Paper Award Winner", which the awards collector
-reads (`ppr/awards/usenix_notes.py`).
+technical-sessions page lists every paper as a `.node-paper` node -- an
+`article` since 2017, a `div` teaser in 2013-16 -- with the title in `h2 a` and
+a people-text block whose first <p> names the authors: names as plain text,
+each group's affiliation in an <em>. Award notes, which the awards collector
+reads (`ppr/awards/usenix_notes.py`), are later <p>s (2019 on) or a <strong>
+inside the author <p> (2013-18). The crawler itself serves 2023 on.
 Requires a browser User-Agent header to avoid 403 responses.
 """
 
@@ -57,24 +58,29 @@ def _authors(p) -> list[str]:
     return [name for name in (" ".join(part.split()) for part in _NAME_SEPARATOR.split(text)) if name]
 
 
+def _text(el) -> str:
+    return " ".join(el.get_text(" ").split())
+
+
 def parse_sessions(markup: str | bytes) -> list[dict]:
-    """One {"title", "link", "authors", "notes"} per paper article on the page."""
+    """One {"title", "link", "authors", "notes"} per paper node on the page."""
     soup = BeautifulSoup(markup, "html.parser")
     rows = []
-    for article in soup.select("article.node-paper"):
-        link_tag = article.select_one("h2 a")
+    for node in soup.select(".node-paper"):
+        link_tag = node.select_one("h2 a")
         title = link_tag.get_text(strip=True) if link_tag else ""
         if not title:
             continue
         href = link_tag.get("href", "")
         if href and not href.startswith("http"):
             href = f"https://www.usenix.org{href}"
-        people = article.select(".field-name-field-paper-people-text p")
+        people = node.select(".field-name-field-paper-people-text p")
+        inline = [_text(s) for s in people[0].find_all("strong")] if people else []
         rows.append({
             "title": title,
             "link": href,
             "authors": _authors(people[0] if people else None),
-            "notes": [" ".join(p.get_text(" ").split()) for p in people[1:]],
+            "notes": [n for n in inline if n] + [_text(p) for p in people[1:]],
         })
     return rows
 
