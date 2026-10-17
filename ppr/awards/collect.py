@@ -22,7 +22,7 @@ from datetime import date
 from pathlib import Path
 from typing import Callable
 
-from ppr.awards import cvf_registry, iclr_blog, manual, researchr_badges, sigsoft, tmlr_certifications, usenix_notes, virtual
+from ppr.awards import ase_mip, cvf_registry, iclr_blog, icse_mip, issta_impact, manual, researchr_badges, sigsoft, tmlr_certifications, usenix_notes, virtual
 from ppr.awards.join import attach
 from ppr.awards.labels import UnknownAwardLabel
 from ppr.awards.model import Award, awards_path, merge, read_awards, write_awards
@@ -55,10 +55,10 @@ SOURCES_BY_PREFIX: dict[str, list[tuple[str, Source]]] = {
     "eccv": [("manual", manual.manual), ("virtual", virtual.awards_detail),
              ("cvf_registry", cvf_registry.cvf_registry)],
     "wacv": [("manual", manual.manual)],
-    "icse": _SE,
+    "icse": _SE + [("icse_mip", icse_mip.icse_mip)],
     "fse": _SE,
-    "ase": _SE,
-    "issta": _SE,
+    "ase": _SE + [("ase_mip", ase_mip.ase_mip)],
+    "issta": _SE + [("issta_impact", issta_impact.issta_impact)],
     "usenix_security": [("manual", manual.manual), ("usenix", usenix_notes.usenix_awards)],
     "tmlr": [("tmlr", tmlr_certifications.tmlr_certifications)],
 }
