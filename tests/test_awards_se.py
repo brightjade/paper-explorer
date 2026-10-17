@@ -8,6 +8,7 @@ from ppr.awards import researchr_badges, sigsoft
 from ppr.awards.model import Award
 from ppr.awards.researchr_badges import badge_awards
 from ppr.awards.sigsoft import LABEL, SIGSOFT_URL, parse_sigsoft
+from ppr.scrapers.researchr import RESEARCHR_CONFERENCES
 from tests.test_researchr import _page, _row
 
 TRACK_URL = "https://conf.researchr.org/track/icse-2025/icse-2025-research-track"
@@ -44,6 +45,21 @@ class TestBadgeAwards:
 
     def test_unregistered_conference_has_nothing(self):
         assert researchr_badges.researchr_badges("icse_2031", 2031, []) == []
+
+    def test_an_archive_year_reads_its_track_page_on_an_alias_host(self, monkeypatch):
+        html = _page([_row("e1", "Won", track="Research Papers", badges=("ACM SIGSOFT Distinguished Paper Award",))],
+                     track="Research Papers", conf="FSE 2020")
+        get = MagicMock(return_value=MagicMock(status_code=200, text=html))
+        monkeypatch.setattr(researchr_badges.fetch, "get", get)
+        out = researchr_badges.researchr_badges("fse_2020", 2020, [])
+        assert [(a.label, a.title) for a in out] == [("ACM SIGSOFT Distinguished Paper Award", "Won")]
+        get.assert_called_once_with("https://2020.esec-fse.org/track/fse-2020-papers")
+
+    def test_archive_tracks_are_awards_only(self):
+        assert not set(researchr_badges.ARCHIVE_TRACKS) & set(RESEARCHR_CONFERENCES)
+        assert sorted(researchr_badges.ARCHIVE_TRACKS) == sorted(
+            [f"icse_{y}" for y in range(2019, 2023)] + [f"fse_{y}" for y in range(2020, 2023)]
+            + [f"ase_{y}" for y in range(2019, 2023)] + [f"issta_{y}" for y in range(2019, 2023)])
 
 
 SIGSOFT_PAGE = (
