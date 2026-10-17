@@ -75,7 +75,7 @@ class TestOutcomes:
              [_a("Test of Time Award", "test_of_time", "Old", "b"), _a("Honorable Mention", "honorable", "Missing", "b")])
         out = collect_conference("demo_2025", tmp_path)
         assert (out.status, out.count, out.matched, out.unmatched) == ("collected", 3, 1, ["Missing"])
-        assert [a.title for a in read_awards(awards_path(tmp_path, "demo_2025"))] == ["Won", "Missing", "Old"]
+        assert [a.title for a in read_awards(awards_path(tmp_path, "demo_2025"))] == ["Won", "Old", "Missing"]
 
     def test_later_sources_see_what_earlier_ones_found(self, demo, tmp_path):
         _, b = demo([_a("Best Paper", "award", "Won", "a")], [])

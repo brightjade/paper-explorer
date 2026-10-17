@@ -62,6 +62,26 @@ OBSERVED = {
     "Runner-Up": "honorable",
     "Best Paper Nominee": "candidate",
     "Best Paper Award Nominee": "candidate",
+    # 2013-2022 pages and manual files (2026-10-17)
+    "Datasets and Benchmarks Award": "award",
+    "NIPS Classic Paper Award": "test_of_time",
+    "Classic Paper Prize": "test_of_time",
+    "10 Year Paper": "test_of_time",
+    "Most Influential Paper Award": "test_of_time",
+    "Impact Paper Award": "test_of_time",
+    "Retrospective Paper Award": "test_of_time",
+    "Test of Time Runner Up": "test_of_time",
+    "Best Paper Nomination": "candidate",
+    "Best Paper Finalist": "candidate",
+    "Paper Award Nominee": "candidate",
+    "Awarded Best Paper": "award",
+    "Awarded Best Student Paper": "award",
+    "Facebook Internet Defense Prize Winner": "award",
+    "Winner of the 2017 Internet Defense Prize": "award",
+    "First Prize winner of the 2020 Internet Defense Prize": "award",
+    "2018 Internet Defense Prize First Runner Up": "honorable",
+    "Runner Up for Best Paper": "honorable",
+    "Best Paper Runner Up Awards": "honorable",
 }
 
 
@@ -74,6 +94,7 @@ def test_every_observed_label_maps_to_its_kind(label, kind):
     "Artifact-Available", "Artifact-Functional", "Artifact-Reusable",
     "Artifacts Available", "Artifacts Evaluated \u2013 Functional", "Artifact Evaluated",
     "Highlight", "Virtual Attendance", "Recorded talk",
+    "Outstanding Demonstration", "Best Demonstration Honorable Mention", "Best Demonstration",
 ])
 def test_known_non_awards_are_none(label):
     assert classify(label) is None
@@ -97,8 +118,17 @@ def test_prefix_rules_come_before_the_defaults(monkeypatch):
 
 
 def test_kind_order_follows_kinds():
-    assert KINDS == ("award", "honorable", "candidate", "artifact", "test_of_time")
+    # A test-of-time prize outranks an honorable mention or a candidacy on the
+    # paper it honors (spec §2).
+    assert KINDS == ("award", "test_of_time", "honorable", "candidate", "artifact")
     assert [KIND_ORDER[k] for k in KINDS] == [0, 1, 2, 3, 4]
+
+
+def test_icml_application_paper_is_an_award():
+    # ICML 2014's "Application Paper" prize; no other venue uses the bare phrase.
+    assert classify("Application Paper", "icml") == "award"
+    with pytest.raises(UnknownAwardLabel):
+        classify("Application Paper", "neurips")
 
 
 @pytest.mark.parametrize("label,kind", [

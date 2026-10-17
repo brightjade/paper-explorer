@@ -35,7 +35,7 @@ class TestMerge:
                       _a("Best Paper", "award", "C"),
                       _a("Best Paper", "award", "A")]])
         assert [(a.kind, a.title) for a in out] == [
-            ("award", "A"), ("award", "C"), ("honorable", "B"), ("test_of_time", "Z")]
+            ("award", "A"), ("award", "C"), ("test_of_time", "Z"), ("honorable", "B")]
 
     def test_no_results_merge_to_nothing(self):
         assert merge([]) == []

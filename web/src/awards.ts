@@ -6,7 +6,7 @@ export interface AwardChip {
   count: number;
 }
 
-const ORDER: AwardKind[] = ["award", "honorable", "candidate", "artifact", "test_of_time"];
+const ORDER: AwardKind[] = ["award", "test_of_time", "honorable", "candidate", "artifact"];
 
 /** One chip per award label on these papers, in kind order, each counting its papers. */
 export function awardChips(papers: Paper[]): AwardChip[] {
