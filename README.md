@@ -150,7 +150,7 @@ A conference ID is `<venue>_<year>`, with the venue IDs listed under [Conference
 | | ECCV | `eccv` | 2014–2024 (even years) | main |
 | | WACV | `wacv` | 2013–2026 | main |
 | Robotics | RSS | `rss` | 2013–2026 | main |
-| | CoRL | `corl` | 2017–2025 | oral, poster, main |
+| | CoRL | `corl` | 2017–2026 | oral, spotlight, poster, main |
 | | ICRA | `icra` | 2013–2026 | main |
 | | IROS | `iros` | 2013–2025 | main |
 | SE | ICSE | `icse` | 2013–2026 | main |

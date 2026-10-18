@@ -1,0 +1,8 @@
+conference:
+  name: "CoRL"
+  year: 2026
+  venue_id: "robot-learning.org/CoRL/2026/Conference"
+  selections:
+    oral: "CoRL 2026 Oral"
+    poster: "CoRL 2026 Poster"
+    spotlight: "CoRL 2026 Spotlight"
