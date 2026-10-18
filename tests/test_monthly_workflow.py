@@ -105,3 +105,10 @@ def test_rolling_recrawl_writes_a_report_that_is_uploaded():
 def test_notify_reads_the_rolling_report():
     decide = next(s for s in _wf()["jobs"]["notify"]["steps"] if s.get("name") == "Decide the issue action")
     assert "--rolling reports/rolling.json" in decide["run"]
+
+
+def test_the_base_release_is_the_newest_published_one():
+    """createdAt is the tagged commit's date: releases made from one commit tie on it."""
+    run = _named("Download the latest data release")["run"]
+    assert "sort_by(.publishedAt)" in run
+    assert "createdAt" not in run

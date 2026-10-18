@@ -57,16 +57,28 @@ def tree(root):
 class TestNewestDataTag:
     def test_picks_newest_non_draft_data_release(self):
         releases = [
-            {"tag_name": "data-2026-10-14", "created_at": "2026-10-14T11:20:30Z", "draft": False},
-            {"tag_name": "v1.0", "created_at": "2026-12-01T00:00:00Z", "draft": False},
-            {"tag_name": "data-2026-11-03", "created_at": "2026-11-03T12:00:00Z", "draft": True},
-            {"tag_name": "data-2026-10-15", "created_at": "2026-10-15T06:30:40Z", "draft": False},
+            {"tag_name": "data-2026-10-14", "published_at": "2026-10-14T11:20:30Z", "draft": False},
+            {"tag_name": "v1.0", "published_at": "2026-12-01T00:00:00Z", "draft": False},
+            {"tag_name": "data-2026-11-03", "published_at": None, "draft": True},
+            {"tag_name": "data-2026-10-15", "published_at": "2026-10-15T06:30:40Z", "draft": False},
         ]
         assert newest_data_tag(releases) == "data-2026-10-15"
 
     def test_no_data_release_is_an_error(self):
         with pytest.raises(RuntimeError):
-            newest_data_tag([{"tag_name": "v1.0", "created_at": "2026-01-01T00:00:00Z", "draft": False}])
+            newest_data_tag([{"tag_name": "v1.0", "published_at": "2026-01-01T00:00:00Z", "draft": False}])
+
+    @pytest.mark.parametrize("order", [1, -1])
+    def test_releases_made_from_one_commit_are_ordered_by_publication(self, order):
+        # GitHub's created_at is the tagged commit's date, so two releases made
+        # from one commit tie on it (data-2026-10-17-2 and -3); published_at does not.
+        releases = [
+            {"tag_name": "data-2026-10-17-2", "created_at": "2026-10-16T12:06:30Z",
+             "published_at": "2026-10-17T07:41:27Z", "draft": False},
+            {"tag_name": "data-2026-10-17-3", "created_at": "2026-10-16T12:06:30Z",
+             "published_at": "2026-10-17T11:38:45Z", "draft": False},
+        ][::order]
+        assert newest_data_tag(releases) == "data-2026-10-17-3"
 
 
 class TestSync:

@@ -67,8 +67,11 @@ jobs:
         id: base
         run: |
           set -euo pipefail
-          tag=$(gh release list --limit 100 --json tagName,createdAt,isDraft \
-            --jq '[.[] | select((.tagName | startswith("data-")) and (.isDraft | not))] | sort_by(.createdAt) | last | .tagName')
+          # Newest by publication: a release's creation date is the tagged
+          # commit's date, so releases made from one commit tie on it
+          # (ppr/release.py and scripts/sync_data.py order the same way).
+          tag=$(gh release list --limit 100 --json tagName,publishedAt,isDraft \
+            --jq '[.[] | select((.tagName | startswith("data-")) and (.isDraft | not))] | sort_by(.publishedAt) | last | .tagName')
           if [ -z "$tag" ] || [ "$tag" = "null" ]; then
             echo "No data-* release to start from" >&2; exit 1
           fi

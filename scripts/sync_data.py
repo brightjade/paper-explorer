@@ -36,11 +36,15 @@ class SyncRefused(Exception):
 
 
 def newest_data_tag(releases: list[dict]) -> str:
-    """The same rule the monthly workflow starts from: newest non-draft data-*."""
+    """The same rule the monthly workflow starts from: the newest published non-draft data-*.
+
+    Not created_at, which is the tagged commit's date: releases made from one
+    commit tie on it.
+    """
     data = [r for r in releases if r["tag_name"].startswith("data-") and not r.get("draft")]
     if not data:
         raise RuntimeError("no data-* release found")
-    return max(data, key=lambda r: r["created_at"])["tag_name"]
+    return max(data, key=lambda r: r["published_at"])["tag_name"]
 
 
 def fetch_latest_tag() -> str:

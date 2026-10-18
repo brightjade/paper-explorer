@@ -16,7 +16,7 @@ from ppr.release import (
 
 class FakeGh:
     def __init__(self, releases, fail_on=()):
-        self.releases = releases  # list of (tag, createdAt[, isDraft])
+        self.releases = releases  # list of (tag, publishedAt[, isDraft])
         self.calls = []
         self.fail_on = fail_on
 
@@ -25,7 +25,7 @@ class FakeGh:
         if any(cmd[:3] == list(f) for f in self.fail_on):
             raise RuntimeError("gh failed")
         if cmd[:3] == ["gh", "release", "list"]:
-            return json.dumps([{"tagName": r[0], "createdAt": r[1], "isDraft": len(r) > 2 and r[2]}
+            return json.dumps([{"tagName": r[0], "publishedAt": r[1], "isDraft": len(r) > 2 and r[2]}
                                     for r in self.releases])
         return ""
 
@@ -50,9 +50,22 @@ RELEASES = [("data-2026-10-03", "2026-10-03T00:00:00Z"),
 
 
 class TestDataReleases:
-    def test_ignores_other_tags_and_sorts_by_creation(self):
+    def test_ignores_other_tags_and_sorts_by_publication(self):
         gh = FakeGh(list(reversed(RELEASES)))  # listed oldest first on purpose
         assert data_releases(gh) == ["data-2026-10-03", "data-2026-09-03", "data-2026-08-05"]
+        [list_call] = gh.calls
+        assert "publishedAt" in list_call[list_call.index("--json") + 1]
+
+    @pytest.mark.parametrize("order", [1, -1])
+    def test_releases_made_from_one_commit_are_ordered_by_publication(self, order):
+        # GitHub's createdAt is the tagged commit's date, so two releases made from
+        # one commit tie on it (data-2026-10-17-2 and -3, which aborted run
+        # 39038452486's release); publishedAt does not.
+        rows = [{"tagName": "data-2026-10-17-2", "createdAt": "2026-10-16T12:06:30Z",
+                 "publishedAt": "2026-10-17T07:41:27Z", "isDraft": False},
+                {"tagName": "data-2026-10-17-3", "createdAt": "2026-10-16T12:06:30Z",
+                 "publishedAt": "2026-10-17T11:38:45Z", "isDraft": False}][::order]
+        assert data_releases(lambda cmd: json.dumps(rows))[0] == "data-2026-10-17-3"
 
 
 class TestDrafts:

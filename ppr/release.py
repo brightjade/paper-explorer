@@ -32,10 +32,16 @@ def gh(cmd: list[str]) -> str:
 
 
 def data_releases(run: Runner) -> list[str]:
+    """Non-draft data releases, newest published first.
+
+    Not by createdAt: GitHub sets it to the tagged commit's date, so releases
+    made from one commit tie on it (data-2026-10-17-2 and -3), and a tie broken
+    differently here and in the workflow aborted a release.
+    """
     rows = json.loads(run(["gh", "release", "list", "--limit", "100",
-                           "--json", "tagName,createdAt,isDraft"]))
+                           "--json", "tagName,publishedAt,isDraft"]))
     rows = [r for r in rows if r["tagName"].startswith(PREFIX) and not r.get("isDraft")]
-    rows.sort(key=lambda r: r["createdAt"], reverse=True)
+    rows.sort(key=lambda r: r["publishedAt"], reverse=True)
     return [r["tagName"] for r in rows]
 
 
