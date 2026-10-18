@@ -193,11 +193,28 @@ class TestLostSource:
 
 
 class TestConferenceIds:
+    @pytest.fixture(autouse=True)
+    def manual_dir(self, tmp_path_factory, monkeypatch):
+        """No manual files unless a test writes one: the window tests must not depend on configs/."""
+        d = tmp_path_factory.mktemp("manual")
+        monkeypatch.setattr(manual_module, "MANUAL_DIR", d)
+        return d
+
     @staticmethod
     def _dirs(tmp_path, *names):
         for name in names:
             (tmp_path / name).mkdir()
         (tmp_path / "pipeline_state.json").write_text("{}")
+
+    def test_an_old_year_with_a_manual_file_but_no_awards_file_is_retried(self, tmp_path, manual_dir):
+        # neurips_2014 failed on a 503 in the one all-years run (2026-10-17): its
+        # reviewed list must not wait for the next all-years run.
+        self._dirs(tmp_path, "neurips_2013", "neurips_2014", "neurips_2015", "neurips_2026")
+        for conf_id in ("neurips_2013", "neurips_2014"):
+            (manual_dir / f"{conf_id}.yaml").write_text("awards: []\n", encoding="utf-8")
+        write_awards(awards_path(tmp_path, "neurips_2013"), "neurips_2013",
+                     [Award("Outstanding Paper Award", "award", "P", "manual", "https://x.test/")])
+        assert conference_ids(tmp_path, date(2026, 10, 18)) == ["neurips_2014", "neurips_2026"]
 
     def test_this_year_and_last_year_of_venues_with_rules(self, tmp_path):
         self._dirs(tmp_path, "iclr_2024", "iclr_2025", "iclr_2026", "acl_2026", "usenix_security_2025")

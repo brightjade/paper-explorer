@@ -106,7 +106,10 @@ def conference_ids(data_dir: Path, today: date | None = None, all_years: bool = 
     """Every data/<id> whose venue has an awards rule and whose awards can still change, sorted.
 
     That is this year and last year (RECENT_YEARS), plus every year from a
-    venue's FIRST_YEAR_BY_PREFIX on. `all_years` drops the year test.
+    venue's FIRST_YEAR_BY_PREFIX on, plus an older year that has a reviewed
+    manual file but no awards.json yet -- a list that failed to land (a source
+    answered 503 in the all-years run) or was added since -- so it is retried
+    monthly until it is collected. `all_years` drops the year test.
     """
     if not data_dir.exists():
         return []
@@ -117,7 +120,8 @@ def conference_ids(data_dir: Path, today: date | None = None, all_years: bool = 
         if not (d.is_dir() and prefix in SOURCES_BY_PREFIX and year.isdigit()):
             continue
         first = min(first_recent, FIRST_YEAR_BY_PREFIX.get(prefix, first_recent))
-        if all_years or int(year) >= first:
+        pending = (manual.MANUAL_DIR / f"{d.name}.yaml").exists() and not awards_path(data_dir, d.name).exists()
+        if all_years or int(year) >= first or pending:
             out.append(d.name)
     return sorted(out)
 
