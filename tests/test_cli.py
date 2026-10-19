@@ -10,7 +10,9 @@ import json
 import pytest
 
 from ppr import cli
-from ppr.models import EmptyOverwriteError, Paper
+from ppr.layout import papers_path
+from ppr.models import Paper
+from ppr.store import ShrinkError, read_papers, save_enriched
 
 
 def _paper(title: str) -> Paper:
@@ -21,7 +23,7 @@ class TestSavePapers:
     def test_writes_under_the_conference_directory(self, tmp_path, monkeypatch):
         monkeypatch.setattr(cli, "DATA_DIR", tmp_path)
         path = cli._save_papers([_paper("P1")], "ijcai_2026")
-        assert path == tmp_path / "ijcai_2026" / "papers.jsonl"
+        assert path == papers_path(tmp_path, "ijcai_2026")
         assert path.read_text(encoding="utf-8").strip() == _paper("P1").to_json()
 
     def test_refuses_to_erase_an_existing_crawl(self, tmp_path, monkeypatch):
@@ -32,10 +34,17 @@ class TestSavePapers:
         saved = cli._save_papers([_paper("P1"), _paper("P2")], "ijcai_2026")
         before = saved.read_bytes()
 
-        with pytest.raises(EmptyOverwriteError):
+        with pytest.raises(ShrinkError):
             cli._save_papers([], "ijcai_2026")
 
         assert saved.read_bytes() == before
+
+    def test_save_keeps_enrichment_across_a_recrawl(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(cli, "DATA_DIR", tmp_path)
+        path = papers_path(tmp_path, "ijcai_2026")
+        save_enriched([Paper(title="P", link="L", authors=["A"], citation_count=3)], path)
+        cli._save_papers([Paper(title="P", link="L", authors=["A"])], "ijcai_2026")
+        assert read_papers(path)[0].citation_count == 3
 
     def test_first_crawl_of_a_venue_with_no_papers_still_writes(self, tmp_path, monkeypatch):
         monkeypatch.setattr(cli, "DATA_DIR", tmp_path)

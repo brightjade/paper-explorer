@@ -14,6 +14,7 @@ from ppr.autoregister import (
     git_commit,
     outcomes_to_json,
 )
+from ppr.layout import papers_path
 from ppr.venues import Venue
 
 README = """| Field | Venue | ID | Years | Tracks |
@@ -78,7 +79,7 @@ def _crawler(counts):
         n = counts[conf_id]
         if isinstance(n, Exception):
             raise n
-        out = ws.data_dir / conf_id / "papers.jsonl"
+        out = papers_path(ws.data_dir, conf_id)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text("".join(
             json.dumps({"title": f"P{i}", "link": "L", "authors": ["A"], "selection": "main"}) + "\n"
@@ -175,13 +176,13 @@ class TestCountCheck:
         assert "250" in outcomes[0].reason
         assert ws.dblp_module.read_text() == DBLP_SRC
         assert ws.readme.read_text() == README
-        assert not (ws.data_dir / "icse_2026").exists()
+        assert not papers_path(ws.data_dir, "icse_2026").exists()
         assert commits == []
 
 
 def _prior(ws, conf_id, n):
-    path = ws.data_dir / conf_id / "papers.jsonl"
-    path.parent.mkdir(parents=True)
+    path = papers_path(ws.data_dir, conf_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps({"title": f"P{i}"}) + "\n" for i in range(n)) + "\n")
 
 
@@ -258,16 +259,14 @@ class TestRevert:
         assert "icse_2026" not in text and "icse_2027" in text
         assert len(commits) == 1
 
-    def test_preexisting_data_dir_is_restored_on_hold(self, ws):
+    def test_preexisting_year_file_is_restored_on_hold(self, ws):
         # A venue whose push failed last month: its data shipped in the release,
         # but its registration never reached main. A hold must not delete it.
-        old = ws.data_dir / "icse_2026"
-        old.mkdir()
-        (old / "papers.jsonl").write_text("old\n")
-        (old / "papers_enriched.jsonl").write_text("old-enriched\n")
+        path = papers_path(ws.data_dir, "icse_2026")
+        path.parent.mkdir(parents=True)
+        path.write_text("old\n")
         _run([ICSE], ws, counts={"icse_2026": 10})
-        assert (old / "papers.jsonl").read_text() == "old\n"
-        assert (old / "papers_enriched.jsonl").read_text() == "old-enriched\n"
+        assert path.read_text() == "old\n"
 
     def test_already_registered_is_a_hold(self, ws):
         row = _row("icse_2025", 250, {"key": "db/conf/icse/icse2025.bht"})

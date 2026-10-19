@@ -3,8 +3,10 @@ from datetime import date
 
 import pytest
 
-from ppr.models import Paper, write_papers
+from ppr.layout import papers_path
+from ppr.models import Paper
 from ppr.register import render_openreview_config
+from ppr.store import read_papers, save_crawl, save_enriched
 from ppr.rolling import RollingOutcome, due_ids, format_summary, recrawl_rolling, results_to_json
 from ppr.venues import load_registry
 
@@ -14,8 +16,7 @@ def _papers(forum_ids):
 
 
 def _seed(data_dir, conf_id, forum_ids):
-    (data_dir / conf_id).mkdir(parents=True, exist_ok=True)
-    write_papers(_papers(forum_ids), data_dir / conf_id / "papers.jsonl")
+    save_crawl(_papers(forum_ids), papers_path(data_dir, conf_id))
 
 
 def _lines(path):
@@ -71,13 +72,24 @@ def test_a_growing_crawl_is_written(env):
     _seed(data_dir, "tmlr_2026", ["a", "b"])
     (o,) = recrawl_rolling(["tmlr_2026"], configs_dir, data_dir, lambda cfg: _papers(["a", "b", "c"]))
     assert (o.status, o.before, o.after) == ("recrawled", 2, 3)
-    assert len(_lines(data_dir / "tmlr_2026" / "papers.jsonl")) == 3
+    assert len(_lines(papers_path(data_dir, "tmlr_2026"))) == 3
+
+
+def test_a_recrawl_keeps_the_papers_enrichment(env):
+    registry, data_dir, configs_dir = env
+    path = papers_path(data_dir, "tmlr_2026")
+    enriched = _papers(["a", "b"])
+    for p in enriched:
+        p.citation_count = 5
+    save_enriched(enriched, path)
+    recrawl_rolling(["tmlr_2026"], configs_dir, data_dir, lambda config: _papers(["a", "b", "c"]))
+    assert sorted((p.forum_id, p.citation_count) for p in read_papers(path)) == [("a", 5), ("b", 5), ("c", None)]
 
 
 def test_a_vanished_paper_holds_even_when_the_count_grows(env):
     _, data_dir, configs_dir = env
     _seed(data_dir, "tmlr_2026", ["a", "b"])
-    path = data_dir / "tmlr_2026" / "papers.jsonl"
+    path = papers_path(data_dir, "tmlr_2026")
     before = path.read_bytes()
     (o,) = recrawl_rolling(["tmlr_2026"], configs_dir, data_dir, lambda cfg: _papers(["a", "c", "d"]))
     assert o.status == "held" and "b" in o.reason and "crawl returned 3" in o.reason
@@ -87,7 +99,7 @@ def test_a_vanished_paper_holds_even_when_the_count_grows(env):
 def test_an_empty_crawl_holds_and_keeps_the_file(env):
     _, data_dir, configs_dir = env
     _seed(data_dir, "tmlr_2026", ["a"])
-    path = data_dir / "tmlr_2026" / "papers.jsonl"
+    path = papers_path(data_dir, "tmlr_2026")
     before = path.read_bytes()
     (o,) = recrawl_rolling(["tmlr_2026"], configs_dir, data_dir, lambda cfg: [])
     assert o.status == "held"
@@ -108,8 +120,7 @@ def test_a_raising_fetch_fails_that_venue_only(env):
 def test_papers_without_a_forum_id_are_keyed_by_title(env):
     _, data_dir, configs_dir = env
     old = [Paper(title="Same Title", link="", authors=["A"], selection="main")]
-    (data_dir / "tmlr_2026").mkdir()
-    write_papers(old, data_dir / "tmlr_2026" / "papers.jsonl")
+    save_crawl(old, papers_path(data_dir, "tmlr_2026"))
     new = old + [Paper(title="Other", link="", authors=["A"], selection="main")]
     (o,) = recrawl_rolling(["tmlr_2026"], configs_dir, data_dir, lambda cfg: new)
     assert o.status == "recrawled"

@@ -20,8 +20,10 @@ from ppr.enrich import (
     parse_duration,
     results_to_json,
 )
-from ppr.models import Paper, write_papers
+from ppr.layout import conference_ids, papers_path
+from ppr.models import Paper
 from ppr.s2_client import S2Client
+from ppr.store import save_crawl
 from ppr.venues import REGISTRY_STEM
 
 CONFIGS_DIR = Path(__file__).resolve().parent.parent / "configs"
@@ -41,17 +43,15 @@ def _available_conferences() -> list[str]:
 
 
 def all_conference_ids(data_dir: Path) -> list[str]:
-    """Every conference directory under data/, sorted."""
-    if not data_dir.exists():
-        return []
-    return sorted(d.name for d in data_dir.iterdir() if d.is_dir())
+    """Every conference-year with a papers file under data/, sorted."""
+    return conference_ids(data_dir)
 
 
 def _save_papers(papers: list[Paper], conf_id: str) -> Path:
-    # Shares `write_papers`' refusal with the OpenReview save path: a scraper
+    # Shares `save_crawl`'s refusals with the OpenReview save path: a scraper
     # whose selector a site redesign outgrew returns `[]` just as an API error
     # does, and must not silently erase the last good crawl either.
-    return write_papers(papers, DATA_DIR / conf_id / "papers.jsonl")
+    return save_crawl(papers, papers_path(DATA_DIR, conf_id))
 
 
 def _add_auth_args(parser: argparse.ArgumentParser) -> None:

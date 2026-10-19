@@ -5,6 +5,7 @@ import pytest
 
 from ppr import dblp_client
 from ppr.dblp_client import DblpUnavailable
+from ppr.layout import papers_path
 from ppr.validate import (
     DBLP_VALIDATION_KEYS,
     DBLP_SOURCE_IDS,
@@ -47,9 +48,9 @@ class TestThrottlingIsNotACount:
         """`ppr validate` is what the skill tells the operator to run right
         after registering a DBLP venue, so a throttled run reading as FAIL
         would fire on the happy path."""
-        conf_dir = tmp_path / "iclr_2023"
-        conf_dir.mkdir()
-        (conf_dir / "papers.jsonl").write_text(
+        path = papers_path(tmp_path, "iclr_2023")
+        path.parent.mkdir(parents=True)
+        path.write_text(
             "\n".join(json.dumps({"title": f"P{i}", "link": "", "authors": []}) for i in range(100))
         )
         monkeypatch.setattr("ppr.validate.DATA_DIR", tmp_path)
@@ -84,10 +85,9 @@ class TestThrottlingIsNotACount:
 
 class TestValidateConference:
     def test_pass_when_counts_match(self, tmp_path, monkeypatch):
-        conf_dir = tmp_path / "iclr_2023"
-        conf_dir.mkdir()
-        papers_file = conf_dir / "papers.jsonl"
-        papers_file.write_text(
+        path = papers_path(tmp_path, "iclr_2023")
+        path.parent.mkdir(parents=True)
+        path.write_text(
             "\n".join(json.dumps({"title": f"P{i}", "link": "", "authors": []}) for i in range(100))
         )
         monkeypatch.setattr("ppr.validate.DATA_DIR", tmp_path)
@@ -100,10 +100,9 @@ class TestValidateConference:
         assert result.dblp == 100
 
     def test_fail_when_counts_differ_beyond_tolerance(self, tmp_path, monkeypatch):
-        conf_dir = tmp_path / "iclr_2023"
-        conf_dir.mkdir()
-        papers_file = conf_dir / "papers.jsonl"
-        papers_file.write_text(
+        path = papers_path(tmp_path, "iclr_2023")
+        path.parent.mkdir(parents=True)
+        path.write_text(
             "\n".join(json.dumps({"title": f"P{i}", "link": "", "authors": []}) for i in range(200))
         )
         monkeypatch.setattr("ppr.validate.DATA_DIR", tmp_path)
@@ -116,10 +115,9 @@ class TestValidateConference:
         assert result.dblp == 100
 
     def test_pass_within_tolerance(self, tmp_path, monkeypatch):
-        conf_dir = tmp_path / "iclr_2023"
-        conf_dir.mkdir()
-        papers_file = conf_dir / "papers.jsonl"
-        papers_file.write_text(
+        path = papers_path(tmp_path, "iclr_2023")
+        path.parent.mkdir(parents=True)
+        path.write_text(
             "\n".join(json.dumps({"title": f"P{i}", "link": "", "authors": []}) for i in range(105))
         )
         monkeypatch.setattr("ppr.validate.DATA_DIR", tmp_path)
@@ -135,9 +133,9 @@ class TestValidateConference:
         assert result.status == "SKIP"
 
     def test_no_data_when_not_in_dblp(self, tmp_path, monkeypatch):
-        conf_dir = tmp_path / "colm_2024"
-        conf_dir.mkdir()
-        (conf_dir / "papers.jsonl").write_text('{"title":"P","link":"","authors":[]}\n')
+        path = papers_path(tmp_path, "colm_2024")
+        path.parent.mkdir(parents=True)
+        path.write_text('{"title":"P","link":"","authors":[]}\n')
         monkeypatch.setattr("ppr.validate.DATA_DIR", tmp_path)
 
         result = validate_conference("colm_2024")
@@ -149,9 +147,9 @@ class TestValidateConference:
         assert result.status == "NO_DATA"
 
     def test_no_data_when_dblp_returns_zero(self, tmp_path, monkeypatch):
-        conf_dir = tmp_path / "iclr_2023"
-        conf_dir.mkdir()
-        (conf_dir / "papers.jsonl").write_text('{"title":"P","link":"","authors":[]}\n')
+        path = papers_path(tmp_path, "iclr_2023")
+        path.parent.mkdir(parents=True)
+        path.write_text('{"title":"P","link":"","authors":[]}\n')
         monkeypatch.setattr("ppr.validate.DATA_DIR", tmp_path)
 
         with patch("ppr.validate.fetch_dblp_count", return_value=0):

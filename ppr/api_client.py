@@ -7,7 +7,8 @@ import openreview
 
 from ppr.config import CrawlConfig
 from ppr.matching import title_key
-from ppr.models import Paper, write_papers
+from ppr.models import Paper
+from ppr.store import save_crawl
 
 logger = logging.getLogger(__name__)
 
@@ -235,8 +236,8 @@ class OpenReviewAPIClient:
         return papers
 
     def save_papers(self, papers: list[Paper]) -> None:
-        # `write_papers` owns the refusal to truncate a good crawl to zero --
+        # `save_crawl` owns the refusal to replace a good crawl with a short one --
         # `fetch_papers` returns `[]` on an OpenReviewException, which would
         # otherwise reach here and erase the file while logging "Saved 0".
-        save_path = write_papers(papers, self.config.get_save_path())
+        save_path = save_crawl(papers, self.config.get_save_path())
         logger.info("Saved %d papers to %s", len(papers), save_path)

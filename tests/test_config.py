@@ -22,7 +22,7 @@ conference:
         assert config.venue_id == "ICLR.cc/2025/Conference"
         assert config.selections["oral"] == "ICLR 2025 Oral"
         assert config.conference_id == "iclr_2025"
-        assert config.get_save_path() == Path("data/iclr_2025/papers.jsonl")
+        assert config.get_save_path() == Path("data/iclr/2025.jsonl")
 
     def test_from_yaml_missing_file(self):
         with pytest.raises(FileNotFoundError):
@@ -75,7 +75,7 @@ conference:
             name="ICLR", year=2025, venue_id="ICLR.cc/2025/Conference",
             selections={"oral": "X"}, conference_id="iclr_2025",
         )
-        assert config.get_save_path() == Path("data/iclr_2025/papers.jsonl")
+        assert config.get_save_path() == Path("data/iclr/2025.jsonl")
 
     def test_uses_safe_load(self, tmp_path):
         config_file = tmp_path / "evil.yaml"

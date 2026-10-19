@@ -1493,9 +1493,11 @@ from ppr.enrich import format_enrich_summary
 
 
 class TestCliWiring:
-    def test_all_conference_ids_lists_data_dirs(self, tmp_path):
-        (tmp_path / "iclr_2026").mkdir()
-        (tmp_path / "acl_2026").mkdir()
+    def test_all_conference_ids_lists_year_files(self, tmp_path):
+        for conf_id in ("iclr_2026", "acl_2026"):
+            path = papers_path(tmp_path, conf_id)
+            path.parent.mkdir(parents=True)
+            path.write_text("x")
         (tmp_path / "notadir.txt").write_text("x")
         assert all_conference_ids(tmp_path) == ["acl_2026", "iclr_2026"]
 

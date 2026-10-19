@@ -3,6 +3,8 @@ from pathlib import Path
 
 import yaml
 
+from ppr.layout import papers_path
+
 
 @dataclass
 class CrawlConfig:
@@ -104,4 +106,4 @@ class CrawlConfig:
         )
 
     def get_save_path(self) -> Path:
-        return Path("data") / self.conference_id / "papers.jsonl"
+        return papers_path(Path("data"), self.conference_id)

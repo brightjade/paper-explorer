@@ -1,10 +1,5 @@
 from dataclasses import asdict, dataclass, field
-from pathlib import Path
 import json
-
-
-class EmptyOverwriteError(Exception):
-    """A zero-paper write would have erased an existing non-empty papers.jsonl."""
 
 
 @dataclass
@@ -57,46 +52,3 @@ class Paper:
             match_status=data.get("match_status", ""),
             abstract_source=data.get("abstract_source", ""),
         )
-
-
-def _existing_paper_count(path: Path) -> int:
-    """Papers already on disk at `path`; 0 if it is absent or blank.
-
-    Counts non-blank lines the way `ppr/validate.py` does, so a file holding
-    only a stray newline is treated as the empty file it effectively is.
-    """
-    if not path.exists():
-        return 0
-    with open(path, encoding="utf-8") as f:
-        return sum(1 for line in f if line.strip())
-
-
-def write_papers(papers: list[Paper], path: Path) -> Path:
-    """Write `papers` to `path` as JSONL, refusing to erase an existing crawl.
-
-    Every source can fail into an empty list rather than an exception: an
-    OpenReview error swallowed into `[]`, or a scraper whose selector a site
-    redesign outgrew. A plain `open(path, "w")` then truncates a good crawl to
-    zero bytes while the caller logs "Saved 0 papers" and exits 0 -- the CoRL
-    2024 failure reached through the save path instead of the filter.
-
-    `ppr/enrich.py`'s `check_guards` already refuses exactly this for
-    `papers_enriched.jsonl`. The same rule has to hold for the file it reads
-    from, or the two modules disagree about one rule.
-
-    Writing zero papers to a conference that has none yet is fine; it is
-    overwriting real data with nothing that must not happen silently.
-    """
-    existing = _existing_paper_count(path)
-    if not papers and existing:
-        raise EmptyOverwriteError(
-            f"{path} holds {existing} papers and this crawl produced 0 — "
-            f"refusing to overwrite. The source likely broke (an API error, or "
-            f"a selector the site outgrew); fix it and re-crawl."
-        )
-
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        for paper in papers:
-            f.write(paper.to_json() + "\n")
-    return path

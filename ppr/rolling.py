@@ -21,7 +21,9 @@ from typing import Callable
 
 from ppr.config import CrawlConfig
 from ppr.matching import title_key
-from ppr.models import Paper, write_papers
+from ppr.layout import papers_path
+from ppr.models import Paper
+from ppr.store import read_papers, save_crawl
 from ppr.venues import Venue
 
 logger = logging.getLogger(__name__)
@@ -49,17 +51,13 @@ def due_ids(registry: dict[str, Venue], data_dir: Path, configs_dir: Path, today
             if not venue.rolling:
                 continue
             conf_id = f"{prefix}_{year}"
-            if (configs_dir / f"{conf_id}.yaml").exists() and (data_dir / conf_id / "papers.jsonl").exists():
+            if (configs_dir / f"{conf_id}.yaml").exists() and papers_path(data_dir, conf_id).exists():
                 ids.append(conf_id)
     return ids
 
 
 def _key(paper: Paper) -> str:
     return paper.forum_id or title_key(paper.title)
-
-
-def _read(path: Path) -> list[Paper]:
-    return [Paper.from_dict(json.loads(line)) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
 def recrawl_rolling(
@@ -70,10 +68,10 @@ def recrawl_rolling(
 ) -> list[RollingOutcome]:
     outcomes = []
     for conf_id in conf_ids:
-        path = data_dir / conf_id / "papers.jsonl"
+        path = papers_path(data_dir, conf_id)
         try:
             config = CrawlConfig.from_yaml(configs_dir / f"{conf_id}.yaml")
-            old = _read(path)
+            old = read_papers(path)
             new = fetch(config)
         except Exception as e:  # one venue's failure must not stop the others
             logger.warning("%s: rolling recrawl failed: %s", conf_id, e)
@@ -88,7 +86,7 @@ def recrawl_rolling(
                 f"{len(missing)} paper(s) on disk missing from the crawl (crawl returned {len(new)}): {shown}"))
             continue
         try:
-            write_papers(new, path)
+            save_crawl(new, path)
         except Exception as e:
             outcomes.append(RollingOutcome(conf_id, "failed", len(old), len(new), f"{type(e).__name__}: {e}"))
             continue

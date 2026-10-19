@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ppr import dblp_client
 from ppr.dblp_client import DblpUnavailable
+from ppr.layout import papers_path
 from ppr.scrapers.dblp import DBLP_CONFERENCES
 
 logger = logging.getLogger(__name__)
@@ -172,7 +173,7 @@ def validate_conference(
     if conf_id not in DBLP_VALIDATION_KEYS:
         return ValidationResult(conf_id, "NO_DATA", message="No DBLP mapping")
 
-    output_path = DATA_DIR / conf_id / "papers.jsonl"
+    output_path = papers_path(DATA_DIR, conf_id)
     if not output_path.exists():
         return ValidationResult(conf_id, "NO_DATA", message="No output file")
 

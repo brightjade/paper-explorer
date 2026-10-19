@@ -118,7 +118,7 @@ class TestOpenReviewAPIClient:
 import pytest
 
 from ppr.api_client import EmptyCrawlError, OpenReviewAPIClient
-from ppr.models import EmptyOverwriteError
+from ppr.store import ShrinkError
 
 
 class TestEmptyCrawlGuard:
@@ -180,7 +180,7 @@ class TestSaveGuard:
         client.save_papers([Paper(title="P1", link="L1", authors=["A"], selection="poster")])
         before = save_path.read_bytes()
 
-        with pytest.raises(EmptyOverwriteError):
+        with pytest.raises(ShrinkError):
             client.save_papers([])
 
         assert save_path.read_bytes() == before
