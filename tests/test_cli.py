@@ -64,7 +64,8 @@ class TestAwardsCommand:
         # configs/ has an icml_2013 manual file, which would make that old year pending.
         monkeypatch.setattr(manual, "CONFIGS_DIR", tmp_path / "no-manual-files")
         for name in (this_year, "acl_2025", "icml_2013"):
-            (tmp_path / name).mkdir()
+            papers_path(tmp_path, name).parent.mkdir(exist_ok=True)
+            papers_path(tmp_path, name).write_text("")
         seen = []
         monkeypatch.setattr(collect, "collect_conference",
                             lambda conf_id, data_dir: seen.append(conf_id) or collect.Outcome(conf_id, "not-yet"))
@@ -82,7 +83,8 @@ class TestAwardsCommand:
 
         monkeypatch.setattr(cli, "DATA_DIR", tmp_path)
         for name in (f"icml_{date.today().year}", "icml_2013"):
-            (tmp_path / name).mkdir()
+            papers_path(tmp_path, name).parent.mkdir(exist_ok=True)
+            papers_path(tmp_path, name).write_text("")
         seen = []
         monkeypatch.setattr(collect, "collect_conference",
                             lambda conf_id, data_dir: seen.append(conf_id) or collect.Outcome(conf_id, "not-yet"))

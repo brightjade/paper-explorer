@@ -1,4 +1,4 @@
-"""Bind awards.json entries to the papers they name.
+"""Bind data/<venue>/awards.json entries to the papers they name.
 
 Shared by the collector's report and scripts/build_data.py, so "this award is
 on that paper" is decided in one place. A test-of-time prize is conference-level where it was given; when the
@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from ppr.awards.labels import KIND_ORDER
+from ppr.layout import awards_path, split_id
 from ppr.matching import title_key
 
 
@@ -51,11 +52,12 @@ def attach(papers: list[dict], entries: list[dict]) -> Attached:
     return Attached(papers=out, test_of_time=test_of_time, unmatched=unmatched)
 
 
-def load_entries(conf_dir: Path) -> list[dict]:
-    path = conf_dir / "awards.json"
+def load_entries(data_dir: Path, conf_id: str) -> list[dict]:
+    path = awards_path(data_dir, conf_id)
     if not path.exists():
         return []
-    return json.loads(path.read_text(encoding="utf-8"))["awards"]
+    _, year = split_id(conf_id)
+    return json.loads(path.read_text(encoding="utf-8")).get(str(year), [])
 
 
 @dataclass

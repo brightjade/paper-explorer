@@ -119,7 +119,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     # awards
     awards_parser = subparsers.add_parser(
-        "awards", help="Collect paper awards into data/<id>/awards.json"
+        "awards", help="Collect paper awards into data/<venue>/awards.json"
     )
     awards_parser.add_argument("conferences", nargs="*", help="Conference IDs (e.g. neurips_2024)")
     awards_parser.add_argument("--all", action="store_true",

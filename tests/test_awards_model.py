@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from ppr.awards.model import Award, awards_path, merge, read_awards, write_awards
 
 
@@ -47,26 +49,59 @@ class TestStorage:
         path = awards_path(tmp_path, "neurips_2024")
         awards = [_a("Best Paper", "award", "P"),
                   _a("Test of Time Award", "test_of_time", "GAN", via="manual", url="https://x.test/gan")]
-        write_awards(path, "neurips_2024", awards)
+        write_awards(tmp_path, "neurips_2024", awards)
 
-        assert path == tmp_path / "neurips_2024" / "awards.json"
-        assert read_awards(path) == awards
+        assert path == tmp_path / "neurips" / "awards.json"
+        assert read_awards(tmp_path, "neurips_2024") == awards
         raw = json.loads(path.read_text(encoding="utf-8"))
-        assert raw["conf_id"] == "neurips_2024"
-        assert list(raw["awards"][1]) == ["label", "kind", "title", "url", "via", "source"]
+        assert list(raw["2024"][1]) == ["label", "kind", "title", "url", "via", "source"]
 
     def test_missing_file_reads_as_none(self, tmp_path):
-        assert read_awards(tmp_path / "awards.json") is None
+        assert read_awards(tmp_path, "x_2024") is None
 
     def test_rewrite_with_same_awards_is_byte_identical(self, tmp_path):
-        path = tmp_path / "awards.json"
+        path = awards_path(tmp_path, "x_2024")
         awards = [_a("Best Paper", "award", "Ünïcode — title")]
-        write_awards(path, "x_2024", awards)
+        write_awards(tmp_path, "x_2024", awards)
         first = path.read_bytes()
-        write_awards(path, "x_2024", awards)
+        write_awards(tmp_path, "x_2024", awards)
         assert path.read_bytes() == first
         assert "Ünïcode".encode() in first  # ensure_ascii=False
 
     def test_leaves_no_temp_file(self, tmp_path):
-        write_awards(tmp_path / "awards.json", "x_2024", [_a("Best Paper", "award", "P")])
-        assert [p.name for p in tmp_path.iterdir()] == ["awards.json"]
+        write_awards(tmp_path, "x_2024", [_a("Best Paper", "award", "P")])
+        assert [p.name for p in (tmp_path / "x").iterdir()] == ["awards.json"]
+
+
+class TestPerVenueFile:
+    def test_years_share_one_file(self, tmp_path):
+        write_awards(tmp_path, "iclr_2016", [_a("Best Paper", "award", "Old")])
+        write_awards(tmp_path, "iclr_2025", [_a("Outstanding Paper", "award", "New")])
+        assert [p.name for p in (tmp_path / "iclr").iterdir()] == ["awards.json"]
+        assert [a.title for a in read_awards(tmp_path, "iclr_2016")] == ["Old"]
+        assert [a.title for a in read_awards(tmp_path, "iclr_2025")] == ["New"]
+
+    def test_rewriting_a_year_leaves_the_other_years_unchanged(self, tmp_path):
+        write_awards(tmp_path, "iclr_2016", [_a("Best Paper", "award", "Old")])
+        write_awards(tmp_path, "iclr_2025", [_a("Outstanding Paper", "award", "New")])
+        old_block = json.loads(awards_path(tmp_path, "iclr_2016").read_text())["2016"]
+        write_awards(tmp_path, "iclr_2025", [_a("Outstanding Paper", "award", "Newer")])
+        assert json.loads(awards_path(tmp_path, "iclr_2016").read_text())["2016"] == old_block
+
+    def test_a_year_without_an_entry_reads_none(self, tmp_path):
+        write_awards(tmp_path, "iclr_2025", [])
+        assert read_awards(tmp_path, "iclr_2016") is None
+        assert read_awards(tmp_path, "iclr_2025") == []
+
+    def test_a_failed_write_keeps_every_year(self, tmp_path, monkeypatch):
+        write_awards(tmp_path, "iclr_2016", [_a("Best Paper", "award", "Old")])
+        before = awards_path(tmp_path, "iclr_2016").read_bytes()
+
+        def boom(*_):
+            raise OSError("disk full")
+
+        monkeypatch.setattr("ppr.awards.model.os.replace", boom)
+        with pytest.raises(OSError):
+            write_awards(tmp_path, "iclr_2025", [_a("Outstanding Paper", "award", "New")])
+        assert awards_path(tmp_path, "iclr_2016").read_bytes() == before
+        assert [p.name for p in (tmp_path / "iclr").iterdir()] == ["awards.json"]
