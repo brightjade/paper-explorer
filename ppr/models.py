@@ -26,6 +26,7 @@ class Paper:
     open_access_pdf: str = ""
     external_ids: dict = field(default_factory=dict)
     match_status: str = ""
+    abstract_source: str = ""  # "s2" when Semantic Scholar filled `abstract`; empty means the crawl supplied it
 
     def to_dict(self) -> dict:
         d = asdict(self)
@@ -54,6 +55,7 @@ class Paper:
             open_access_pdf=data.get("open_access_pdf", ""),
             external_ids=data.get("external_ids", {}),
             match_status=data.get("match_status", ""),
+            abstract_source=data.get("abstract_source", ""),
         )
 
 

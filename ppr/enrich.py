@@ -19,13 +19,9 @@ from ppr.archive import plan_enrich
 from ppr.matching import MATCHED, MATCHED_FUZZY, REJECT, match_verdict, title_key
 from ppr.models import Paper
 from ppr.s2_client import BATCH_CHUNK_SIZE, S2Client
+from ppr.store import carry_over, normalize_title, read_papers, save_enriched
 
 logger = logging.getLogger(__name__)
-
-
-def normalize_title(title: str) -> str:
-    """Lowercase and collapse whitespace, for cross-source title comparison."""
-    return " ".join(title.lower().split())
 
 
 def apply_enrichment(paper: Paper, entry: dict | None) -> Paper:
@@ -56,6 +52,7 @@ def apply_enrichment(paper: Paper, entry: dict | None) -> Paper:
 
     if not paper.abstract and entry.get("abstract"):
         paper.abstract = entry["abstract"]
+        paper.abstract_source = "s2"
 
     return paper
 
@@ -85,28 +82,6 @@ def unbind(paper: Paper, crawl_abstract: str) -> Paper:
     return paper
 
 
-def carry_over(raw: Paper, prior: Paper) -> Paper:
-    """Copy prior enrichment onto a freshly-crawled paper, in place.
-
-    The raw crawl is authoritative for identity (title, authors, link,
-    selection, keywords, forum_id); the enriched file holds the only copy of
-    previous enrichment. Carrying it over means a paper whose refresh lookup
-    comes back empty keeps its old values instead of silently losing them.
-    """
-    raw.citation_count = prior.citation_count
-    raw.influential_citation_count = prior.influential_citation_count
-    raw.reference_count = prior.reference_count
-    raw.tldr = prior.tldr
-    raw.publication_date = prior.publication_date
-    raw.fields_of_study = prior.fields_of_study
-    raw.open_access_pdf = prior.open_access_pdf
-    raw.external_ids = prior.external_ids
-    raw.match_status = prior.match_status
-    if not raw.abstract and prior.abstract:
-        raw.abstract = prior.abstract
-    return raw
-
-
 # A re-crawl that returns less than this fraction of the previously enriched
 # paper count is treated as a failed crawl rather than a real shrinkage.
 MIN_RAW_RATIO = 0.5
@@ -115,14 +90,6 @@ MIN_RAW_RATIO = 0.5
 # papers carrying a Semantic Scholar ID is treated as a failed lookup rather
 # than as real data.
 MIN_COVERAGE_RATIO = 0.5
-
-
-def read_papers(path: Path) -> list[Paper]:
-    """Read a JSONL paper file. A missing or empty file reads as no papers."""
-    if not path.exists():
-        return []
-    with open(path, encoding="utf-8") as f:
-        return [Paper.from_dict(json.loads(line)) for line in f if line.strip()]
 
 
 def check_guards(raw: list[Paper], enriched: list[Paper]) -> str | None:
@@ -180,29 +147,6 @@ def check_enrichment_coverage(
             f"before — refusing to overwrite. The lookups likely failed; retry."
         )
     return None
-
-
-def write_enriched(papers: list[Paper], path: Path) -> None:
-    """Sort by citation count descending and replace `path` atomically.
-
-    Writing to a temp file and renaming means an interrupted or failing run
-    leaves the previous enriched file untouched.
-    """
-    ordered = sorted(
-        papers,
-        key=lambda p: p.citation_count if p.citation_count is not None else -1,
-        reverse=True,
-    )
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    try:
-        with open(tmp, "w", encoding="utf-8") as f:
-            for paper in ordered:
-                f.write(paper.to_json() + "\n")
-        os.replace(tmp, path)
-    except BaseException:
-        tmp.unlink(missing_ok=True)
-        raise
 
 
 # Suffix of the per-conference checkpoint file. The leading dot on the stem
@@ -733,7 +677,7 @@ async def enrich_conference(
         checkpoint.discard()
         return EnrichResult(conf_id, "skipped", reason=reason)
 
-    write_enriched(raw, conf_dir / "papers_enriched.jsonl")
+    save_enriched(raw, conf_dir / "papers_enriched.jsonl")
     checkpoint.discard()
 
     return EnrichResult(

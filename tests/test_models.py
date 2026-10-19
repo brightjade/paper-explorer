@@ -4,6 +4,13 @@ from ppr.models import Paper
 
 
 class TestPaper:
+    def test_abstract_source_round_trips(self):
+        p = Paper(title="T", link="L", authors=["A"], abstract="x", abstract_source="s2")
+        assert Paper.from_dict(json.loads(p.to_json())) == p
+
+    def test_an_unmarked_abstract_leaves_no_key(self):
+        assert "abstract_source" not in Paper(title="T", link="L", authors=["A"], abstract="x").to_dict()
+
     def test_to_dict_full(self):
         paper = Paper(
             title="Test Paper",

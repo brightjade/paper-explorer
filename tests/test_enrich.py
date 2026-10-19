@@ -8,10 +8,8 @@ from ppr.enrich import (
     carry_over,
     check_enrichment_coverage,
     check_guards,
-    normalize_title,
     read_papers,
     unbind,
-    write_enriched,
 )
 from ppr.models import Paper
 
@@ -36,12 +34,13 @@ FULL_ENTRY = {
 }
 
 
-class TestNormalizeTitle:
-    def test_lowercases_and_collapses_whitespace(self):
-        assert normalize_title("  A   Paper\nTitle ") == "a paper title"
-
-
 class TestApplyEnrichment:
+    def test_a_filled_abstract_is_marked_s2(self):
+        assert apply_enrichment(_paper(), FULL_ENTRY).abstract_source == "s2"
+
+    def test_a_kept_abstract_stays_unmarked(self):
+        assert apply_enrichment(_paper(abstract="OpenReview abstract"), FULL_ENTRY).abstract_source == ""
+
     def test_populates_all_enrichment_fields(self):
         p = apply_enrichment(_paper(), FULL_ENTRY)
         assert p.citation_count == 42
@@ -108,65 +107,6 @@ class TestApplyEnrichment:
         assert p.publication_date == ""
 
 
-class TestCarryOver:
-    def test_copies_enrichment_but_not_identity(self):
-        raw = _paper(title="A Paper", link="NEW", authors=["New"])
-        prior = _paper(
-            title="A Paper",
-            link="OLD",
-            authors=["Old"],
-            citation_count=10,
-            influential_citation_count=2,
-            reference_count=20,
-            tldr="Prior summary",
-            publication_date="2024-01-01",
-            fields_of_study=["CS"],
-            open_access_pdf="https://old.pdf",
-            external_ids={"CorpusId": 55},
-            match_status="matched",
-        )
-        carry_over(raw, prior)
-        assert raw.citation_count == 10
-        assert raw.influential_citation_count == 2
-        assert raw.reference_count == 20
-        assert raw.tldr == "Prior summary"
-        assert raw.publication_date == "2024-01-01"
-        assert raw.fields_of_study == ["CS"]
-        assert raw.open_access_pdf == "https://old.pdf"
-        assert raw.external_ids == {"CorpusId": 55}
-        assert raw.match_status == "matched"
-        assert raw.link == "NEW"
-        assert raw.authors == ["New"]
-
-    def test_prior_abstract_fills_only_when_raw_is_empty(self):
-        raw = _paper(abstract="")
-        carry_over(raw, _paper(abstract="Prior abstract"))
-        assert raw.abstract == "Prior abstract"
-
-        raw2 = _paper(abstract="Fresh abstract")
-        carry_over(raw2, _paper(abstract="Prior abstract"))
-        assert raw2.abstract == "Fresh abstract"
-
-
-class TestReadPapers:
-    def test_missing_file_is_empty(self, tmp_path):
-        assert read_papers(tmp_path / "nope.jsonl") == []
-
-    def test_empty_file_is_empty(self, tmp_path):
-        path = tmp_path / "papers.jsonl"
-        path.write_text("")
-        assert read_papers(path) == []
-
-    def test_reads_papers(self, tmp_path):
-        path = tmp_path / "papers.jsonl"
-        path.write_text(
-            json.dumps({"title": "A", "link": "L", "authors": ["X"]}) + "\n"
-        )
-        papers = read_papers(path)
-        assert len(papers) == 1
-        assert papers[0].title == "A"
-
-
 class TestCheckGuards:
     def test_empty_raw_with_existing_enriched_is_blocked(self):
         reason = check_guards([], [_paper()] * 264)
@@ -218,54 +158,6 @@ class TestCheckEnrichmentCoverage:
 
     def test_growth_in_coverage_is_allowed(self):
         assert check_enrichment_coverage(_with_ids(20), _with_ids(10)) is None
-
-
-class TestWriteEnriched:
-    def test_sorts_by_citations_descending(self, tmp_path):
-        path = tmp_path / "papers_enriched.jsonl"
-        write_enriched(
-            [
-                _paper(title="low", citation_count=1),
-                _paper(title="high", citation_count=100),
-                _paper(title="mid", citation_count=50),
-            ],
-            path,
-        )
-        titles = [json.loads(l)["title"] for l in path.read_text().splitlines()]
-        assert titles == ["high", "mid", "low"]
-
-    def test_uncited_papers_sort_last(self, tmp_path):
-        path = tmp_path / "papers_enriched.jsonl"
-        write_enriched(
-            [_paper(title="unknown"), _paper(title="zero", citation_count=0)], path
-        )
-        titles = [json.loads(l)["title"] for l in path.read_text().splitlines()]
-        assert titles == ["zero", "unknown"]
-
-    def test_replaces_existing_file(self, tmp_path):
-        path = tmp_path / "papers_enriched.jsonl"
-        path.write_text("stale\n")
-        write_enriched([_paper(title="fresh", citation_count=1)], path)
-        assert "stale" not in path.read_text()
-        assert "fresh" in path.read_text()
-
-    def test_failure_mid_write_leaves_original_intact(self, tmp_path, monkeypatch):
-        path = tmp_path / "papers_enriched.jsonl"
-        original = json.dumps({"title": "original", "link": "L", "authors": ["X"]})
-        path.write_text(original + "\n")
-
-        def _boom(self):
-            raise OSError("disk full")
-
-        monkeypatch.setattr(Paper, "to_json", _boom)
-        with pytest.raises(OSError):
-            write_enriched([_paper(title="new")], path)
-        assert path.read_text() == original + "\n"
-
-    def test_leaves_no_temp_file_behind(self, tmp_path):
-        path = tmp_path / "papers_enriched.jsonl"
-        write_enriched([_paper(citation_count=1)], path)
-        assert list(tmp_path.iterdir()) == [path]
 
 
 import httpx
