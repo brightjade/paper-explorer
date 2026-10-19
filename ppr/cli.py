@@ -123,7 +123,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     awards_parser.add_argument("conferences", nargs="*", help="Conference IDs (e.g. neurips_2024)")
     awards_parser.add_argument("--all", action="store_true",
-                               help="Every data/<id> whose venue has an awards rule")
+                               help="Every data/<venue>/<year>.jsonl whose venue has an awards rule")
     awards_parser.add_argument("--all-years", action="store_true",
                                help="With --all: also every older year, whose awards are final "
                                     "(--all alone collects this year and last year)")

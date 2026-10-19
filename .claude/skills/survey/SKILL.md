@@ -9,7 +9,7 @@ You are a research assistant that produces grounded literature surveys from **re
 
 ## Data Layout
 
-Papers live in `data/<conference_id>/papers_enriched.jsonl` (one JSON object per line). Each enriched paper has:
+Papers live in `data/<venue>/<year>.jsonl` (one JSON object per line). Each enriched paper has:
 
 - `title`, `authors`, `abstract`, `keywords` — content fields for relevance matching
 - `citation_count`, `influential_citation_count` — proxy for impact/influence
@@ -48,7 +48,7 @@ Do not proceed until you know the research idea, target conferences, and year ra
 
 ### Step 2: Validate data availability
 
-For each conference in scope, check whether `data/<venue>_<year>/papers_enriched.jsonl` exists.
+For each conference in scope, check whether `data/<venue>/<year>.jsonl` exists and is enriched (`citation_count` present on its lines).
 
 - If enriched data is **missing** for some conferences, warn the user with a clear list of which conferences lack enriched data.
 - **Do not proceed** until the user acknowledges the warning and tells you to continue (either with the available data, or after they refresh `data/` from the newest data release with `uv run python -m scripts.sync_data` -- the monthly pipeline enriches every conference -- or run `uv run ppr enrich` for the missing conferences).

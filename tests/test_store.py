@@ -78,12 +78,12 @@ class TestReadPapers:
         assert read_papers(tmp_path / "nope.jsonl") == []
 
     def test_empty_file_is_empty(self, tmp_path):
-        path = tmp_path / "papers.jsonl"
+        path = tmp_path / "2025.jsonl"
         path.write_text("")
         assert read_papers(path) == []
 
     def test_reads_papers(self, tmp_path):
-        path = tmp_path / "papers.jsonl"
+        path = tmp_path / "2025.jsonl"
         path.write_text(
             json.dumps({"title": "A", "link": "L", "authors": ["X"]}) + "\n"
         )
@@ -94,7 +94,7 @@ class TestReadPapers:
 
 class TestSaveEnriched:
     def test_sorts_by_citations_descending(self, tmp_path):
-        path = tmp_path / "papers_enriched.jsonl"
+        path = tmp_path / "2025.jsonl"
         save_enriched(
             [
                 _paper(title="low", citation_count=1),
@@ -107,7 +107,7 @@ class TestSaveEnriched:
         assert titles == ["high", "mid", "low"]
 
     def test_uncited_papers_sort_last(self, tmp_path):
-        path = tmp_path / "papers_enriched.jsonl"
+        path = tmp_path / "2025.jsonl"
         save_enriched(
             [_paper(title="unknown"), _paper(title="zero", citation_count=0)], path
         )
@@ -115,14 +115,14 @@ class TestSaveEnriched:
         assert titles == ["zero", "unknown"]
 
     def test_replaces_existing_file(self, tmp_path):
-        path = tmp_path / "papers_enriched.jsonl"
+        path = tmp_path / "2025.jsonl"
         path.write_text("stale\n")
         save_enriched([_paper(title="fresh", citation_count=1)], path)
         assert "stale" not in path.read_text()
         assert "fresh" in path.read_text()
 
     def test_failure_mid_write_leaves_original_intact(self, tmp_path, monkeypatch):
-        path = tmp_path / "papers_enriched.jsonl"
+        path = tmp_path / "2025.jsonl"
         original = json.dumps({"title": "original", "link": "L", "authors": ["X"]})
         path.write_text(original + "\n")
 
@@ -135,7 +135,7 @@ class TestSaveEnriched:
         assert path.read_text() == original + "\n"
 
     def test_leaves_no_temp_file_behind(self, tmp_path):
-        path = tmp_path / "papers_enriched.jsonl"
+        path = tmp_path / "2025.jsonl"
         save_enriched([_paper(citation_count=1)], path)
         assert list(tmp_path.iterdir()) == [path]
 

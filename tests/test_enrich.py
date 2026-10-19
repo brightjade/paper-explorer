@@ -528,7 +528,7 @@ class TestEnrichConference:
         result = await enrich_conference("iclr_2026", S2Client(min_interval=0.0), tmp_path)
         out = read_papers(papers_path(tmp_path, "iclr_2026"))
         # Guards against the plan's recurring trap: a coverage-guard skip
-        # leaves papers_enriched.jsonl untouched and defaults `unbound` to 0,
+        # leaves the year file untouched and defaults `unbound` to 0,
         # so a fixture whose only paper does not rebind would pass every
         # assertion below without the cold retry ever running. This one
         # rebinds to a new CorpusId, keeping coverage at 1/1 and clearing the
@@ -1234,7 +1234,7 @@ class TestEnrichResume:
     @respx.mock
     @pytest.mark.asyncio
     async def test_checkpoint_cannot_resurrect_a_paper_dropped_from_raw(self, tmp_path):
-        """papers.jsonl stays authoritative for membership, checkpoint or not."""
+        """The crawl stays authoritative for membership, checkpoint or not."""
         _conf(tmp_path, "icml_2026", [_paper(title="Keep")])
         _write_jsonl(
             checkpoint_path(tmp_path, "icml_2026"),
@@ -1531,13 +1531,13 @@ class TestFormatSummary:
         out = format_enrich_summary(
             [
                 EnrichResult("iclr_2026", "enriched", "refresh", 5340, 5340, 0, 0),
-                EnrichResult("corl_2024", "skipped", reason="papers.jsonl is empty"),
+                EnrichResult("corl_2024", "skipped", reason="the crawl is empty"),
                 EnrichResult("ghost_2026", "nothing-to-do"),
             ]
         )
         assert "iclr_2026" in out
         assert "corl_2024" in out
-        assert "papers.jsonl is empty" in out
+        assert "the crawl is empty" in out
         assert "ghost_2026" in out
 
     def test_counts_skips(self):
@@ -1627,8 +1627,8 @@ class TestCmdEnrichExitCode:
         cmd_enrich(_enrich_args())
 
     def test_a_required_conference_skipped_by_a_guard_exits_nonzero(self, monkeypatch, capsys):
-        """After a re-crawl, a guard skip leaves the old papers_enriched.jsonl
-        beside the new papers.jsonl; shipping that release is the failure."""
+        """After a re-crawl, a guard skip leaves the year file without
+        its new enrichment; shipping that release is the failure."""
         self._patch_results(monkeypatch, [EnrichResult("ase_2024", "skipped", reason="guard")])
         with pytest.raises(SystemExit) as exc:
             cmd_enrich(_enrich_args(require=["ase_2024"]))

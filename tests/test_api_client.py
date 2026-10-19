@@ -80,7 +80,7 @@ class TestOpenReviewAPIClient:
             selections={"oral": "X"},
             conference_id="iclr_2025",
         )
-        save_path = tmp_path / "papers.jsonl"
+        save_path = tmp_path / "2025.jsonl"
         config.get_save_path = lambda: save_path
 
         client = OpenReviewAPIClient(config, MagicMock())
@@ -102,7 +102,7 @@ class TestOpenReviewAPIClient:
             selections={"oral": "X"},
             conference_id="iclr_2025",
         )
-        save_path = tmp_path / "papers.jsonl"
+        save_path = tmp_path / "2025.jsonl"
         config.get_save_path = lambda: save_path
 
         client = OpenReviewAPIClient(config, MagicMock())
@@ -168,7 +168,7 @@ class TestSaveGuard:
             selections={"poster": "X"},
             conference_id="corl_2024",
         )
-        save_path = tmp_path / "papers.jsonl"
+        save_path = tmp_path / "2025.jsonl"
         config.get_save_path = lambda: save_path
         return OpenReviewAPIClient(config, MagicMock()), save_path
 

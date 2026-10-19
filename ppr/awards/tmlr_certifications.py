@@ -3,7 +3,7 @@
 A paper carries a `certifications` list on its OpenReview note. Unlike the other
 venues' awards this is read live from OpenReview every month, not from the crawl:
 Outstanding is awarded after publication, and past years are not recrawled, so
-papers.jsonl can be stale. A paper's year is its publication (`pdate`) year, the
+the year file can be stale. A paper's year is its publication (`pdate`) year, the
 same one the `tmlr_<year>` ids use. A paper with several certifications gets one
 entry, of its highest kind.
 """
