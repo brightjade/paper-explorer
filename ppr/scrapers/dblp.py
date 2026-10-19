@@ -6,7 +6,7 @@ disambiguation suffixes), so this module only maps records to papers.
 
 Two kinds of entry share the dict. Live years are written here one toc key at
 a time, by hand or by autoregister (`register_dblp`), and crawl as `main`. The
-2013-2022 backfill lives in `configs/backfill/dblp.yaml`: each conference-year
+2013-2022 backfill lives in `configs/<venue>/dblp.yaml`: each conference-year
 lists its proceedings volumes with the selection their papers get.
 """
 
@@ -17,11 +17,10 @@ from pathlib import Path
 import yaml
 
 from ppr import dblp_client
+from ppr.layout import CONFIGS_DIR, dblp_config_paths
 from ppr.models import Paper
 
 logger = logging.getLogger(__name__)
-
-BACKFILL_PATH = Path(__file__).resolve().parent.parent.parent / "configs" / "backfill" / "dblp.yaml"
 
 DBLP_CONFERENCES = {
     # Robotics
@@ -42,17 +41,18 @@ class EmptyTocError(Exception):
     """A backfill toc page answered with no listable papers: a registry error."""
 
 
-def load_backfill(path: Path = BACKFILL_PATH) -> dict[str, dict]:
-    """The reviewed 2013-2022 registry: conf_id -> {"tocs": [{"key", "selection"}]}."""
-    if not path.exists():
-        return {}
-    raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+def load_backfill(configs_dir: Path = CONFIGS_DIR) -> dict[str, dict]:
+    """The reviewed 2013-2022 registry, from every configs/<venue>/dblp.yaml:
+    conf_id -> {"tocs": [{"key", "selection"}]}."""
     out = {}
-    for conf_id, entry in raw.items():
-        tocs = entry.get("tocs") if isinstance(entry, dict) else None
-        if not tocs:
-            raise ValueError(f"{path}: {conf_id} lists no tocs")
-        out[conf_id] = {"tocs": [{"key": t["key"], "selection": t["selection"]} for t in tocs]}
+    for path in dblp_config_paths(configs_dir):
+        raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        for year, entry in raw.items():
+            tocs = entry.get("tocs") if isinstance(entry, dict) else None
+            if not isinstance(year, int) or not tocs:
+                raise ValueError(f"{path}: {year!r} needs a year key and a tocs list")
+            out[f"{path.parent.name}_{year}"] = {
+                "tocs": [{"key": t["key"], "selection": t["selection"]} for t in tocs]}
     return out
 
 

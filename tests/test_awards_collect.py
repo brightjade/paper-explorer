@@ -14,7 +14,8 @@ from ppr.awards.collect import (
 )
 from ppr.awards import manual as manual_module
 from ppr.awards.labels import UnknownAwardLabel
-from ppr.awards.manual import MANUAL_DIR
+from ppr.awards.manual import CONFIGS_DIR
+from ppr.layout import manual_awards_path
 from ppr.awards.model import Award, awards_path, read_awards, write_awards
 
 
@@ -158,9 +159,9 @@ class TestRegistry:
             assert len(names) == len(set(names)), prefix
 
     def test_every_manual_file_belongs_to_a_venue_that_reads_manual_files(self):
-        for path in MANUAL_DIR.glob("*.yaml"):
-            prefix = path.stem.rpartition("_")[0]
-            assert "manual" in [name for name, _ in SOURCES_BY_PREFIX[prefix]], path.name
+        for path in CONFIGS_DIR.glob("*/awards/*.yaml"):
+            prefix = path.parent.parent.name
+            assert "manual" in [name for name, _ in SOURCES_BY_PREFIX[prefix]], path
 
 
 class TestTailFailures:
@@ -197,7 +198,7 @@ class TestConferenceIds:
     def manual_dir(self, tmp_path_factory, monkeypatch):
         """No manual files unless a test writes one: the window tests must not depend on configs/."""
         d = tmp_path_factory.mktemp("manual")
-        monkeypatch.setattr(manual_module, "MANUAL_DIR", d)
+        monkeypatch.setattr(manual_module, "CONFIGS_DIR", d)
         return d
 
     @staticmethod
@@ -211,7 +212,9 @@ class TestConferenceIds:
         # reviewed list must not wait for the next all-years run.
         self._dirs(tmp_path, "neurips_2013", "neurips_2014", "neurips_2015", "neurips_2026")
         for conf_id in ("neurips_2013", "neurips_2014"):
-            (manual_dir / f"{conf_id}.yaml").write_text("awards: []\n", encoding="utf-8")
+            path = manual_awards_path(manual_dir, conf_id)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("awards: []\n", encoding="utf-8")
         write_awards(awards_path(tmp_path, "neurips_2013"), "neurips_2013",
                      [Award("Outstanding Paper Award", "award", "P", "manual", "https://x.test/")])
         assert conference_ids(tmp_path, date(2026, 10, 18)) == ["neurips_2014", "neurips_2026"]
@@ -237,10 +240,11 @@ class TestConferenceIds:
 
 
 def _manual_file(monkeypatch, tmp_path, body):
-    manual_dir = tmp_path / "manual"
-    manual_dir.mkdir()
-    (manual_dir / "demo_2025.yaml").write_text(body, encoding="utf-8")
-    monkeypatch.setattr(manual_module, "MANUAL_DIR", manual_dir)
+    configs_dir = tmp_path / "configs"
+    path = manual_awards_path(configs_dir, "demo_2025")
+    path.parent.mkdir(parents=True)
+    path.write_text(body, encoding="utf-8")
+    monkeypatch.setattr(manual_module, "CONFIGS_DIR", configs_dir)
 
 
 class TestManualFirst:

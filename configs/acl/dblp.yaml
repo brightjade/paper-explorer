@@ -1,0 +1,45 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 327 papers
+  tocs:
+    - {key: db/conf/acl/acl2013-1.bht, selection: main}
+    - {key: db/conf/acl/acl2013-2.bht, selection: main}
+2014:  # 286 papers
+  tocs:
+    - {key: db/conf/acl/acl2014-1.bht, selection: main}
+    - {key: db/conf/acl/acl2014-2.bht, selection: main}
+2015:  # 318 papers
+  tocs:
+    - {key: db/conf/acl/acl2015-1.bht, selection: main}
+    - {key: db/conf/acl/acl2015-2.bht, selection: main}
+2016:  # 328 papers
+  tocs:
+    - {key: db/conf/acl/acl2016-1.bht, selection: main}
+    - {key: db/conf/acl/acl2016-2.bht, selection: main}
+2017:  # 302 papers
+  tocs:
+    - {key: db/conf/acl/acl2017-1.bht, selection: main}
+    - {key: db/conf/acl/acl2017-2.bht, selection: main}
+2018:  # 381 papers
+  tocs:
+    - {key: db/conf/acl/acl2018-1.bht, selection: main}
+    - {key: db/conf/acl/acl2018-2.bht, selection: main}
+2019:  # 660 papers
+  tocs:
+    - {key: db/conf/acl/acl2019-1.bht, selection: main}
+2020:  # 778 papers
+  tocs:
+    - {key: db/conf/acl/acl2020.bht, selection: main}
+2021:  # 1169 papers
+  tocs:
+    - {key: db/conf/acl/acl2021-1.bht, selection: main}
+    - {key: db/conf/acl/acl2021-2.bht, selection: main}
+    - {key: db/conf/acl/acl2021f.bht, selection: findings}
+2022:  # 1034 papers
+  tocs:
+    - {key: db/conf/acl/acl2022-1.bht, selection: main}
+    - {key: db/conf/acl/acl2022-2.bht, selection: main}
+    - {key: db/conf/acl/acl2022f.bht, selection: findings}

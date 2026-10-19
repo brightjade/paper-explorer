@@ -1,0 +1,35 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 94 papers
+  tocs:
+    - {key: db/conf/kbse/ase2013.bht, selection: main}
+2014:  # 107 papers
+  tocs:
+    - {key: db/conf/kbse/ase2014.bht, selection: main}
+2015:  # 100 papers
+  tocs:
+    - {key: db/conf/kbse/ase2015.bht, selection: main}
+2016:  # 100 papers
+  tocs:
+    - {key: db/conf/kbse/ase2016.bht, selection: main}
+2017:  # 117 papers
+  tocs:
+    - {key: db/conf/kbse/ase2017.bht, selection: main}
+2018:  # 112 papers
+  tocs:
+    - {key: db/conf/kbse/ase2018.bht, selection: main}
+2019:  # 154 papers
+  tocs:
+    - {key: db/conf/kbse/ase2019.bht, selection: main}
+2020:  # 158 papers
+  tocs:
+    - {key: db/conf/kbse/ase2020.bht, selection: main}
+2021:  # 166 papers
+  tocs:
+    - {key: db/conf/kbse/ase2021.bht, selection: main}
+2022:  # 228 papers
+  tocs:
+    - {key: db/conf/kbse/ase2022.bht, selection: main}

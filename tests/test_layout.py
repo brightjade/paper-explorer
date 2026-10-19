@@ -1,10 +1,12 @@
 # tests/test_layout.py
+import re
 from pathlib import Path
 
 import pytest
 
 from ppr import layout
 from ppr.release import CHECKPOINT_SUFFIX
+from ppr.venues import load_registry
 
 
 def _touch(root: Path, *rels: str) -> None:
@@ -79,3 +81,20 @@ class TestConfigPaths:
     def test_dblp_config_paths(self, tmp_path):
         _touch(tmp_path, "aaai/dblp.yaml", "acl/dblp.yaml", "iclr/2025.yaml")
         assert layout.dblp_config_paths(tmp_path) == [tmp_path / "aaai" / "dblp.yaml", tmp_path / "acl" / "dblp.yaml"]
+
+
+def test_every_config_file_follows_the_layout():
+    configs = layout.CONFIGS_DIR
+    for path in configs.rglob("*.yaml"):
+        rel = path.relative_to(configs).parts
+        ok = (rel == ("venues.yaml",)
+              or (len(rel) == 2 and (re.fullmatch(r"\d{4}\.yaml", rel[1]) or rel[1] == "dblp.yaml"))
+              or (len(rel) == 3 and rel[1] == "awards" and re.fullmatch(r"\d{4}\.yaml", rel[2])))
+        assert ok, path
+    assert {p.name for p in configs.iterdir() if p.is_dir()} <= set(load_registry())
+
+
+def test_the_move_kept_every_config():
+    configs = layout.CONFIGS_DIR
+    assert len(layout.crawl_config_ids(configs)) == 33
+    assert len(list(configs.glob("*/awards/*.yaml"))) == 40

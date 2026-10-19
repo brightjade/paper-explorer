@@ -1,0 +1,21 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2014:  # 221 papers
+  tocs:
+    - {key: db/conf/coling/coling2014.bht, selection: main}
+2016:  # 337 papers
+  tocs:
+    - {key: db/conf/coling/coling2016.bht, selection: main}
+2018:  # 330 papers
+  tocs:
+    - {key: db/conf/coling/coling2018.bht, selection: main}
+2020:  # 634 papers
+  tocs:
+    - {key: db/conf/coling/coling2020.bht, selection: main}
+    - {key: db/conf/coling/coling2020i.bht, selection: industry}
+2022:  # 633 papers
+  tocs:
+    - {key: db/conf/coling/coling2022.bht, selection: main}

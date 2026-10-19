@@ -20,11 +20,10 @@ from ppr.enrich import (
     parse_duration,
     results_to_json,
 )
-from ppr.layout import conference_ids, papers_path
+from ppr.layout import conference_ids, crawl_config_ids, crawl_config_path, papers_path
 from ppr.models import Paper
 from ppr.s2_client import S2Client
 from ppr.store import save_crawl
-from ppr.venues import REGISTRY_STEM
 
 CONFIGS_DIR = Path(__file__).resolve().parent.parent / "configs"
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -206,11 +205,9 @@ def cmd_crawl(args: argparse.Namespace) -> None:
     conf_ids = args.conferences
 
     # Split into scraped vs OpenReview conferences
+    configured = set(crawl_config_ids(CONFIGS_DIR))
     scraped = [c for c in conf_ids if c in SCRAPERS]
-    openreview = [
-        c for c in conf_ids
-        if c not in SCRAPERS and c != REGISTRY_STEM and (CONFIGS_DIR / f"{c}.yaml").exists()
-    ]
+    openreview = [c for c in conf_ids if c not in SCRAPERS and c in configured]
     unknown = [c for c in conf_ids if c not in scraped and c not in openreview]
 
     if unknown:
@@ -228,7 +225,7 @@ def cmd_crawl(args: argparse.Namespace) -> None:
 
     # Fetch OpenReview conferences (one login per API version, reuse clients)
     if openreview:
-        configs = [CrawlConfig.from_yaml(CONFIGS_DIR / f"{c}.yaml") for c in openreview]
+        configs = [CrawlConfig.from_yaml(crawl_config_path(CONFIGS_DIR, c)) for c in openreview]
         api_versions = {c.api_version for c in configs}
 
         # Create only the clients needed (avoids unnecessary logins)

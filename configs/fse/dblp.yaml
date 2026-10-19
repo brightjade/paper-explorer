@@ -1,0 +1,35 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 95 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2013.bht, selection: main}
+2014:  # 105 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2014.bht, selection: main}
+2015:  # 124 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2015.bht, selection: main}
+2016:  # 143 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2016.bht, selection: main}
+2017:  # 124 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2017.bht, selection: main}
+2018:  # 124 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2018.bht, selection: main}
+2019:  # 150 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2019.bht, selection: main}
+2020:  # 169 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2020.bht, selection: main}
+2021:  # 188 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2021.bht, selection: main}
+2022:  # 186 papers
+  tocs:
+    - {key: db/conf/sigsoft/fse2022.bht, selection: main}

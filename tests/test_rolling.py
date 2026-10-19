@@ -3,7 +3,7 @@ from datetime import date
 
 import pytest
 
-from ppr.layout import papers_path
+from ppr.layout import crawl_config_path, papers_path
 from ppr.models import Paper
 from ppr.register import render_openreview_config
 from ppr.store import read_papers, save_crawl, save_enriched
@@ -36,7 +36,8 @@ def env(tmp_path):
     )
     configs_dir = tmp_path / "configs"
     configs_dir.mkdir()
-    (configs_dir / "tmlr_2026.yaml").write_text(
+    crawl_config_path(configs_dir, "tmlr_2026").parent.mkdir()
+    crawl_config_path(configs_dir, "tmlr_2026").write_text(
         render_openreview_config("TMLR", 2026, "TMLR", {"main": "Accepted by TMLR"}, year_from_pdate=True),
         encoding="utf-8",
     )
@@ -58,7 +59,7 @@ def test_last_year_is_due_january_through_march_and_unregistered_years_are_skipp
 
 def test_january_lists_last_year_before_this_year(env):
     registry, data_dir, configs_dir = env
-    (configs_dir / "tmlr_2027.yaml").write_text(
+    crawl_config_path(configs_dir, "tmlr_2027").write_text(
         render_openreview_config("TMLR", 2027, "TMLR", {"main": "Accepted by TMLR"}, year_from_pdate=True),
         encoding="utf-8",
     )

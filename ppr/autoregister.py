@@ -17,7 +17,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from ppr.api_client import note_pdate
-from ppr.layout import papers_path
+from ppr.layout import crawl_config_path, papers_path
 from ppr.readme_table import selection_cell, update_readme
 from ppr.register import (
     TRACK_VOCABULARY,
@@ -210,7 +210,8 @@ def _register_openreview(row: dict, venue: Venue, ws: Workspace, snap: _Snapshot
         extra_ids.append(track_id)
         expected += len(notes)
 
-    path = snap.file(ws.configs_dir / f"{row['conf_id']}.yaml")
+    path = snap.file(crawl_config_path(ws.configs_dir, row["conf_id"]))
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         render_openreview_config(venue.name, row["year"], venue_id, selections,
                                  extra_venue_ids=extra_ids, year_from_pdate=venue.rolling),
@@ -326,7 +327,7 @@ def default_crawl(openreview: Callable[[], object]) -> Crawl:
             from ppr.config import CrawlConfig
             from ppr.store import save_crawl
 
-            config = CrawlConfig.from_yaml(ws.configs_dir / f"{conf_id}.yaml")
+            config = CrawlConfig.from_yaml(crawl_config_path(ws.configs_dir, conf_id))
             papers = OpenReviewAPIClient(config, openreview()).fetch_papers()
             save_crawl(papers, out)
             return len(papers)

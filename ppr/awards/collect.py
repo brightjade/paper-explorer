@@ -26,6 +26,7 @@ from ppr.awards import ase_mip, cvf_registry, iclr_blog, icse_mip, issta_impact,
 from ppr.awards.join import attach
 from ppr.awards.labels import UnknownAwardLabel
 from ppr.awards.model import Award, awards_path, merge, read_awards, write_awards
+from ppr.layout import manual_awards_path
 from ppr.matching import title_key
 
 logger = logging.getLogger(__name__)
@@ -120,7 +121,7 @@ def conference_ids(data_dir: Path, today: date | None = None, all_years: bool = 
         if not (d.is_dir() and prefix in SOURCES_BY_PREFIX and year.isdigit()):
             continue
         first = min(first_recent, FIRST_YEAR_BY_PREFIX.get(prefix, first_recent))
-        pending = (manual.MANUAL_DIR / f"{d.name}.yaml").exists() and not awards_path(data_dir, d.name).exists()
+        pending = manual_awards_path(manual.CONFIGS_DIR, d.name).exists() and not awards_path(data_dir, d.name).exists()
         if all_years or int(year) >= first or pending:
             out.append(d.name)
     return sorted(out)

@@ -1,0 +1,29 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 360 papers
+  tocs:
+    - {key: db/conf/nips/nips2013.bht, selection: main}
+2014:  # 411 papers
+  tocs:
+    - {key: db/conf/nips/nips2014.bht, selection: main}
+2015:  # 403 papers
+  tocs:
+    - {key: db/conf/nips/nips2015.bht, selection: main}
+2016:  # 569 papers
+  tocs:
+    - {key: db/conf/nips/nips2016.bht, selection: main}
+2017:  # 679 papers
+  tocs:
+    - {key: db/conf/nips/nips2017.bht, selection: main}
+2018:  # 1010 papers
+  tocs:
+    - {key: db/conf/nips/nips2018.bht, selection: main}
+2019:  # 1427 papers
+  tocs:
+    - {key: db/conf/nips/nips2019.bht, selection: main}
+2020:  # 1898 papers
+  tocs:
+    - {key: db/conf/nips/neurips2020.bht, selection: main}

@@ -1,0 +1,115 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2014:  # 362 papers
+  tocs:
+    - {key: db/conf/eccv/eccv2014-1.bht, selection: main}
+    - {key: db/conf/eccv/eccv2014-2.bht, selection: main}
+    - {key: db/conf/eccv/eccv2014-3.bht, selection: main}
+    - {key: db/conf/eccv/eccv2014-4.bht, selection: main}
+    - {key: db/conf/eccv/eccv2014-5.bht, selection: main}
+    - {key: db/conf/eccv/eccv2014-6.bht, selection: main}
+    - {key: db/conf/eccv/eccv2014-7.bht, selection: main}
+2016:  # 415 papers
+  tocs:
+    - {key: db/conf/eccv/eccv2016-1.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-2.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-3.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-4.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-5.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-6.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-7.bht, selection: main}
+    - {key: db/conf/eccv/eccv2016-8.bht, selection: main}
+2018:  # 776 papers
+  tocs:
+    - {key: db/conf/eccv/eccv2018-1.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-2.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-3.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-4.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-5.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-6.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-7.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-8.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-9.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-10.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-11.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-12.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-13.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-14.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-15.bht, selection: main}
+    - {key: db/conf/eccv/eccv2018-16.bht, selection: main}
+2020:  # 1358 papers
+  tocs:
+    - {key: db/conf/eccv/eccv2020-1.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-2.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-3.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-4.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-5.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-6.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-7.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-8.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-9.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-10.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-11.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-12.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-13.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-14.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-15.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-16.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-17.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-18.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-19.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-20.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-21.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-22.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-23.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-24.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-25.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-26.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-27.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-28.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-29.bht, selection: main}
+    - {key: db/conf/eccv/eccv2020-30.bht, selection: main}
+2022:  # 1645 papers
+  tocs:
+    - {key: db/conf/eccv/eccv2022-1.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-2.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-3.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-4.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-5.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-6.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-7.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-8.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-9.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-10.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-11.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-12.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-13.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-14.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-15.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-16.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-17.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-18.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-19.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-20.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-21.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-22.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-23.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-24.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-25.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-26.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-27.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-28.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-29.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-30.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-31.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-32.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-33.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-34.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-35.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-36.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-37.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-38.bht, selection: main}
+    - {key: db/conf/eccv/eccv2022-39.bht, selection: main}

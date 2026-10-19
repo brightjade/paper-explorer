@@ -1,3 +1,4 @@
+from ppr.layout import crawl_config_ids
 from ppr.discover import known_conference_ids, missing_years
 
 
@@ -53,7 +54,7 @@ class TestKnownConferenceIds:
         from ppr.scrapers import SCRAPERS
 
         configs = Path(__file__).resolve().parent.parent / "configs"
-        expected = {p.stem for p in configs.glob("*.yaml") if p.stem != "venues"}
+        expected = set(crawl_config_ids(configs))
         expected |= set(SCRAPERS.keys())
         assert known_conference_ids() == expected
         assert len(expected) >= 69

@@ -1,0 +1,35 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 471 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2013.bht, selection: main}
+2014:  # 540 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2014.bht, selection: main}
+2015:  # 602 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2015.bht, selection: main}
+2016:  # 643 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2016.bht, selection: main}
+2017:  # 783 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2017.bht, selection: main}
+2018:  # 979 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2018.bht, selection: main}
+2019:  # 1294 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2019.bht, selection: main}
+2020:  # 1465 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2020.bht, selection: main}
+2021:  # 1660 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2021.bht, selection: main}
+2022:  # 2072 papers
+  tocs:
+    - {key: db/conf/cvpr/cvpr2022.bht, selection: main}

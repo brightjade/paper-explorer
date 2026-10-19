@@ -1,0 +1,32 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 496 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2013.bht, selection: main}
+2015:  # 649 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2015.bht, selection: main}
+2016:  # 658 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2016.bht, selection: main}
+2017:  # 781 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2017.bht, selection: main}
+2018:  # 870 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2018.bht, selection: main}
+2019:  # 965 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2019.bht, selection: main}
+2020:  # 778 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2020.bht, selection: main}
+2021:  # 721 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2021.bht, selection: main}
+2022:  # 863 papers
+  tocs:
+    - {key: db/conf/ijcai/ijcai2022.bht, selection: main}

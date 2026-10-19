@@ -1,0 +1,32 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 167 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2013.bht, selection: main}
+2015:  # 239 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2015.bht, selection: main}
+2016:  # 181 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2016.bht, selection: main}
+2018:  # 357 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2018-1.bht, selection: main}
+    - {key: db/conf/naacl/naacl2018-2.bht, selection: main}
+    - {key: db/conf/naacl/naacl2018-3.bht, selection: industry}
+2019:  # 452 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2019-1.bht, selection: main}
+    - {key: db/conf/naacl/naacl2019-2.bht, selection: industry}
+2021:  # 515 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2021-2.bht, selection: industry}
+    - {key: db/conf/naacl/naacl2021.bht, selection: main}
+2022:  # 694 papers
+  tocs:
+    - {key: db/conf/naacl/naacl2022.bht, selection: main}
+    - {key: db/conf/naacl/naacl2022f.bht, selection: findings}
+    - {key: db/conf/naacl/naacl2022i.bht, selection: industry}

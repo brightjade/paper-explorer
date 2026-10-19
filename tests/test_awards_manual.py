@@ -1,7 +1,8 @@
 import pytest
 
 from ppr.awards.labels import UnknownAwardLabel
-from ppr.awards.manual import MANUAL_DIR, load_manual, replaced_titles
+from ppr.awards.manual import CONFIGS_DIR, load_manual, replaced_titles
+from ppr.layout import manual_awards_path
 from ppr.discover import known_conference_ids
 from ppr.matching import title_key
 
@@ -30,7 +31,7 @@ def test_title_corrections(conf_id, replaced):
 
 
 def test_the_committed_files_are_the_expected_ones():
-    assert sorted(p.stem for p in MANUAL_DIR.glob("*.yaml")) == sorted(EXPECTED)
+    assert sorted(f"{p.parent.parent.name}_{p.stem}" for p in CONFIGS_DIR.glob("*/awards/*.yaml")) == sorted(EXPECTED)
 
 
 @pytest.mark.parametrize("conf_id,count", EXPECTED.items())
@@ -53,7 +54,9 @@ def test_missing_file_is_none(tmp_path):
 
 
 def _write(tmp_path, label):
-    (tmp_path / "x_2024.yaml").write_text(
+    path = manual_awards_path(tmp_path, "x_2024")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
         f'source: https://x.test/\nretrieved: 2026-10-15\nawards:\n  - {{label: "{label}", title: "P"}}\n',
         encoding="utf-8")
 
@@ -71,11 +74,13 @@ def test_a_non_award_label_raises(tmp_path):
 
 
 def test_the_directory_is_never_mistaken_for_a_conference_config():
-    assert "awards_manual" not in known_conference_ids()
+    assert "awards" not in known_conference_ids()
 
 
 def _file(tmp_path, body, name="x_2024"):
-    (tmp_path / f"{name}.yaml").write_text(body, encoding="utf-8")
+    path = manual_awards_path(tmp_path, name)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(body, encoding="utf-8")
 
 
 def test_entries_carry_forum_id_and_url(tmp_path):
@@ -107,6 +112,6 @@ def test_replaced_titles_are_kind_and_title_key(tmp_path):
 @pytest.mark.parametrize("conf_id", sorted(EXPECTED))
 def test_every_committed_secondary_list_names_its_corroboration(conf_id):
     import yaml
-    raw = yaml.safe_load((MANUAL_DIR / f"{conf_id}.yaml").read_text(encoding="utf-8"))
+    raw = yaml.safe_load(manual_awards_path(CONFIGS_DIR, conf_id).read_text(encoding="utf-8"))
     if raw.get("official", True) is False:
         assert raw["also"] and all(u.startswith("https://") for u in raw["also"])

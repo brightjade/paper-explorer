@@ -21,7 +21,7 @@ from typing import Callable
 
 from ppr.config import CrawlConfig
 from ppr.matching import title_key
-from ppr.layout import papers_path
+from ppr.layout import crawl_config_path, papers_path
 from ppr.models import Paper
 from ppr.store import read_papers, save_crawl
 from ppr.venues import Venue
@@ -51,7 +51,7 @@ def due_ids(registry: dict[str, Venue], data_dir: Path, configs_dir: Path, today
             if not venue.rolling:
                 continue
             conf_id = f"{prefix}_{year}"
-            if (configs_dir / f"{conf_id}.yaml").exists() and papers_path(data_dir, conf_id).exists():
+            if crawl_config_path(configs_dir, conf_id).exists() and papers_path(data_dir, conf_id).exists():
                 ids.append(conf_id)
     return ids
 
@@ -70,7 +70,7 @@ def recrawl_rolling(
     for conf_id in conf_ids:
         path = papers_path(data_dir, conf_id)
         try:
-            config = CrawlConfig.from_yaml(configs_dir / f"{conf_id}.yaml")
+            config = CrawlConfig.from_yaml(crawl_config_path(configs_dir, conf_id))
             old = read_papers(path)
             new = fetch(config)
         except Exception as e:  # one venue's failure must not stop the others

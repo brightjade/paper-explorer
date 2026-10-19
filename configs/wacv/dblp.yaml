@@ -1,0 +1,36 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+# Volume title reads "IEEE Workshop on Applications of Computer Vision" (WACV was renamed in 2014); it is the main conference, kept by an override.
+2013:  # 73 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2013.bht, selection: main}
+2014:  # 152 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2014.bht, selection: main}
+2015:  # 155 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2015.bht, selection: main}
+2016:  # 189 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2016.bht, selection: main}
+2017:  # 140 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2017.bht, selection: main}
+2018:  # 221 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2018.bht, selection: main}
+2019:  # 230 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2019.bht, selection: main}
+2020:  # 378 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2020.bht, selection: main}
+2021:  # 406 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2021.bht, selection: main}
+2022:  # 406 papers
+  tocs:
+    - {key: db/conf/wacv/wacv2022.bht, selection: main}

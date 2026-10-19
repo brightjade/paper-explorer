@@ -1,0 +1,35 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 55 papers
+  tocs:
+    - {key: db/conf/rss/rss2013.bht, selection: main}
+2014:  # 57 papers
+  tocs:
+    - {key: db/conf/rss/rss2014.bht, selection: main}
+2015:  # 49 papers
+  tocs:
+    - {key: db/conf/rss/rss2015.bht, selection: main}
+2016:  # 47 papers
+  tocs:
+    - {key: db/conf/rss/rss2016.bht, selection: main}
+2017:  # 75 papers
+  tocs:
+    - {key: db/conf/rss/rss2017.bht, selection: main}
+2018:  # 71 papers
+  tocs:
+    - {key: db/conf/rss/rss2018.bht, selection: main}
+2019:  # 84 papers
+  tocs:
+    - {key: db/conf/rss/rss2019.bht, selection: main}
+2020:  # 103 papers
+  tocs:
+    - {key: db/conf/rss/rss2020.bht, selection: main}
+2021:  # 92 papers
+  tocs:
+    - {key: db/conf/rss/rss2021.bht, selection: main}
+2022:  # 74 papers
+  tocs:
+    - {key: db/conf/rss/rss2022.bht, selection: main}

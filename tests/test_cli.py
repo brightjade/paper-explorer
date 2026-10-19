@@ -62,7 +62,7 @@ class TestAwardsCommand:
         this_year = f"icml_{date.today().year}"
         monkeypatch.setattr(cli, "DATA_DIR", tmp_path)
         # configs/ has an icml_2013 manual file, which would make that old year pending.
-        monkeypatch.setattr(manual, "MANUAL_DIR", tmp_path / "no-manual-files")
+        monkeypatch.setattr(manual, "CONFIGS_DIR", tmp_path / "no-manual-files")
         for name in (this_year, "acl_2025", "icml_2013"):
             (tmp_path / name).mkdir()
         seen = []

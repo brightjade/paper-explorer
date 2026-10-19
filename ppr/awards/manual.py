@@ -1,4 +1,4 @@
-"""Hand-reviewed award lists: configs/awards_manual/<conf_id>.yaml.
+"""Hand-reviewed award lists: configs/<venue>/awards/<year>.yaml.
 
 For pages no parser reads -- a PDF, a past year's static awards page, a
 venue's one-off announcement -- the winners were extracted once, reviewed and
@@ -25,18 +25,17 @@ import yaml
 
 from ppr.awards.labels import UnknownAwardLabel, classify
 from ppr.awards.model import Award
+from ppr.layout import CONFIGS_DIR, manual_awards_path
 from ppr.matching import title_key
 
-MANUAL_DIR = Path(__file__).resolve().parents[2] / "configs" / "awards_manual"
 
-
-def _read(conf_id: str, manual_dir: Path | None) -> tuple[dict | None, Path]:
-    path = (manual_dir or MANUAL_DIR) / f"{conf_id}.yaml"
+def _read(conf_id: str, configs_dir: Path | None) -> tuple[dict | None, Path]:
+    path = manual_awards_path(configs_dir or CONFIGS_DIR, conf_id)
     if not path.exists():
         return None, path
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     if raw.get("official", True) is False and not raw.get("also"):
-        raise ValueError(f"{path.name}: a list from secondary sources names its corroboration under 'also'")
+        raise ValueError(f"{path}: a list from secondary sources names its corroboration under 'also'")
     return raw, path
 
 
@@ -47,8 +46,8 @@ def _kind(label: str, prefix: str, path: Path) -> str:
     return kind
 
 
-def load_manual(conf_id: str, manual_dir: Path | None = None) -> list[Award] | None:
-    raw, path = _read(conf_id, manual_dir)
+def load_manual(conf_id: str, configs_dir: Path | None = None) -> list[Award] | None:
+    raw, path = _read(conf_id, configs_dir)
     if raw is None:
         return None
     prefix = conf_id.rsplit("_", 1)[0]
@@ -58,9 +57,9 @@ def load_manual(conf_id: str, manual_dir: Path | None = None) -> list[Award] | N
             for entry in raw["awards"]]
 
 
-def replaced_titles(conf_id: str, manual_dir: Path | None = None) -> set[tuple[str, str]]:
+def replaced_titles(conf_id: str, configs_dir: Path | None = None) -> set[tuple[str, str]]:
     """(kind, title_key) of every other source's title a reviewed entry replaces."""
-    raw, path = _read(conf_id, manual_dir)
+    raw, path = _read(conf_id, configs_dir)
     if raw is None:
         return set()
     prefix = conf_id.rsplit("_", 1)[0]
