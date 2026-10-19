@@ -1105,6 +1105,67 @@ class TestEnrichConference:
 class TestEnrichResume:
     @respx.mock
     @pytest.mark.asyncio
+    async def test_resume_after_an_unbind_drops_the_strangers_abstract(self, tmp_path):
+        """A checkpointed paper restores onto its crawl view, not onto the stale file.
+
+        The year file holds a wrong binding whose abstract came from Semantic
+        Scholar. The killed run unbinds it and finds the right record; the
+        resume must not let the file's stale abstract outlive that.
+        """
+        def _year_file(conf_id):
+            save_enriched([
+                _paper(title="Wrong", link="https://doi.org/10.1/w", authors=["Ada Lovelace"],
+                       external_ids={"CorpusId": 1},
+                       citation_count=400, abstract="Someone else's abstract.",
+                       abstract_source="s2", match_status="matched"),
+                _paper(title="Right", authors=["Grace Hopper"], external_ids={"CorpusId": 2},
+                       citation_count=8, match_status="matched"),
+                _paper(title="New", authors=["Alan Kay"]),
+            ], papers_path(tmp_path, conf_id))
+
+        def _batch(request):
+            ids = json.loads(request.content)["ids"]
+            if not ids[0].startswith("CorpusId"):
+                # The unbound paper's DOI: the record it really is.
+                return httpx.Response(200, json=[{
+                    "title": "Wrong", "citationCount": 5, "abstract": "The correct abstract.",
+                    "externalIds": {"CorpusId": 42}, "authors": [{"name": "Ada Lovelace"}]}])
+            entries = {
+                "CorpusId:1": {"title": "Computing Neighbourhoods", "citationCount": 400,
+                               "externalIds": {"CorpusId": 1}, "authors": [{"name": "Alan Turing"}]},
+                "CorpusId:2": {"title": "Right", "citationCount": 9,
+                               "externalIds": {"CorpusId": 2}, "authors": [{"name": "Grace Hopper"}]},
+            }
+            return httpx.Response(200, json=[entries[i] for i in ids])
+
+        state = {"die": False}
+
+        def _match(request):
+            if state["die"]:
+                raise RuntimeError("killed")
+            return httpx.Response(200, json={"data": []})
+
+        respx.post(BATCH_URL).mock(side_effect=_batch)
+        respx.get(BULK_URL).mock(return_value=httpx.Response(200, json={"total": 0, "data": []}))
+        respx.get(MATCH_URL).mock(side_effect=_match)
+
+        _year_file("clean_2026")
+        await enrich_conference("clean_2026", S2Client(min_interval=0.0), tmp_path)
+
+        _year_file("resumed_2026")
+        state["die"] = True
+        with pytest.raises(RuntimeError):
+            await enrich_conference("resumed_2026", S2Client(min_interval=0.0), tmp_path)
+        state["die"] = False
+        await enrich_conference("resumed_2026", S2Client(min_interval=0.0), tmp_path)
+
+        clean = {p.title: p for p in read_papers(papers_path(tmp_path, "clean_2026"))}
+        resumed = {p.title: p for p in read_papers(papers_path(tmp_path, "resumed_2026"))}
+        assert clean["Wrong"].abstract == "The correct abstract."
+        assert resumed["Wrong"].to_dict() == clean["Wrong"].to_dict()
+
+    @respx.mock
+    @pytest.mark.asyncio
     async def test_checkpoint_is_written_as_work_completes(self, tmp_path):
         """The point of the checkpoint is to survive a kill, so it must exist mid-run."""
         _conf(tmp_path, "icml_2026", [

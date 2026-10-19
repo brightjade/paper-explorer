@@ -524,7 +524,11 @@ async def enrich_conference(
         if finished is None:
             todo.append(paper)
         else:
-            carry_over(paper, finished)
+            # Onto the crawl view, not the file as found: the checkpoint's
+            # record is the whole enrich result for that paper, as the old raw
+            # file was the crawl alone. Otherwise an abstract the file got
+            # from an unbound record would outlive the unbind.
+            carry_over(crawl_view(paper), finished)
     resumed = len(papers) - len(todo)
     if resumed:
         logger.info(
