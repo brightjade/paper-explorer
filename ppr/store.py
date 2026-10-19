@@ -19,9 +19,49 @@ from ppr.models import Paper
 # selector a redesign outgrew), not as the venue shrinking.
 MIN_KEEP_RATIO = 0.5
 
+# A run that would leave less than this fraction of the previously matched
+# papers carrying a Semantic Scholar ID is treated as a failed lookup rather
+# than as real data.
+MIN_COVERAGE_RATIO = 0.5
+
+
+def enrichment_coverage(papers: list[Paper]) -> int:
+    """How many papers carry a Semantic Scholar corpus ID."""
+    return sum(1 for p in papers if (p.external_ids or {}).get("CorpusId"))
+
+
+def check_enrichment_coverage(
+    papers: list[Paper], enriched: list[Paper]
+) -> str | None:
+    """Decide whether the about-to-be-written papers are worth keeping.
+
+    The paper-count check bounds how many *papers* a write may lose; this bounds
+    how much *enrichment* it may lose, which the paper count cannot see. An API that
+    answers nothing — or a title change that routes every paper cold and finds
+    no match — writes the same papers back with citations, tldrs and external
+    IDs blank. Losing the corpus IDs also costs every future run the fast
+    refresh path, so the damage compounds.
+
+    Returns a human-readable reason to skip, or None to proceed. Coverage is
+    only ever compared against existing enrichment, so a conference being
+    enriched for the first time is never blocked.
+    """
+    prior = enrichment_coverage(enriched)
+    if not prior:
+        return None
+    current = enrichment_coverage(papers)
+    if current < MIN_COVERAGE_RATIO * prior:
+        return (
+            f"only {current} of {len(papers)} papers would keep a Semantic "
+            f"Scholar ID, under {MIN_COVERAGE_RATIO:.0%} of the {prior} matched "
+            f"before — refusing to overwrite. The lookups likely failed; retry."
+        )
+    return None
+
 
 class ShrinkError(Exception):
-    """A crawl would have replaced a conference's papers with under half as many."""
+    """A crawl would have replaced a conference's papers with under half as many,
+    or left under half of its matched papers enriched."""
 
 
 def normalize_title(title: str) -> str:
@@ -109,7 +149,10 @@ def save_crawl(papers: list[Paper], path: Path) -> Path:
     OpenReview error swallowed into `[]`, or a scraper whose selector a site
     redesign outgrew -- so a crawl under half of what is on disk is refused and
     the file left alone. The crawl decides which papers are listed: one it no
-    longer returns is dropped, a new one arrives unenriched.
+    longer returns is dropped, a new one arrives unenriched. A crawl that would
+    leave under half of the matched papers enriched is refused too: titles are
+    how enrichment is carried over, so a source that garbled them would
+    otherwise wipe every citation without changing the paper count.
     """
     existing = read_papers(path)
     if existing and len(papers) < MIN_KEEP_RATIO * len(existing):
@@ -124,6 +167,14 @@ def save_crawl(papers: list[Paper], path: Path) -> Path:
         old = prior.get(normalize_title(paper.title))
         if old is not None:
             carry_over(paper, old)
+    kept, before = enrichment_coverage(papers), enrichment_coverage(existing)
+    if kept < MIN_COVERAGE_RATIO * before:
+        raise ShrinkError(
+            f"{path}: only {kept} of this crawl's papers would keep a Semantic Scholar ID, "
+            f"under {MIN_COVERAGE_RATIO:.0%} of the {before} on disk -- refusing to overwrite. "
+            f"A paper keeps its enrichment only when its title still matches; if the source "
+            f"really renamed them, delete {path} and re-crawl."
+        )
     _write_sorted(papers, path)
     return path
 

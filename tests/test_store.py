@@ -173,6 +173,26 @@ class TestSaveCrawl:
         assert (p.authors, p.selection) == (["New"], "oral")
         assert (p.citation_count, p.external_ids, p.match_status) == (10, {"CorpusId": 1}, "matched")
 
+    def test_title_drift_is_refused_before_it_wipes_enrichment(self, tmp_path):
+        path = tmp_path / "2026.jsonl"
+        save_enriched([_paper(title=f"P{i}", external_ids={"CorpusId": i + 1}) for i in range(10)], path)
+        before = path.read_bytes()
+        with pytest.raises(ShrinkError, match="keep a Semantic Scholar ID"):
+            save_crawl([_paper(title=f"Q{i}") for i in range(10)], path)
+        assert path.read_bytes() == before
+
+    def test_a_crawl_keeping_half_the_enrichment_is_written(self, tmp_path):
+        path = tmp_path / "2026.jsonl"
+        save_enriched([_paper(title=f"P{i}", external_ids={"CorpusId": i + 1}) for i in range(10)], path)
+        save_crawl([_paper(title=f"{c}{i}") for c in "PQ" for i in range(5)], path)
+        assert sum(1 for p in read_papers(path) if p.external_ids.get("CorpusId")) == 5
+
+    def test_an_unenriched_file_never_blocks_a_retitled_crawl(self, tmp_path):
+        path = tmp_path / "2026.jsonl"
+        save_enriched([_paper(title=f"P{i}") for i in range(10)], path)
+        save_crawl([_paper(title=f"Q{i}") for i in range(10)], path)
+        assert sorted(p.title for p in read_papers(path)) == sorted(f"Q{i}" for i in range(10))
+
     def test_titles_match_across_case_and_spacing(self, tmp_path):
         path = tmp_path / "2026.jsonl"
         save_enriched([_enriched(title="A  Paper")], path)
