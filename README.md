@@ -69,17 +69,17 @@ import json
 from pathlib import Path
 
 # The five most cited ICLR 2025 orals
-papers = [json.loads(line) for line in open("data/iclr_2025/papers_enriched.jsonl")]
+papers = [json.loads(line) for line in open("data/iclr/2025.jsonl")]
 orals = [p for p in papers if p["selection"] == "oral"]
 for p in sorted(orals, key=lambda p: p.get("citation_count", 0), reverse=True)[:5]:
     print(p.get("citation_count", 0), p["title"])
 
 # Every 2024-2025 paper on unlearning, across all venues
-for path in Path("data").glob("*_202[45]/papers_enriched.jsonl"):
+for path in Path("data").glob("*/202[45].jsonl"):
     for line in path.open():
         p = json.loads(line)
         if "unlearning" in (p["title"] + " " + p.get("abstract", "")).lower():
-            print(path.parent.name, p.get("citation_count", 0), p["title"])
+            print(path.parent.name, path.stem, p.get("citation_count", 0), p["title"])
 ```
 
 ## Quick start
@@ -107,13 +107,15 @@ cp .env.example .env    # then fill it in
 ## Data format
 
 ```text
-data/<conference_id>/
-├── papers.jsonl             # the crawl: title, authors, link, track
-├── papers_enriched.jsonl    # + Semantic Scholar metadata, sorted by citation count
-└── awards.json              # paper awards, for venues that publish them
+data/
+├── iclr/
+│   ├── 2025.jsonl      # one paper per line: crawl + Semantic Scholar metadata, sorted by citation count
+│   └── awards.json     # {"2025": [...], ...}: the venue's paper awards by year
+├── pipeline_state.json
+└── citation_updated.txt
 ```
 
-A conference ID is `<venue>_<year>`, with the venue IDs listed under [Conferences](#conferences): `iclr_2025`, `emnlp_2024`, `usenix_security_2023`. Each line of `papers_enriched.jsonl` is one paper; empty fields are left out.
+A conference ID is `<venue>_<year>`, with the venue IDs listed under [Conferences](#conferences): `iclr_2025`, `emnlp_2024`, `usenix_security_2023`. Each line of `data/<venue>/<year>.jsonl` is one paper; empty fields are left out.
 
 | Field | Meaning |
 |---|---|
@@ -123,6 +125,7 @@ A conference ID is `<venue>_<year>`, with the venue IDs listed under [Conference
 | `citation_count`, `influential_citation_count`, `reference_count` | From Semantic Scholar, refreshed monthly |
 | `publication_date`, `fields_of_study`, `open_access_pdf` | From Semantic Scholar |
 | `external_ids` | `CorpusId`, `DOI`, `ArXiv`, `DBLP`, `ACL`, ... |
+| `abstract_source` | `"s2"` when Semantic Scholar supplied the abstract; absent when it came from the venue's own listing (e.g. OpenReview) |
 | `forum_id` | OpenReview forum ID, for OpenReview venues |
 | `venue_date` | TMLR only: the date TMLR published the paper |
 | `match_status` | How the paper was bound to its Semantic Scholar record: `matched`, `matched_fuzzy`, `not_found`, ... |
@@ -178,10 +181,10 @@ Every command runs as `uv run ppr <command>`; `--help` on any of them lists all 
 
 ```bash
 # Build the data
-uv run ppr crawl iclr_2025 neurips_2025      # fetch accepted papers -> data/<id>/papers.jsonl
-uv run ppr enrich iclr_2025 neurips_2025     # add Semantic Scholar metadata -> papers_enriched.jsonl
+uv run ppr crawl iclr_2025 neurips_2025      # fetch accepted papers -> data/<venue>/<year>.jsonl
+uv run ppr enrich iclr_2025 neurips_2025     # add Semantic Scholar metadata in place
 uv run ppr enrich --all --time-budget 4h     # refresh every conference in data/ within a time budget
-uv run ppr awards neurips_2024               # collect paper awards -> data/<id>/awards.json
+uv run ppr awards neurips_2024               # collect paper awards -> data/<venue>/awards.json
 uv run ppr awards --all --all-years     # every venue-year, including the final older ones
 uv run ppr validate iclr_2025                # compare paper counts with DBLP (10% tolerance)
 

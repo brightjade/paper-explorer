@@ -89,22 +89,27 @@ class TestBackfillEntries:
 
 
 class TestLoadBackfill:
-    def test_missing_file_is_empty(self, tmp_path):
-        assert load_backfill(tmp_path / "none.yaml") == {}
+    @staticmethod
+    def _venue_file(tmp_path, body):
+        (tmp_path / "acl").mkdir(exist_ok=True)
+        (tmp_path / "acl" / "dblp.yaml").write_text(body)
+
+    def test_no_venue_file_is_empty(self, tmp_path):
+        assert load_backfill(tmp_path) == {}
 
     def test_empty_mapping(self, tmp_path):
-        (tmp_path / "b.yaml").write_text("# header\n{}\n")
-        assert load_backfill(tmp_path / "b.yaml") == {}
+        self._venue_file(tmp_path, "# header\n{}\n")
+        assert load_backfill(tmp_path) == {}
 
     def test_entry_without_tocs_is_refused(self, tmp_path):
-        (tmp_path / "b.yaml").write_text("acl_2021:\n  tocs: []\n")
-        with pytest.raises(ValueError, match="acl_2021"):
-            load_backfill(tmp_path / "b.yaml")
+        self._venue_file(tmp_path, "2021:\n  tocs: []\n")
+        with pytest.raises(ValueError, match="2021"):
+            load_backfill(tmp_path)
 
     def test_reads_tocs(self, tmp_path):
-        (tmp_path / "b.yaml").write_text(
-            "acl_2021:\n  tocs:\n    - {key: db/conf/acl/acl2021-1.bht, selection: main}\n")
-        assert load_backfill(tmp_path / "b.yaml") == {
+        self._venue_file(
+            tmp_path, "2021:\n  tocs:\n    - {key: db/conf/acl/acl2021-1.bht, selection: main}\n")
+        assert load_backfill(tmp_path) == {
             "acl_2021": {"tocs": [{"key": "db/conf/acl/acl2021-1.bht", "selection": "main"}]}}
 
     def test_merge_refuses_an_id_already_in_dblp_py(self):

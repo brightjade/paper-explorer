@@ -1,1 +1,1 @@
-"""Paper awards: collection into data/<id>/awards.json, and the join onto papers."""
+"""Paper awards: collection into data/<venue>/awards.json, and the join onto papers."""

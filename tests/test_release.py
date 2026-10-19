@@ -3,6 +3,8 @@ import zipfile
 
 import pytest
 
+from ppr.layout import checkpoint_path, papers_path
+
 from ppr.release import (
     KEEP,
     ReleaseAborted,
@@ -36,9 +38,9 @@ class FakeGh:
 @pytest.fixture
 def data_dir(tmp_path):
     d = tmp_path / "data"
-    (d / "iclr_2025").mkdir(parents=True)
-    (d / "iclr_2025" / "papers.jsonl").write_text("{}\n")
-    (d / "iclr_2025" / ".papers_enriched.tmp.jsonl").write_text("{}\n")
+    papers_path(d, "iclr_2025").parent.mkdir(parents=True)
+    papers_path(d, "iclr_2025").write_text("{}\n")
+    checkpoint_path(d, "iclr_2025").write_text("{}\n")
     (d / "citation_updated.txt").write_text("2026-11-03\n")
     return d
 
@@ -92,7 +94,8 @@ class TestMakeZip:
         z = tmp_path / "data.zip"
         make_zip(data_dir, z)
         names = set(zipfile.ZipFile(z).namelist())
-        assert "data/iclr_2025/papers.jsonl" in names
+        assert "data/iclr/2025.jsonl" in names
+        assert "data/iclr/.2025.tmp.jsonl" not in names
         assert "data/citation_updated.txt" in names
         assert not any(n.endswith(".tmp.jsonl") for n in names)
 
@@ -128,6 +131,25 @@ class TestPublish:
         assert publish(data_dir, "data-2026-10-03", "n", "2026-11-03", gh,
                        zip_path=tmp_path / "d.zip") == "data-2026-11-03"
 
+    def test_refuses_a_data_dir_without_year_files(self, tmp_path):
+        d = tmp_path / "data"
+        d.mkdir()
+        (d / "pipeline_state.json").write_text("{}\n")
+        gh = FakeGh(RELEASES)
+        with pytest.raises(ReleaseAborted, match="per-venue layout"):
+            publish(d, "data-2026-10-03", "n", "2026-11-03", gh, zip_path=tmp_path / "d.zip")
+        assert gh.calls == []
+        assert not (tmp_path / "d.zip").exists()
+
+    def test_refuses_a_data_dir_holding_an_old_layout_file(self, data_dir, tmp_path):
+        (data_dir / "iclr_2025").mkdir()
+        (data_dir / "iclr_2025" / "papers.jsonl").write_text("{}\n")
+        gh = FakeGh(RELEASES)
+        with pytest.raises(ReleaseAborted, match="old-layout"):
+            publish(data_dir, "data-2026-10-03", "n", "2026-11-03", gh, zip_path=tmp_path / "d.zip")
+        assert gh.calls == []
+        assert not (tmp_path / "d.zip").exists()
+
     def test_dry_run_touches_nothing(self, data_dir, tmp_path):
         gh = FakeGh(RELEASES)
         publish(data_dir, "data-2026-10-03", "n", "2026-11-03", gh,
@@ -138,7 +160,7 @@ class TestPublish:
 
 class TestRenderNotes:
     def test_lists_additions_holds_and_match_counts(self, data_dir):
-        (data_dir / "iclr_2025" / "papers_enriched.jsonl").write_text(
+        papers_path(data_dir, "iclr_2025").write_text(
             json.dumps({"title": "A", "link": "L", "authors": [], "match_status": "matched"}) + "\n"
             + json.dumps({"title": "B", "link": "L", "authors": [], "match_status": "not_found"}) + "\n"
         )

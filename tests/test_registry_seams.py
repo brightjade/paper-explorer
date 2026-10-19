@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 
 from ppr.cli import build_parser
+from ppr.layout import crawl_config_path
 from ppr.register import (
     register_crossref,
     register_roboticsproceedings,
@@ -63,9 +64,9 @@ def test_registering_one_venue_per_source_keeps_the_suite_green(tmp_path):
     register_cvf("cvpr_2099", "https://openaccess.thecvf.com/CVPR2099?day=all",
                  "openaccess", scrapers / "cvf.py")
     register_usenix("usenix_security_2099", "usenixsecurity99", scrapers / "usenix.py")
-    (tmp_path / "configs" / "colm_2099.yaml").write_text(render_openreview_config(
+    crawl_config_path(tmp_path / "configs", "colm_2099").write_text(render_openreview_config(
         "COLM", 2099, "colmweb.org/COLM/2099/Conference", {"main": "COLM 2099"}))
-    (tmp_path / "configs" / "tmlr_2099.yaml").write_text(render_openreview_config(
+    crawl_config_path(tmp_path / "configs", "tmlr_2099").write_text(render_openreview_config(
         "TMLR", 2099, "TMLR", {"main": "Accepted by TMLR"}, year_from_pdate=True))
     update_readme(tmp_path / "README.md", "ICSE", 2099, "main")
     update_readme(tmp_path / "README.md", "TMLR", 2099, "main")

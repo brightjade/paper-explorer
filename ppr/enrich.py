@@ -17,15 +17,19 @@ from tqdm import tqdm
 
 from ppr.archive import plan_enrich
 from ppr.matching import MATCHED, MATCHED_FUZZY, REJECT, match_verdict, title_key
+from ppr.layout import checkpoint_path, papers_path
 from ppr.models import Paper
 from ppr.s2_client import BATCH_CHUNK_SIZE, S2Client
+from ppr.store import (
+    carry_over,
+    check_enrichment_coverage,
+    crawl_view,
+    normalize_title,
+    read_papers,
+    save_enriched,
+)
 
 logger = logging.getLogger(__name__)
-
-
-def normalize_title(title: str) -> str:
-    """Lowercase and collapse whitespace, for cross-source title comparison."""
-    return " ".join(title.lower().split())
 
 
 def apply_enrichment(paper: Paper, entry: dict | None) -> Paper:
@@ -56,174 +60,34 @@ def apply_enrichment(paper: Paper, entry: dict | None) -> Paper:
 
     if not paper.abstract and entry.get("abstract"):
         paper.abstract = entry["abstract"]
+        paper.abstract_source = "s2"
 
     return paper
 
 
-def unbind(paper: Paper, crawl_abstract: str) -> Paper:
+def unbind(paper: Paper) -> Paper:
     """Sever a binding that failed verification, in place.
 
     Everything Semantic Scholar contributed goes, because all of it described
-    a different paper. `abstract` is restored from the crawl rather than
-    cleared: apply_enrichment only ever fills an empty abstract, so an
-    OpenReview one may be sitting there, and an enriched record does not say
-    which source it came from.
-
-    The paper is left looking exactly like one that was never matched, which
-    is what puts it back in the retry queue.
+    a different paper -- an abstract it filled in included. A crawl's own
+    abstract (OpenReview's) stays: `crawl_view` tells them apart by
+    `abstract_source`. The paper is left looking exactly like one that was
+    never matched, which is what puts it back in the retry queue.
     """
-    paper.citation_count = None
-    paper.influential_citation_count = None
-    paper.reference_count = None
-    paper.tldr = ""
-    paper.publication_date = ""
-    paper.fields_of_study = []
-    paper.open_access_pdf = ""
-    paper.external_ids = {}
-    paper.abstract = crawl_abstract
+    crawl_view(paper)
     paper.match_status = "not_found"
     return paper
-
-
-def carry_over(raw: Paper, prior: Paper) -> Paper:
-    """Copy prior enrichment onto a freshly-crawled paper, in place.
-
-    The raw crawl is authoritative for identity (title, authors, link,
-    selection, keywords, forum_id); the enriched file holds the only copy of
-    previous enrichment. Carrying it over means a paper whose refresh lookup
-    comes back empty keeps its old values instead of silently losing them.
-    """
-    raw.citation_count = prior.citation_count
-    raw.influential_citation_count = prior.influential_citation_count
-    raw.reference_count = prior.reference_count
-    raw.tldr = prior.tldr
-    raw.publication_date = prior.publication_date
-    raw.fields_of_study = prior.fields_of_study
-    raw.open_access_pdf = prior.open_access_pdf
-    raw.external_ids = prior.external_ids
-    raw.match_status = prior.match_status
-    if not raw.abstract and prior.abstract:
-        raw.abstract = prior.abstract
-    return raw
-
-
-# A re-crawl that returns less than this fraction of the previously enriched
-# paper count is treated as a failed crawl rather than a real shrinkage.
-MIN_RAW_RATIO = 0.5
-
-# A run that would leave less than this fraction of the previously matched
-# papers carrying a Semantic Scholar ID is treated as a failed lookup rather
-# than as real data.
-MIN_COVERAGE_RATIO = 0.5
-
-
-def read_papers(path: Path) -> list[Paper]:
-    """Read a JSONL paper file. A missing or empty file reads as no papers."""
-    if not path.exists():
-        return []
-    with open(path, encoding="utf-8") as f:
-        return [Paper.from_dict(json.loads(line)) for line in f if line.strip()]
-
-
-def check_guards(raw: list[Paper], enriched: list[Paper]) -> str | None:
-    """Decide whether it is safe to overwrite an existing enriched file.
-
-    Returns a human-readable reason to skip, or None to proceed. Both guards
-    compare against existing enrichment, so a conference being enriched for the
-    first time is never blocked.
-    """
-    if not enriched:
-        return None
-    if not raw:
-        return (
-            f"papers.jsonl is empty or missing while papers_enriched.jsonl holds "
-            f"{len(enriched)} papers — refusing to overwrite. Re-crawl first."
-        )
-    if len(raw) < MIN_RAW_RATIO * len(enriched):
-        return (
-            f"papers.jsonl has {len(raw)} papers, under "
-            f"{MIN_RAW_RATIO:.0%} of the {len(enriched)} already enriched — "
-            f"refusing to overwrite. Re-crawl first."
-        )
-    return None
-
-
-def enrichment_coverage(papers: list[Paper]) -> int:
-    """How many papers carry a Semantic Scholar corpus ID."""
-    return sum(1 for p in papers if (p.external_ids or {}).get("CorpusId"))
-
-
-def check_enrichment_coverage(
-    papers: list[Paper], enriched: list[Paper]
-) -> str | None:
-    """Decide whether the about-to-be-written papers are worth keeping.
-
-    check_guards bounds how many *papers* a run may lose; this bounds how much
-    *enrichment* it may lose, which the paper count cannot see. An API that
-    answers nothing — or a title change that routes every paper cold and finds
-    no match — writes the same papers back with citations, tldrs and external
-    IDs blank. Losing the corpus IDs also costs every future run the fast
-    refresh path, so the damage compounds.
-
-    Returns a human-readable reason to skip, or None to proceed. Coverage is
-    only ever compared against existing enrichment, so a conference being
-    enriched for the first time is never blocked.
-    """
-    prior = enrichment_coverage(enriched)
-    if not prior:
-        return None
-    current = enrichment_coverage(papers)
-    if current < MIN_COVERAGE_RATIO * prior:
-        return (
-            f"only {current} of {len(papers)} papers would keep a Semantic "
-            f"Scholar ID, under {MIN_COVERAGE_RATIO:.0%} of the {prior} matched "
-            f"before — refusing to overwrite. The lookups likely failed; retry."
-        )
-    return None
-
-
-def write_enriched(papers: list[Paper], path: Path) -> None:
-    """Sort by citation count descending and replace `path` atomically.
-
-    Writing to a temp file and renaming means an interrupted or failing run
-    leaves the previous enriched file untouched.
-    """
-    ordered = sorted(
-        papers,
-        key=lambda p: p.citation_count if p.citation_count is not None else -1,
-        reverse=True,
-    )
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    try:
-        with open(tmp, "w", encoding="utf-8") as f:
-            for paper in ordered:
-                f.write(paper.to_json() + "\n")
-        os.replace(tmp, path)
-    except BaseException:
-        tmp.unlink(missing_ok=True)
-        raise
-
-
-# Suffix of the per-conference checkpoint file. The leading dot on the stem
-# keeps it out of directory listings and out of anything globbing "*.jsonl".
-TMP_SUFFIX = ".tmp.jsonl"
-
-
-def checkpoint_path(conf_dir: Path) -> Path:
-    """Where a run streams cold-path progress: `<conf_dir>/.papers_enriched.tmp.jsonl`."""
-    return conf_dir / f".papers_enriched{TMP_SUFFIX}"
 
 
 class Checkpoint:
     """Append-only log of papers whose Semantic Scholar lookup has finished.
 
-    papers_enriched.jsonl is written once, at the end, so without this a run
+    The year file is written once, at the end, so without this a run
     killed at 277 of 381 papers loses all 277 lookups — and the cold paths cost
     roughly a second per paper, so a large conference is hours of work with
     nothing to show for an interruption. Each finished paper is appended and
     flushed as it completes; a later run reads the file back and skips those
-    papers. It is deleted once papers_enriched.jsonl lands, which supersedes it.
+    papers. It is deleted once the year file lands, which supersedes it.
 
     Flushing (not fsync) is deliberate: the failure this protects against is the
     process dying, not the machine, and fsync per paper would be pure cost.
@@ -468,7 +332,6 @@ async def _run_batch(
     *,
     mode: str,
     record: Record,
-    crawl_abstracts: dict[str, str] | None = None,
 ) -> tuple[list[Paper], int]:
     """Look papers up by ID and merge the results in place.
 
@@ -488,7 +351,6 @@ async def _run_batch(
     fuzzy = 0
     if not papers:
         return unsettled, fuzzy
-    abstracts = crawl_abstracts or {}
     for start in range(0, len(papers), BATCH_CHUNK_SIZE):
         chunk = papers[start : start + BATCH_CHUNK_SIZE]
         entries = await client.get_batch(http, [id_of(p) for p in chunk])
@@ -500,7 +362,7 @@ async def _run_batch(
             if mode == "verify" and entry is not None:
                 verdict = match_verdict(paper.title, paper.authors, entry)
                 if verdict == REJECT:
-                    unbind(paper, abstracts.get(normalize_title(paper.title), ""))
+                    unbind(paper)
                     unsettled.append(paper)
                     continue
                 paper.match_status = verdict
@@ -627,57 +489,55 @@ async def enrich_conference(
     these years long ago, so a title it could not match then it will not match
     now; those papers are written as routed and counted `untried`.
     """
-    conf_dir = data_dir / conf_id
-    checkpoint = Checkpoint(checkpoint_path(conf_dir))
+    path = papers_path(data_dir, conf_id)
+    checkpoint = Checkpoint(checkpoint_path(data_dir, conf_id))
     if full:
         # --full exists to discard prior enrichment; resuming onto a checkpoint
         # written by an earlier run would quietly keep the very values it is
         # meant to throw away.
         checkpoint.discard()
 
-    raw = read_papers(conf_dir / "papers.jsonl")
-    # Captured before carry_over runs, while `abstract` still holds only what
-    # the crawl supplied. Unbinding needs to tell an OpenReview abstract from
-    # one Semantic Scholar filled in, and the enriched record does not say.
-    crawl_abstracts = {normalize_title(p.title): p.abstract for p in raw}
-    enriched = read_papers(conf_dir / "papers_enriched.jsonl")
+    papers = read_papers(path)
+    # The file as this run found it, read a second time so `papers` can be
+    # mutated: each paper's prior enrichment, and the coverage guard's baseline.
+    before = read_papers(path)
 
-    reason = check_guards(raw, enriched)
-    if reason:
-        logger.warning("Skipping %s: %s", conf_id, reason)
-        # The checkpoint is kept here, unlike on a coverage-guard skip: this
-        # guard fires before any lookup runs, so it never rejects the results
-        # the checkpoint holds — those are still someone's unfinished run.
-        return EnrichResult(conf_id, "skipped", reason=reason)
-
-    if not raw:
+    if not papers:
         # A success path like any other, so it clears the checkpoint too;
         # leaving one here would let it be consumed by a later, unrelated crawl.
         checkpoint.discard()
         return EnrichResult(conf_id, "nothing-to-do")
 
-    # papers.jsonl stays authoritative for membership and for identity: the
-    # checkpoint contributes enrichment to papers still in the raw file and
-    # nothing else, so one it holds that the latest crawl dropped stays dropped.
+    if full:
+        for paper in papers:
+            crawl_view(paper)
+
+    # The file stays authoritative for membership: the checkpoint contributes
+    # enrichment to papers still listed and nothing else, so one it holds that
+    # the latest crawl dropped stays dropped.
     done = checkpoint.restore()
     todo: list[Paper] = []
-    for paper in raw:
+    for paper in papers:
         finished = done.get(normalize_title(paper.title))
         if finished is None:
             todo.append(paper)
         else:
-            carry_over(paper, finished)
-    resumed = len(raw) - len(todo)
+            # Onto the crawl view, not the file as found: the checkpoint's
+            # record is the whole enrich result for that paper, as the old raw
+            # file was the crawl alone. Otherwise an abstract the file got
+            # from an unbound record would outlive the unbind.
+            carry_over(crawl_view(paper), finished)
+    resumed = len(papers) - len(todo)
     if resumed:
         logger.info(
             "Resuming %s: %d of %d papers already done in %s",
             conf_id,
             resumed,
-            len(raw),
+            len(papers),
             checkpoint.path.name,
         )
 
-    prior_by_title = {normalize_title(p.title): p for p in enriched}
+    prior_by_title = {normalize_title(p.title): p for p in before}
     refresh, doi_cold, title_cold = route_papers(todo, prior_by_title, full=full)
 
     # Assigned before the block runs: it is always set inside today, but a
@@ -690,7 +550,7 @@ async def enrich_conference(
         async with httpx.AsyncClient(timeout=60.0) as http:
             unbound, refresh_fuzzy = await _run_batch(
                 client, http, refresh, corpus_id_of,
-                mode="verify", crawl_abstracts=crawl_abstracts,
+                mode="verify",
                 record=checkpoint.record,
             )
             # Routed exactly like any unmatched paper, because that is what
@@ -723,7 +583,7 @@ async def enrich_conference(
             fuzzy_total,
         )
 
-    reason = check_enrichment_coverage(raw, enriched)
+    reason = check_enrichment_coverage(papers, before)
     if reason:
         logger.warning("Skipping %s: %s", conf_id, reason)
         # The checkpoint holds exactly the results this guard just rejected.
@@ -733,14 +593,14 @@ async def enrich_conference(
         checkpoint.discard()
         return EnrichResult(conf_id, "skipped", reason=reason)
 
-    write_enriched(raw, conf_dir / "papers_enriched.jsonl")
+    save_enriched(papers, path)
     checkpoint.discard()
 
     return EnrichResult(
         conf_id=conf_id,
         status="enriched",
         path=_dominant_path(refresh, doi_cold, title_cold),
-        total=len(raw),
+        total=len(papers),
         # Unbound papers were refreshed and then re-run cold. Counting them
         # only under Cold keeps total = Refresh + Cold + Resumed.
         refreshed=len(refresh) - len(unbound),

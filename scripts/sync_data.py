@@ -95,7 +95,7 @@ def _check_zip(z: zipfile.ZipFile) -> dict[str, int]:
         parts = PurePosixPath(name).parts
         if name.startswith("/") or ".." in parts or len(parts) < 2 or parts[0] != "data":
             raise RuntimeError(f"data.zip has an entry outside data/: {name}")
-    if not any(re.fullmatch(r"data/[^/]+/papers\.jsonl", name) for name in files):
+    if not any(re.fullmatch(r"data/[^/]+/\d{4}\.jsonl", name) for name in files):
         raise RuntimeError("data.zip holds no conference data")
     return files
 

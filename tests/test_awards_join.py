@@ -68,10 +68,12 @@ def test_no_entries_returns_papers_unchanged():
 
 
 def test_load_entries(tmp_path):
-    assert load_entries(tmp_path) == []
-    (tmp_path / "awards.json").write_text(
-        json.dumps({"conf_id": "x_2024", "awards": [_e("Best Paper", "award", "P")]}), encoding="utf-8")
-    assert load_entries(tmp_path) == [_e("Best Paper", "award", "P")]
+    assert load_entries(tmp_path, "x_2024") == []
+    (tmp_path / "x").mkdir()
+    (tmp_path / "x" / "awards.json").write_text(
+        json.dumps({"2024": [_e("Best Paper", "award", "P")]}), encoding="utf-8")
+    assert load_entries(tmp_path, "x_2024") == [_e("Best Paper", "award", "P")]
+    assert load_entries(tmp_path, "x_2025") == []
 
 
 NAMES = {"neurips_2013": "NeurIPS 2013", "neurips_2014": "NeurIPS 2014", "neurips_2023": "NeurIPS 2023",

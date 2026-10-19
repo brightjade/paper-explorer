@@ -4,6 +4,7 @@ import pytest
 import yaml
 
 from ppr.cli import _available_conferences, cmd_crawl
+from ppr.layout import crawl_config_ids
 from ppr.venues import (
     CADENCES,
     MANUAL_SOURCES,
@@ -93,7 +94,7 @@ class TestShippedRegistry:
         from ppr.scrapers import SCRAPERS
 
         configs = Path(__file__).resolve().parent.parent / "configs"
-        ids = {p.stem for p in configs.glob("*.yaml") if p.stem != "venues"}
+        ids = set(crawl_config_ids(configs))
         ids |= set(SCRAPERS.keys())
         prefixes = {cid.rsplit("_", 1)[0] for cid in ids}
         assert prefixes <= set(load_registry(REGISTRY_PATH)), (
@@ -102,9 +103,9 @@ class TestShippedRegistry:
 
 
 class TestConfigsDirExcludesRegistry:
-    """configs/venues.yaml shares a directory with per-year conference configs.
-    Anything deriving conference IDs by globbing configs/*.yaml must exclude it,
-    or the registry itself gets treated as a bogus conference."""
+    """configs/venues.yaml sits alone at the root; conference configs live in
+    configs/<venue>/<year>.yaml. `crawl_config_ids` only reads those, so the
+    registry is never treated as a bogus conference."""
 
     def test_venues_not_in_available_conferences(self):
         assert "venues" not in _available_conferences()

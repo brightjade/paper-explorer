@@ -1,0 +1,35 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 242 papers
+  tocs:
+    - {key: db/conf/icse/icse2013.bht, selection: main}
+2014:  # 99 papers
+  tocs:
+    - {key: db/conf/icse/icse2014.bht, selection: main}
+2015:  # 86 papers
+  tocs:
+    - {key: db/conf/icse/icse2015-1.bht, selection: main}
+2016:  # 101 papers
+  tocs:
+    - {key: db/conf/icse/icse2016.bht, selection: main}
+2017:  # 68 papers
+  tocs:
+    - {key: db/conf/icse/icse2017.bht, selection: main}
+2018:  # 153 papers
+  tocs:
+    - {key: db/conf/icse/icse2018.bht, selection: main}
+2019:  # 109 papers
+  tocs:
+    - {key: db/conf/icse/icse2019.bht, selection: main}
+2020:  # 129 papers
+  tocs:
+    - {key: db/conf/icse/icse2020.bht, selection: main}
+2021:  # 138 papers
+  tocs:
+    - {key: db/conf/icse/icse2021.bht, selection: main}
+2022:  # 199 papers
+  tocs:
+    - {key: db/conf/icse/icse2022.bht, selection: main}

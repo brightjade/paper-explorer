@@ -128,7 +128,7 @@ _MAIN_ALIASES = ("regular",)
 def openreview_selections(client, venue_id: str) -> dict[str, str]:
     """Read a conference's actual `venue` values and turn them into selections.
 
-    Never generate these from a pattern. `configs/corl_2024.yaml` was written
+    Never generate these from a pattern. `configs/corl/2024.yaml` was written
     to match "CoRL 2024 Oral"/"CoRL 2024 Poster" by analogy with 2023 and 2025,
     but CoRL 2024 tags all 264 papers plain "CoRL 2024". The crawl matched
     nothing, wrote an empty file, and reported success.
@@ -186,7 +186,7 @@ def render_openreview_config(
     extra_venue_ids: list[str] | None = None,
     year_from_pdate: bool = False,
 ) -> str:
-    """Render a `configs/<id>.yaml` body.
+    """Render a `configs/<venue>/<year>.yaml` body.
 
     `api_version` is deliberately omitted. `ppr/config.py`'s
     `CrawlConfig.from_yaml` defaults it to 2, and that's what the majority of

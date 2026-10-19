@@ -2,11 +2,13 @@ import pytest
 from pathlib import Path
 
 from ppr.config import CrawlConfig
+from ppr.layout import crawl_config_path
 
 
 class TestCrawlConfig:
     def test_from_yaml_valid(self, tmp_path):
-        config_file = tmp_path / "iclr_2025.yaml"
+        config_file = tmp_path / "iclr" / "2025.yaml"
+        config_file.parent.mkdir()
         config_file.write_text("""
 conference:
   name: "ICLR"
@@ -22,7 +24,7 @@ conference:
         assert config.venue_id == "ICLR.cc/2025/Conference"
         assert config.selections["oral"] == "ICLR 2025 Oral"
         assert config.conference_id == "iclr_2025"
-        assert config.get_save_path() == Path("data/iclr_2025/papers.jsonl")
+        assert config.get_save_path() == Path("data/iclr/2025.jsonl")
 
     def test_from_yaml_missing_file(self):
         with pytest.raises(FileNotFoundError):
@@ -75,7 +77,7 @@ conference:
             name="ICLR", year=2025, venue_id="ICLR.cc/2025/Conference",
             selections={"oral": "X"}, conference_id="iclr_2025",
         )
-        assert config.get_save_path() == Path("data/iclr_2025/papers.jsonl")
+        assert config.get_save_path() == Path("data/iclr/2025.jsonl")
 
     def test_uses_safe_load(self, tmp_path):
         config_file = tmp_path / "evil.yaml"
@@ -91,8 +93,9 @@ conference: !!python/object:builtins.dict
             CrawlConfig.from_yaml(config_file)
 
 
-def _write(tmp_path, body: str, name="iclr_2019.yaml"):
+def _write(tmp_path, body: str, name="iclr/2019.yaml"):
     path = tmp_path / name
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(body)
     return path
 
@@ -174,8 +177,22 @@ class TestYearFromPdate:
 
 def test_tmlr_configs():
     for y in range(2022, 2027):
-        cfg = CrawlConfig.from_yaml(Path(__file__).resolve().parents[1] / "configs" / f"tmlr_{y}.yaml")
+        cfg = CrawlConfig.from_yaml(crawl_config_path(Path(__file__).resolve().parents[1] / "configs", f"tmlr_{y}"))
         assert cfg.venue_id == "TMLR"
         assert cfg.year == y
         assert cfg.year_from_pdate is True
         assert cfg.selections == {"main": "Accepted by TMLR"}
+
+
+def test_conference_id_comes_from_the_venue_folder_and_year(tmp_path):
+    path = tmp_path / "usenix_security" / "2025.yaml"
+    path.parent.mkdir()
+    path.write_text('conference:\n  name: X\n  year: 2025\n  venue_id: "X/2025"\n  selections: {main: "X 2025"}\n')
+    assert CrawlConfig.from_yaml(path).conference_id == "usenix_security_2025"
+
+
+def test_a_flat_config_is_rejected(tmp_path):
+    path = tmp_path / "iclr_2025.yaml"
+    path.write_text('conference:\n  name: X\n  year: 2025\n  venue_id: "X/2025"\n  selections: {main: "X 2025"}\n')
+    with pytest.raises(ValueError, match="configs/<venue>/<year>.yaml"):
+        CrawlConfig.from_yaml(path)

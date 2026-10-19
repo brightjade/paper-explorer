@@ -20,9 +20,10 @@ from ppr.enrich import (
     parse_duration,
     results_to_json,
 )
-from ppr.models import Paper, write_papers
+from ppr.layout import conference_ids, crawl_config_ids, crawl_config_path, papers_path
+from ppr.models import Paper
 from ppr.s2_client import S2Client
-from ppr.venues import REGISTRY_STEM
+from ppr.store import save_crawl
 
 CONFIGS_DIR = Path(__file__).resolve().parent.parent / "configs"
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -41,17 +42,15 @@ def _available_conferences() -> list[str]:
 
 
 def all_conference_ids(data_dir: Path) -> list[str]:
-    """Every conference directory under data/, sorted."""
-    if not data_dir.exists():
-        return []
-    return sorted(d.name for d in data_dir.iterdir() if d.is_dir())
+    """Every conference-year with a papers file under data/, sorted."""
+    return conference_ids(data_dir)
 
 
 def _save_papers(papers: list[Paper], conf_id: str) -> Path:
-    # Shares `write_papers`' refusal with the OpenReview save path: a scraper
+    # Shares `save_crawl`'s refusals with the OpenReview save path: a scraper
     # whose selector a site redesign outgrew returns `[]` just as an API error
     # does, and must not silently erase the last good crawl either.
-    return write_papers(papers, DATA_DIR / conf_id / "papers.jsonl")
+    return save_crawl(papers, papers_path(DATA_DIR, conf_id))
 
 
 def _add_auth_args(parser: argparse.ArgumentParser) -> None:
@@ -120,11 +119,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     # awards
     awards_parser = subparsers.add_parser(
-        "awards", help="Collect paper awards into data/<id>/awards.json"
+        "awards", help="Collect paper awards into data/<venue>/awards.json"
     )
     awards_parser.add_argument("conferences", nargs="*", help="Conference IDs (e.g. neurips_2024)")
     awards_parser.add_argument("--all", action="store_true",
-                               help="Every data/<id> whose venue has an awards rule")
+                               help="Every data/<venue>/<year>.jsonl whose venue has an awards rule")
     awards_parser.add_argument("--all-years", action="store_true",
                                help="With --all: also every older year, whose awards are final "
                                     "(--all alone collects this year and last year)")
@@ -206,11 +205,9 @@ def cmd_crawl(args: argparse.Namespace) -> None:
     conf_ids = args.conferences
 
     # Split into scraped vs OpenReview conferences
+    configured = set(crawl_config_ids(CONFIGS_DIR))
     scraped = [c for c in conf_ids if c in SCRAPERS]
-    openreview = [
-        c for c in conf_ids
-        if c not in SCRAPERS and c != REGISTRY_STEM and (CONFIGS_DIR / f"{c}.yaml").exists()
-    ]
+    openreview = [c for c in conf_ids if c not in SCRAPERS and c in configured]
     unknown = [c for c in conf_ids if c not in scraped and c not in openreview]
 
     if unknown:
@@ -228,7 +225,7 @@ def cmd_crawl(args: argparse.Namespace) -> None:
 
     # Fetch OpenReview conferences (one login per API version, reuse clients)
     if openreview:
-        configs = [CrawlConfig.from_yaml(CONFIGS_DIR / f"{c}.yaml") for c in openreview]
+        configs = [CrawlConfig.from_yaml(crawl_config_path(CONFIGS_DIR, c)) for c in openreview]
         api_versions = {c.api_version for c in configs}
 
         # Create only the clients needed (avoids unnecessary logins)
@@ -283,8 +280,8 @@ def cmd_enrich(args: argparse.Namespace) -> None:
 
     # `ppr enrich --all` feeds ./build.sh and a data release, so a crashed
     # conference must not read as success to the calling shell. Guard skips are
-    # a correct outcome and stay exit-0 -- except for a conference that was just
-    # re-crawled, where a skip ships the stale enriched file beside the new list.
+    # a correct outcome and stay exit-0 -- except for a required conference, where
+    # a skip keeps the crawl's papers with old enrichment and a release would ship it.
     failures = [r for r in results if r.status == "failed"]
     status = {r.conf_id: r.status for r in results}
     unmet = [c for c in args.require if status.get(c) not in ("enriched", "nothing-to-do")]

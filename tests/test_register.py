@@ -237,7 +237,8 @@ class TestRenderOpenreviewConfig:
 
         text = render_openreview_config("CoRL", 2024, "robot-learning.org/CoRL/2024/Conference",
                                         {"main": "CoRL 2024"})
-        p = tmp_path / "corl_2024.yaml"
+        p = tmp_path / "corl" / "2024.yaml"
+        p.parent.mkdir()
         p.write_text(text)
         config = CrawlConfig.from_yaml(p)
         assert config.api_version == 2
@@ -281,7 +282,8 @@ class TestRenderExtraVenueIds:
             {"poster": "NeurIPS 2026 poster", "datasets_poster": "NeurIPS 2026 Datasets and Benchmarks Track poster"},
             extra_venue_ids=["NeurIPS.cc/2026/Datasets_and_Benchmarks_Track"],
         )
-        p = tmp_path / "neurips_2026.yaml"
+        p = tmp_path / "neurips" / "2026.yaml"
+        p.parent.mkdir()
         p.write_text(text)
         config = CrawlConfig.from_yaml(p)
         assert config.extra_venue_ids == ["NeurIPS.cc/2026/Datasets_and_Benchmarks_Track"]
@@ -362,7 +364,8 @@ class TestRegisterRoboticsProceedings:
 
 
 def test_render_year_from_pdate_round_trips(tmp_path):
-    path = tmp_path / "tmlr_2027.yaml"
+    path = tmp_path / "tmlr" / "2027.yaml"
+    path.parent.mkdir()
     path.write_text(render_openreview_config("TMLR", 2027, "TMLR",
                                              {"main": "Accepted by TMLR"}, year_from_pdate=True))
     assert CrawlConfig.from_yaml(path).year_from_pdate is True

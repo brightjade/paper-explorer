@@ -80,7 +80,7 @@ class TestOpenReviewAPIClient:
             selections={"oral": "X"},
             conference_id="iclr_2025",
         )
-        save_path = tmp_path / "papers.jsonl"
+        save_path = tmp_path / "2025.jsonl"
         config.get_save_path = lambda: save_path
 
         client = OpenReviewAPIClient(config, MagicMock())
@@ -102,7 +102,7 @@ class TestOpenReviewAPIClient:
             selections={"oral": "X"},
             conference_id="iclr_2025",
         )
-        save_path = tmp_path / "papers.jsonl"
+        save_path = tmp_path / "2025.jsonl"
         config.get_save_path = lambda: save_path
 
         client = OpenReviewAPIClient(config, MagicMock())
@@ -118,7 +118,7 @@ class TestOpenReviewAPIClient:
 import pytest
 
 from ppr.api_client import EmptyCrawlError, OpenReviewAPIClient
-from ppr.models import EmptyOverwriteError
+from ppr.store import ShrinkError
 
 
 class TestEmptyCrawlGuard:
@@ -168,7 +168,7 @@ class TestSaveGuard:
             selections={"poster": "X"},
             conference_id="corl_2024",
         )
-        save_path = tmp_path / "papers.jsonl"
+        save_path = tmp_path / "2025.jsonl"
         config.get_save_path = lambda: save_path
         return OpenReviewAPIClient(config, MagicMock()), save_path
 
@@ -180,7 +180,7 @@ class TestSaveGuard:
         client.save_papers([Paper(title="P1", link="L1", authors=["A"], selection="poster")])
         before = save_path.read_bytes()
 
-        with pytest.raises(EmptyOverwriteError):
+        with pytest.raises(ShrinkError):
             client.save_papers([])
 
         assert save_path.read_bytes() == before

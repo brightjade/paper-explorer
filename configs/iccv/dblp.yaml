@@ -1,0 +1,20 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 454 papers
+  tocs:
+    - {key: db/conf/iccv/iccv2013.bht, selection: main}
+2015:  # 526 papers
+  tocs:
+    - {key: db/conf/iccv/iccv2015.bht, selection: main}
+2017:  # 621 papers
+  tocs:
+    - {key: db/conf/iccv/iccv2017.bht, selection: main}
+2019:  # 1075 papers
+  tocs:
+    - {key: db/conf/iccv/iccv2019.bht, selection: main}
+2021:  # 1611 papers
+  tocs:
+    - {key: db/conf/iccv/iccv2021.bht, selection: main}

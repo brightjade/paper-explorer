@@ -1,4 +1,4 @@
-"""One award entry, how several sources' entries combine, and data/<id>/awards.json."""
+"""One award entry, how several sources' entries combine, and data/<venue>/awards.json."""
 
 import json
 import os
@@ -6,6 +6,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
+from ppr import layout
 from ppr.awards.labels import KIND_ORDER
 from ppr.matching import title_key
 
@@ -62,21 +63,29 @@ def merge(results: list[list[Award]]) -> list[Award]:
 
 
 def awards_path(data_dir: Path, conf_id: str) -> Path:
-    return data_dir / conf_id / "awards.json"
+    return layout.awards_path(data_dir, conf_id)
 
 
-def read_awards(path: Path) -> list[Award] | None:
-    """The entries in `path`, or None when there is no file yet."""
+def _years(path: Path) -> dict[str, list[dict]]:
     if not path.exists():
-        return None
-    raw = json.loads(path.read_text(encoding="utf-8"))
-    return [Award.from_dict(d) for d in raw["awards"]]
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
-def write_awards(path: Path, conf_id: str, awards: list[Award]) -> None:
-    """Replace `path` atomically: a crash mid-write leaves the previous file whole."""
-    text = json.dumps({"conf_id": conf_id, "awards": [a.to_dict() for a in awards]},
-                      ensure_ascii=False, indent=2) + "\n"
+def read_awards(data_dir: Path, conf_id: str) -> list[Award] | None:
+    """`conf_id`'s entries, or None when its year has none on file yet."""
+    _, year = layout.split_id(conf_id)
+    entries = _years(awards_path(data_dir, conf_id)).get(str(year))
+    return None if entries is None else [Award.from_dict(d) for d in entries]
+
+
+def write_awards(data_dir: Path, conf_id: str, awards: list[Award]) -> None:
+    """Replace `conf_id`'s year in its venue's file, atomically; the other years stay as they are."""
+    path = awards_path(data_dir, conf_id)
+    _, year = layout.split_id(conf_id)
+    years = _years(path)
+    years[str(year)] = [a.to_dict() for a in awards]
+    text = json.dumps(dict(sorted(years.items())), ensure_ascii=False, indent=2) + "\n"
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".awards-", suffix=".tmp")
     try:

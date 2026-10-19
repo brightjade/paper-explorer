@@ -8,6 +8,7 @@ from collections.abc import Iterable
 from pathlib import Path
 
 from ppr.awards.join import attach, attach_test_of_time, load_entries
+from ppr.layout import conference_ids, papers_path
 from ppr.venues import load_registry
 from scripts.impact import build_top, compute_impact, with_relative_citations
 from scripts.ngrams import build_ngram_data
@@ -92,20 +93,15 @@ def parse_conference_id(conf_id: str) -> tuple[str, int]:
     return venue, year
 
 
-def load_papers(conf_dir: Path) -> list[dict]:
-    """Load papers from a conference directory, preferring enriched data."""
-    enriched = conf_dir / "papers_enriched.jsonl"
-    plain = conf_dir / "papers.jsonl"
-    source = enriched if enriched.exists() else plain
-    if not source.exists():
+def load_papers(data_dir: Path, conf_id: str) -> list[dict]:
+    """Load a conference-year's papers from its year file."""
+    path = papers_path(data_dir, conf_id)
+    if not path.exists():
         return []
-    papers = []
-    with open(source) as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                papers.append(json.loads(line))
-    return papers
+    with open(path, encoding="utf-8") as f:
+        # abstract_source is the pipeline's bookkeeping, not dataset content the site shows
+        return [{k: v for k, v in json.loads(line).items() if k != "abstract_source"}
+                for line in f if line.strip()]
 
 
 def build_manifest_entry(conf_id: str, papers: list[dict]) -> dict:
@@ -301,14 +297,11 @@ def build_all(data_dir: Path, out_dir: Path) -> None:
     all_papers: dict[str, list[dict]] = {}
     conferences: list[dict] = []
 
-    for conf_dir in sorted(data_dir.iterdir()):
-        if not conf_dir.is_dir():
-            continue
-        conf_id = conf_dir.name
-        papers = load_papers(conf_dir)
+    for conf_id in conference_ids(data_dir):
+        papers = load_papers(data_dir, conf_id)
         if not papers:
             continue
-        attached = attach(papers, load_entries(conf_dir))
+        attached = attach(papers, load_entries(data_dir, conf_id))
         papers = attached.papers
         for entry in attached.unmatched:
             print(f"warning: {conf_id}: award {entry['label']!r} matches no paper: {entry['title']}")
@@ -317,6 +310,11 @@ def build_all(data_dir: Path, out_dir: Path) -> None:
         if attached.test_of_time:
             manifest_entry["test_of_time"] = attached.test_of_time
         conferences.append(manifest_entry)
+
+    if not conferences:
+        # A data/ in another layout (an old release with new code, or the
+        # reverse) reads as empty; deploying that would publish a blank site.
+        raise SystemExit(f"no conference data under {data_dir}")
 
     # A test-of-time prize is listed where it was given; when the dataset holds
     # the paper it honors (an earlier edition of the same venue), that paper

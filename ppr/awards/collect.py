@@ -1,10 +1,10 @@
-"""Collect each conference's awards into data/<id>/awards.json, never making it worse.
+"""Collect each conference's awards into data/<venue>/awards.json, never making it worse.
 
 Each venue has an ordered list of sources (SOURCES_BY_PREFIX), so a new year is
 covered by rule. Every conference ends in one of four states:
 
 - collected: written atomically, with how many entries landed on a paper;
-- not-yet:   every source answered with nothing, and there is no file yet;
+- not-yet:   every source answered with nothing, and there is no entry for its year yet;
 - held:      a label no rule knows, or the run would lose entries (the whole
              result going empty, or a source that had entries on file now
              returning none) -- the file on disk stays;
@@ -25,7 +25,8 @@ from typing import Callable
 from ppr.awards import ase_mip, cvf_registry, iclr_blog, icse_mip, issta_impact, manual, researchr_badges, sigsoft, tmlr_certifications, usenix_notes, usenix_tot, virtual
 from ppr.awards.join import attach
 from ppr.awards.labels import UnknownAwardLabel
-from ppr.awards.model import Award, awards_path, merge, read_awards, write_awards
+from ppr import layout
+from ppr.awards.model import Award, merge, read_awards, write_awards
 from ppr.matching import title_key
 
 logger = logging.getLogger(__name__)
@@ -88,12 +89,11 @@ class Outcome:
 
 
 def _papers(data_dir: Path, conf_id: str) -> list[dict]:
-    for name in ("papers_enriched.jsonl", "papers.jsonl"):
-        path = data_dir / conf_id / name
-        if path.exists():
-            with open(path, encoding="utf-8") as f:
-                return [json.loads(line) for line in f if line.strip()]
-    return []
+    path = layout.papers_path(data_dir, conf_id)
+    if not path.exists():
+        return []
+    with open(path, encoding="utf-8") as f:
+        return [json.loads(line) for line in f if line.strip()]
 
 
 def _retitle(awards: list[Award], papers: list[dict]) -> list[Award]:
@@ -103,27 +103,27 @@ def _retitle(awards: list[Award], papers: list[dict]) -> list[Award]:
 
 
 def conference_ids(data_dir: Path, today: date | None = None, all_years: bool = False) -> list[str]:
-    """Every data/<id> whose venue has an awards rule and whose awards can still change, sorted.
+    """Every conference-year in data/ whose venue has an awards rule and whose awards can still change, sorted.
 
     That is this year and last year (RECENT_YEARS), plus every year from a
     venue's FIRST_YEAR_BY_PREFIX on, plus an older year that has a reviewed
-    manual file but no awards.json yet -- a list that failed to land (a source
-    answered 503 in the all-years run) or was added since -- so it is retried
-    monthly until it is collected. `all_years` drops the year test.
+    manual file but no entry in its venue's awards.json yet -- a list that
+    failed to land (a source answered 503 in the all-years run) or was added
+    since -- so it is retried monthly until it is collected. `all_years` drops
+    the year test.
     """
-    if not data_dir.exists():
-        return []
     first_recent = (today or date.today()).year - RECENT_YEARS + 1
     out = []
-    for d in data_dir.iterdir():
-        prefix, _, year = d.name.rpartition("_")
-        if not (d.is_dir() and prefix in SOURCES_BY_PREFIX and year.isdigit()):
+    for conf_id in layout.conference_ids(data_dir):
+        prefix, year = layout.split_id(conf_id)
+        if prefix not in SOURCES_BY_PREFIX:
             continue
         first = min(first_recent, FIRST_YEAR_BY_PREFIX.get(prefix, first_recent))
-        pending = (manual.MANUAL_DIR / f"{d.name}.yaml").exists() and not awards_path(data_dir, d.name).exists()
-        if all_years or int(year) >= first or pending:
-            out.append(d.name)
-    return sorted(out)
+        pending = (layout.manual_awards_path(manual.CONFIGS_DIR, conf_id).exists()
+                   and read_awards(data_dir, conf_id) is None)
+        if all_years or year >= first or pending:
+            out.append(conf_id)
+    return out
 
 
 def collect_conference(conf_id: str, data_dir: Path) -> Outcome:
@@ -153,8 +153,7 @@ def collect_conference(conf_id: str, data_dir: Path) -> Outcome:
 
 
 def _merge_and_write(conf_id: str, data_dir: Path, results: dict[str, list[Award] | None]) -> Outcome:
-    path = awards_path(data_dir, conf_id)
-    previous = read_awards(path) or []
+    previous = read_awards(data_dir, conf_id) or []
     papers = _papers(data_dir, conf_id)
     replaced = manual.replaced_titles(conf_id)
     for kind, key in sorted(replaced):
@@ -180,7 +179,7 @@ def _merge_and_write(conf_id: str, data_dir: Path, results: dict[str, list[Award
                        reason=f"{', '.join(names)} returned nothing; the file on disk has "
                               f"{sum(uncovered.values())} entries from it")
     attached = attach(papers, [a.to_dict() for a in merged])  # before the write, so a failure leaves the file alone
-    write_awards(path, conf_id, merged)
+    write_awards(data_dir, conf_id, merged)
     paper_level = sum(a.kind != "test_of_time" for a in merged)
     return Outcome(conf_id, "collected", count=len(merged), matched=paper_level - len(attached.unmatched),
                    unmatched=[e["title"] for e in attached.unmatched])

@@ -98,10 +98,10 @@ from ppr.register import openreview_selections, render_openreview_config
 client = create_openreview_client()
 sel = openreview_selections(client, "ICLR.cc/2027/Conference")
 print(sel)  # review before writing
-Path("configs/iclr_2027.yaml").write_text(render_openreview_config("ICLR", 2027, "ICLR.cc/2027/Conference", sel))
+Path("configs/iclr/2027.yaml").write_text(render_openreview_config("ICLR", 2027, "ICLR.cc/2027/Conference", sel))
 ```
 
-`configs/corl_2024.yaml` followed the 2023/2025 pattern, matched nothing, and wrote an empty file that went unnoticed for months. ICML 2026 proved the point again: it tags papers `"ICML 2026 regular"` / `"ICML 2026 spotlight"` where 2025 used `oral` / `spotlightposter` / `poster`.
+`configs/corl/2024.yaml` followed the 2023/2025 pattern, matched nothing, and wrote an empty file that went unnoticed for months. ICML 2026 proved the point again: it tags papers `"ICML 2026 regular"` / `"ICML 2026 spotlight"` where 2025 used `oral` / `spotlightposter` / `poster`.
 
 **Review the generated selection names before crawling.** `openreview_selections` derives a key from each venue string: a single venue string becomes `main`, a track word (`oral`, `spotlight`, `poster`, `findings`, `industry`) names its track, and `regular` maps to `main` (ICML 2026's base track). Anything else falls back to a slug of the whole venue string, such as `iclr_2027_highlight`; autoregister holds those venues for exactly this reason. That name would land on every paper and show up in the web app's track breakdown, so rename it to the project's vocabulary (`TRACK_VOCABULARY` in `ppr/register.py`): `main` for a base track (61k papers already use it), then `oral`, `poster`, `spotlight`, `findings`, `industry`.
 
@@ -109,7 +109,7 @@ Then crawl and check:
 
 ```bash
 uv run ppr crawl <conf_id>
-wc -l data/<conf_id>/papers.jsonl
+wc -l data/<venue>/<year>.jsonl
 uv run ppr validate <conf_id>   # only if a DBLP key exists for it
 ```
 

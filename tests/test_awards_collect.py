@@ -14,8 +14,15 @@ from ppr.awards.collect import (
 )
 from ppr.awards import manual as manual_module
 from ppr.awards.labels import UnknownAwardLabel
-from ppr.awards.manual import MANUAL_DIR
+from ppr.awards.manual import CONFIGS_DIR
+from ppr.layout import manual_awards_path, papers_path
 from ppr.awards.model import Award, awards_path, read_awards, write_awards
+
+
+def _write_papers(data_dir, conf_id, text):
+    path = papers_path(data_dir, conf_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
 
 
 def _a(label, kind, title, via):
@@ -38,10 +45,7 @@ def _src(result):
 @pytest.fixture
 def demo(monkeypatch, tmp_path):
     """A fake venue "demo" with sources "a" then "b", and a demo_2025 with two papers."""
-    conf_dir = tmp_path / "demo_2025"
-    conf_dir.mkdir()
-    (conf_dir / "papers.jsonl").write_text(
-        json.dumps({"title": "Won"}) + "\n" + json.dumps({"title": "Also"}) + "\n", encoding="utf-8")
+    _write_papers(tmp_path, "demo_2025", json.dumps({"title": "Won"}) + "\n" + json.dumps({"title": "Also"}) + "\n")
 
     def install(a, b):
         sources = (_src(a), _src(b))
@@ -52,22 +56,19 @@ def demo(monkeypatch, tmp_path):
 
 
 def _previous(tmp_path, *awards):
-    write_awards(awards_path(tmp_path, "demo_2025"), "demo_2025", list(awards))
+    write_awards(tmp_path, "demo_2025", list(awards))
     return awards_path(tmp_path, "demo_2025").read_bytes()
 
 
 def test_award_titles_follow_the_paper_with_the_same_forum_id(monkeypatch, tmp_path):
-    conf_dir = tmp_path / "demo_2025"
-    conf_dir.mkdir()
-    (conf_dir / "papers.jsonl").write_text(
-        json.dumps({"title": "AlphaEdit: Null-Space Editing", "forum_id": "f1"}) + "\n", encoding="utf-8")
+    _write_papers(tmp_path, "demo_2025", json.dumps({"title": "AlphaEdit: Null-Space Editing", "forum_id": "f1"}) + "\n")
     first = Award(label="Outstanding Papers", kind="award", title="AlphaEdit (Null-Space Constrained Editing)", via="a",
                   source="https://a.test/", forum_id="f1")
     monkeypatch.setitem(SOURCES_BY_PREFIX, "demo", [
         ("a", _src([first])), ("b", _src([_a("Best Paper", "award", "AlphaEdit: Null-Space Editing", "b")]))])
     out = collect_conference("demo_2025", tmp_path)
     assert (out.status, out.count, out.matched) == ("collected", 1, 1)
-    [only] = read_awards(awards_path(tmp_path, "demo_2025"))
+    [only] = read_awards(tmp_path, "demo_2025")
     assert (only.via, only.title, only.forum_id) == ("a", "AlphaEdit: Null-Space Editing", "f1")
 
 
@@ -77,7 +78,7 @@ class TestOutcomes:
              [_a("Test of Time Award", "test_of_time", "Old", "b"), _a("Honorable Mention", "honorable", "Missing", "b")])
         out = collect_conference("demo_2025", tmp_path)
         assert (out.status, out.count, out.matched, out.unmatched) == ("collected", 3, 1, ["Missing"])
-        assert [a.title for a in read_awards(awards_path(tmp_path, "demo_2025"))] == ["Won", "Old", "Missing"]
+        assert [a.title for a in read_awards(tmp_path, "demo_2025")] == ["Won", "Old", "Missing"]
 
     def test_later_sources_see_what_earlier_ones_found(self, demo, tmp_path):
         _, b = demo([_a("Best Paper", "award", "Won", "a")], [])
@@ -158,9 +159,9 @@ class TestRegistry:
             assert len(names) == len(set(names)), prefix
 
     def test_every_manual_file_belongs_to_a_venue_that_reads_manual_files(self):
-        for path in MANUAL_DIR.glob("*.yaml"):
-            prefix = path.stem.rpartition("_")[0]
-            assert "manual" in [name for name, _ in SOURCES_BY_PREFIX[prefix]], path.name
+        for path in CONFIGS_DIR.glob("*/awards/*.yaml"):
+            prefix = path.parent.parent.name
+            assert "manual" in [name for name, _ in SOURCES_BY_PREFIX[prefix]], path
 
 
 class TestTailFailures:
@@ -174,9 +175,7 @@ class TestTailFailures:
 
     def test_one_bad_conference_does_not_stop_the_next(self, demo, tmp_path, monkeypatch):
         demo([_a("Best Paper", "award", "Won", "a")], [])
-        bad = tmp_path / "demo_2024"
-        bad.mkdir()
-        (bad / "papers.jsonl").write_text("{broken\n", encoding="utf-8")
+        _write_papers(tmp_path, "demo_2024", "{broken\n")
         outs = collect_all(["demo_2024", "demo_2025"], tmp_path)
         assert [o.status for o in outs] == ["failed", "collected"]
 
@@ -189,7 +188,7 @@ class TestLostSource:
                   _a("Best Paper Candidate", "candidate", "Also", "b")])
         out = collect_conference("demo_2025", tmp_path)
         assert (out.status, out.count) == ("collected", 2)
-        assert {a.via for a in read_awards(awards_path(tmp_path, "demo_2025"))} == {"b"}
+        assert {a.via for a in read_awards(tmp_path, "demo_2025")} == {"b"}
 
 
 class TestConferenceIds:
@@ -197,13 +196,13 @@ class TestConferenceIds:
     def manual_dir(self, tmp_path_factory, monkeypatch):
         """No manual files unless a test writes one: the window tests must not depend on configs/."""
         d = tmp_path_factory.mktemp("manual")
-        monkeypatch.setattr(manual_module, "MANUAL_DIR", d)
+        monkeypatch.setattr(manual_module, "CONFIGS_DIR", d)
         return d
 
     @staticmethod
     def _dirs(tmp_path, *names):
         for name in names:
-            (tmp_path / name).mkdir()
+            _write_papers(tmp_path, name, "")
         (tmp_path / "pipeline_state.json").write_text("{}")
 
     def test_an_old_year_with_a_manual_file_but_no_awards_file_is_retried(self, tmp_path, manual_dir):
@@ -211,8 +210,10 @@ class TestConferenceIds:
         # reviewed list must not wait for the next all-years run.
         self._dirs(tmp_path, "neurips_2013", "neurips_2014", "neurips_2015", "neurips_2026")
         for conf_id in ("neurips_2013", "neurips_2014"):
-            (manual_dir / f"{conf_id}.yaml").write_text("awards: []\n", encoding="utf-8")
-        write_awards(awards_path(tmp_path, "neurips_2013"), "neurips_2013",
+            path = manual_awards_path(manual_dir, conf_id)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("awards: []\n", encoding="utf-8")
+        write_awards(tmp_path, "neurips_2013",
                      [Award("Outstanding Paper Award", "award", "P", "manual", "https://x.test/")])
         assert conference_ids(tmp_path, date(2026, 10, 18)) == ["neurips_2014", "neurips_2026"]
 
@@ -237,10 +238,11 @@ class TestConferenceIds:
 
 
 def _manual_file(monkeypatch, tmp_path, body):
-    manual_dir = tmp_path / "manual"
-    manual_dir.mkdir()
-    (manual_dir / "demo_2025.yaml").write_text(body, encoding="utf-8")
-    monkeypatch.setattr(manual_module, "MANUAL_DIR", manual_dir)
+    configs_dir = tmp_path / "configs"
+    path = manual_awards_path(configs_dir, "demo_2025")
+    path.parent.mkdir(parents=True)
+    path.write_text(body, encoding="utf-8")
+    monkeypatch.setattr(manual_module, "CONFIGS_DIR", configs_dir)
 
 
 class TestManualFirst:
@@ -254,22 +256,17 @@ class TestManualFirst:
             assert [name for name, _ in SOURCES_BY_PREFIX[prefix]][:3] == ["manual", "researchr", "sigsoft"]
 
     def test_a_manual_entry_wins_a_duplicate_and_corrects_its_label(self, monkeypatch, tmp_path):
-        conf_dir = tmp_path / "demo_2025"
-        conf_dir.mkdir()
-        (conf_dir / "papers.jsonl").write_text(json.dumps({"title": "Won"}) + "\n", encoding="utf-8")
+        _write_papers(tmp_path, "demo_2025", json.dumps({"title": "Won"}) + "\n")
         _manual_file(monkeypatch, tmp_path, 'source: https://m.test/\nretrieved: 2026-10-17\nawards:\n'
                                             '  - {label: "Best Student Paper Honorable Mention", title: "Won"}\n')
         monkeypatch.setitem(SOURCES_BY_PREFIX, "demo", [
             ("manual", manual_module.manual), ("b", _src([_a("Best Paper Honorable Mention", "honorable", "Won", "b")]))])
         collect_conference("demo_2025", tmp_path)
-        assert [(a.label, a.via) for a in read_awards(awards_path(tmp_path, "demo_2025"))] == [
+        assert [(a.label, a.via) for a in read_awards(tmp_path, "demo_2025")] == [
             ("Best Student Paper Honorable Mention", "manual")]
 
     def test_replaces_drops_another_sources_spelling_of_the_same_kind(self, monkeypatch, tmp_path):
-        conf_dir = tmp_path / "demo_2025"
-        conf_dir.mkdir()
-        (conf_dir / "papers.jsonl").write_text(json.dumps({"title": "Pose-NDF: Modeling Poses"}) + "\n",
-                                               encoding="utf-8")
+        _write_papers(tmp_path, "demo_2025", json.dumps({"title": "Pose-NDF: Modeling Poses"}) + "\n")
         _manual_file(monkeypatch, tmp_path, 'source: https://m.test/\nretrieved: 2026-10-17\nawards:\n'
                                             '  - {label: "Honorable Mention", title: "Pose-NDF: Modeling Poses",'
                                             ' replaces: "Pose-NDF: Modelling Poses"}\n')
@@ -278,16 +275,14 @@ class TestManualFirst:
             ("b", _src([_a("Honorable Mention", "honorable", "Pose-NDF: Modelling Poses", "b"),
                         _a("Best Paper", "award", "Pose-NDF: Modelling Poses", "b")]))])
         out = collect_conference("demo_2025", tmp_path)
-        assert [(a.kind, a.title, a.via) for a in read_awards(awards_path(tmp_path, "demo_2025"))] == [
+        assert [(a.kind, a.title, a.via) for a in read_awards(tmp_path, "demo_2025")] == [
             ("award", "Pose-NDF: Modelling Poses", "b"),
             ("honorable", "Pose-NDF: Modeling Poses", "manual"),
         ]
         assert (out.matched, out.unmatched) == (1, ["Pose-NDF: Modelling Poses"])
 
     def test_a_replaces_that_drops_nothing_is_logged(self, monkeypatch, tmp_path, caplog):
-        conf_dir = tmp_path / "demo_2025"
-        conf_dir.mkdir()
-        (conf_dir / "papers.jsonl").write_text(json.dumps({"title": "Won"}) + "\n", encoding="utf-8")
+        _write_papers(tmp_path, "demo_2025", json.dumps({"title": "Won"}) + "\n")
         _manual_file(monkeypatch, tmp_path, 'source: https://m.test/\nretrieved: 2026-10-17\nawards:\n'
                                             '  - {label: "Honorable Mention", title: "Won", replaces: "Typo Title"}\n')
         monkeypatch.setitem(SOURCES_BY_PREFIX, "demo", [

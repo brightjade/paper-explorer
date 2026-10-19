@@ -2,6 +2,9 @@ import json
 
 import pytest
 
+from ppr.layout import papers_path
+from ppr.store import save_crawl, save_enriched
+from ppr.models import Paper
 from scripts.build_data import (
     parse_conference_id,
     load_papers,
@@ -14,11 +17,15 @@ from scripts.build_data import (
 )
 
 
+def _write_papers(root, conf_id, papers):
+    path = papers_path(root, conf_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("".join(json.dumps(p) + "\n" for p in papers), encoding="utf-8")
+
+
 @pytest.fixture
 def sample_outputs(tmp_path):
     """Create a minimal outputs directory with two conferences."""
-    iclr_dir = tmp_path / "iclr_2025"
-    iclr_dir.mkdir()
     papers = [
         {
             "title": "Paper A",
@@ -48,12 +55,8 @@ def sample_outputs(tmp_path):
             "citation_count": 10,
         },
     ]
-    with open(iclr_dir / "papers_enriched.jsonl", "w") as f:
-        for p in papers:
-            f.write(json.dumps(p) + "\n")
+    _write_papers(tmp_path, "iclr_2025", papers)
 
-    acl_dir = tmp_path / "acl_2025"
-    acl_dir.mkdir()
     papers2 = [
         {
             "title": "Paper D",
@@ -62,9 +65,7 @@ def sample_outputs(tmp_path):
             "keywords": ["nlp"],
         },
     ]
-    with open(acl_dir / "papers.jsonl", "w") as f:
-        for p in papers2:
-            f.write(json.dumps(p) + "\n")
+    _write_papers(tmp_path, "acl_2025", papers2)
 
     return tmp_path
 
@@ -156,20 +157,13 @@ class TestCategories:
 
 
 class TestLoadPapers:
-    def test_prefers_enriched(self, sample_outputs):
-        papers = load_papers(sample_outputs / "iclr_2025")
-        assert len(papers) == 3
-        assert papers[0]["citation_count"] == 100
-
-    def test_falls_back_to_plain(self, sample_outputs):
-        papers = load_papers(sample_outputs / "acl_2025")
-        assert len(papers) == 1
-        assert "citation_count" not in papers[0]
+    def test_loads_the_year_file(self, sample_outputs):
+        assert [p["title"] for p in load_papers(sample_outputs, "iclr_2025")] == ["Paper A", "Paper B", "Paper C"]
 
 
 class TestBuildManifestEntry:
     def test_with_citations(self, sample_outputs):
-        papers = load_papers(sample_outputs / "iclr_2025")
+        papers = load_papers(sample_outputs, "iclr_2025")
         entry = build_manifest_entry("iclr_2025", papers)
         assert entry["id"] == "iclr_2025"
         assert entry["venue"] == "ICLR"
@@ -183,7 +177,7 @@ class TestBuildManifestEntry:
         assert entry["total_citations"] == 160
 
     def test_without_citations(self, sample_outputs):
-        papers = load_papers(sample_outputs / "acl_2025")
+        papers = load_papers(sample_outputs, "acl_2025")
         entry = build_manifest_entry("acl_2025", papers)
         assert entry["has_citations"] is False
         assert entry["total_citations"] == 0
@@ -193,8 +187,8 @@ class TestBuildManifestEntry:
 class TestBuildAuthorIndex:
     def test_aggregation(self, sample_outputs):
         all_papers = {
-            "iclr_2025": load_papers(sample_outputs / "iclr_2025"),
-            "acl_2025": load_papers(sample_outputs / "acl_2025"),
+            "iclr_2025": load_papers(sample_outputs, "iclr_2025"),
+            "acl_2025": load_papers(sample_outputs, "acl_2025"),
         }
         authors = build_author_index(all_papers)
         alice = next(a for a in authors if a["name"] == "Alice")
@@ -210,8 +204,8 @@ class TestBuildAuthorIndex:
 class TestBuildTrends:
     def test_overview_section(self, sample_outputs):
         all_papers = {
-            "iclr_2025": load_papers(sample_outputs / "iclr_2025"),
-            "acl_2025": load_papers(sample_outputs / "acl_2025"),
+            "iclr_2025": load_papers(sample_outputs, "iclr_2025"),
+            "acl_2025": load_papers(sample_outputs, "acl_2025"),
         }
         trends = build_trends(all_papers)
         overview = trends["overview"]
@@ -222,7 +216,7 @@ class TestBuildTrends:
 
     def test_top_level_keys(self, sample_outputs):
         all_papers = {
-            "iclr_2025": load_papers(sample_outputs / "iclr_2025"),
+            "iclr_2025": load_papers(sample_outputs, "iclr_2025"),
         }
         trends = build_trends(all_papers)
         assert "overview" in trends
@@ -232,7 +226,7 @@ class TestBuildTrends:
 
     def test_impact_citation_stats(self, sample_outputs):
         all_papers = {
-            "iclr_2025": load_papers(sample_outputs / "iclr_2025"),
+            "iclr_2025": load_papers(sample_outputs, "iclr_2025"),
         }
         trends = build_trends(all_papers)
         stats = trends["impact"]["citation_stats_by_year"]["2025"]["ICLR"]
@@ -245,14 +239,14 @@ class TestBuildTrends:
     def test_impact_has_no_top_papers(self, sample_outputs):
         """The top-20 table moved to top.json (the Top 100 page)."""
         all_papers = {
-            "iclr_2025": load_papers(sample_outputs / "iclr_2025"),
+            "iclr_2025": load_papers(sample_outputs, "iclr_2025"),
         }
         trends = build_trends(all_papers)
         assert "top_papers_by_year" not in trends["impact"]
 
     def test_composition_track_breakdown(self, sample_outputs):
         all_papers = {
-            "iclr_2025": load_papers(sample_outputs / "iclr_2025"),
+            "iclr_2025": load_papers(sample_outputs, "iclr_2025"),
         }
         trends = build_trends(all_papers)
         tracks = trends["composition"]["track_breakdown_by_year"]["2025"]["ICLR"]
@@ -261,7 +255,7 @@ class TestBuildTrends:
 
     def test_composition_venue_counts_all_years(self, sample_outputs):
         all_papers = {
-            "iclr_2025": load_papers(sample_outputs / "iclr_2025"),
+            "iclr_2025": load_papers(sample_outputs, "iclr_2025"),
         }
         trends = build_trends(all_papers)
         all_years = trends["composition"]["venue_counts_all_years"]
@@ -270,14 +264,14 @@ class TestBuildTrends:
     def test_growth_pct_requires_two_years(self, sample_outputs):
         """Growth percentage requires at least two years of data."""
         all_papers = {
-            "iclr_2025": load_papers(sample_outputs / "iclr_2025"),
+            "iclr_2025": load_papers(sample_outputs, "iclr_2025"),
         }
         trends = build_trends(all_papers)
         assert trends["overview"]["growth_pct_by_year"] == {}
 
     def test_topics_section_present(self, sample_outputs):
         all_papers = {
-            "iclr_2025": load_papers(sample_outputs / "iclr_2025"),
+            "iclr_2025": load_papers(sample_outputs, "iclr_2025"),
         }
         trends = build_trends(all_papers)
         topics = trends["topics"]
@@ -366,8 +360,8 @@ class TestAwards:
              "url": "https://x.test/old", "via": "manual", "source": "s"},
             {"label": "Outstanding Paper", "kind": "award", "title": "Paper Z", "via": "virtual", "source": "s"},
         ]
-        (sample_outputs / "iclr_2025" / "awards.json").write_text(
-            json.dumps({"conf_id": "iclr_2025", "awards": entries}), encoding="utf-8")
+        (sample_outputs / "iclr" / "awards.json").write_text(
+            json.dumps({"2025": entries}), encoding="utf-8")
         return sample_outputs
 
     def test_awards_land_on_their_paper(self, with_awards, tmp_path):
@@ -412,10 +406,8 @@ class TestTestOfTimeOnTheOriginalPaper:
                              {"title": "Other", "authors": ["B"], "selection": "main", "citation_count": 10}],
             "neurips_2023": [{"title": "New Paper", "authors": ["C"], "selection": "poster", "citation_count": 5}],
         }.items():
-            (root / conf_id).mkdir(parents=True)
-            (root / conf_id / "papers_enriched.jsonl").write_text(
-                "".join(json.dumps(p) + "\n" for p in papers), encoding="utf-8")
-        (root / "neurips_2023" / "awards.json").write_text(json.dumps({"conf_id": "neurips_2023", "awards": [
+            _write_papers(root, conf_id, papers)
+        (root / "neurips" / "awards.json").write_text(json.dumps({"2023": [
             {"label": "Test of Time Award", "kind": "test_of_time", "title": "Word Vectors",
              "url": "https://x.test/w2v", "via": "virtual", "source": "s"}]}), encoding="utf-8")
         return root
@@ -438,3 +430,25 @@ class TestTestOfTimeOnTheOriginalPaper:
         top = json.loads((out / "top.json").read_text())
         [w2v] = [p for p in top["papers"] if p["title"] == "Word Vectors"]
         assert w2v["awards"] == [{"label": "Test of Time Award (NeurIPS 2023)", "kind": "test_of_time"}]
+
+
+def test_reads_the_year_files(tmp_path):
+    save_crawl([Paper(title="P", link="L", authors=["A"], selection="main")], papers_path(tmp_path, "usenix_security_2024"))
+    out = tmp_path / "web"
+    build_all(tmp_path, out)
+    assert [c["id"] for c in json.loads((out / "manifest.json").read_text())["conferences"]] == ["usenix_security_2024"]
+
+
+def test_no_conference_fails_instead_of_deploying_an_empty_site(tmp_path):
+    (tmp_path / "data" / "iclr_2025").mkdir(parents=True)
+    (tmp_path / "data" / "iclr_2025" / "papers_enriched.jsonl").write_text('{"title": "Old layout"}\n')
+    with pytest.raises(SystemExit, match="no conference"):
+        build_all(tmp_path / "data", tmp_path / "web")
+
+
+def test_abstract_source_never_reaches_the_site(tmp_path):
+    save_enriched([Paper(title="P", link="L", authors=["A"], abstract="S2", abstract_source="s2",
+                         citation_count=1)], papers_path(tmp_path, "iclr_2025"))
+    build_all(tmp_path, tmp_path / "web")
+    [paper] = json.loads((tmp_path / "web" / "iclr_2025.json").read_text())
+    assert paper["abstract"] == "S2" and "abstract_source" not in paper

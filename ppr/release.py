@@ -13,6 +13,8 @@ from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
 
+from ppr.layout import conference_ids, papers_path
+
 logger = logging.getLogger(__name__)
 
 KEEP = 3
@@ -64,8 +66,8 @@ def make_zip(data_dir: Path, zip_path: Path) -> None:
 
 def _match_counts(data_dir: Path) -> Counter:
     counts: Counter = Counter()
-    for path in data_dir.glob("*/papers_enriched.jsonl"):
-        with open(path, encoding="utf-8") as f:
+    for conf_id in conference_ids(data_dir):
+        with open(papers_path(data_dir, conf_id), encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     counts[json.loads(line).get("match_status") or "unattempted"] += 1
@@ -93,6 +95,17 @@ def render_notes(base_tag: str, register: dict | None, enrich: dict | None,
 
 def publish(data_dir: Path, base_tag: str, notes: str, today: str, run: Runner, *,
             zip_path: Path, dry_run: bool = False) -> str:
+    if not conference_ids(data_dir):
+        raise ReleaseAborted(
+            f"{data_dir} holds no year files in the per-venue layout -- refusing to publish it"
+        )
+    old = sorted(p for pattern in ("*/papers.jsonl", "*/papers_enriched.jsonl")
+                 for p in data_dir.glob(pattern))
+    if old:
+        raise ReleaseAborted(
+            f"{data_dir} still holds old-layout files ({old[0].relative_to(data_dir)}) "
+            "-- refusing to publish a mixed tree"
+        )
     tags = data_releases(run)
     if not tags or tags[0] != base_tag:
         raise ReleaseAborted(

@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from ppr.config import CrawlConfig
+from ppr.layout import crawl_config_path
 from ppr.validate import DBLP_VALIDATION_KEYS
 
 CONFIGS = Path(__file__).resolve().parent.parent / "configs"
@@ -12,7 +13,7 @@ BACKFILL_OPENREVIEW = [f"iclr_{y}" for y in range(2017, 2023)] + [
 
 @pytest.mark.parametrize("conf_id", BACKFILL_OPENREVIEW)
 def test_config_is_v1_and_named_for_its_year(conf_id):
-    cfg = CrawlConfig.from_yaml(CONFIGS / f"{conf_id}.yaml")
+    cfg = CrawlConfig.from_yaml(crawl_config_path(CONFIGS, conf_id))
     assert cfg.api_version == 1
     assert cfg.year == int(conf_id.rsplit("_", 1)[1])
 
@@ -26,4 +27,4 @@ def test_counts_are_cross_checked_against_dblp(conf_id):
                                           ("iclr_2019", "reply_suffix"),
                                           ("iclr_2020", "reply_suffix")])
 def test_iclr_2018_to_2020_read_decisions(conf_id, mode):
-    assert mode in CrawlConfig.from_yaml(CONFIGS / f"{conf_id}.yaml").decisions
+    assert mode in CrawlConfig.from_yaml(crawl_config_path(CONFIGS, conf_id)).decisions

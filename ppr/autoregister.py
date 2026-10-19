@@ -17,6 +17,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from ppr.api_client import note_pdate
+from ppr.layout import crawl_config_path, papers_path
 from ppr.readme_table import selection_cell, update_readme
 from ppr.register import (
     TRACK_VOCABULARY,
@@ -115,7 +116,7 @@ class _Snapshot:
 
     def __init__(self) -> None:
         self._files: dict[Path, str | None] = {}
-        self._dirs: dict[Path, Path | None] = {}
+        self._data: dict[Path, Path | None] = {}
         self._tmp = Path(tempfile.mkdtemp(prefix="autoregister-"))
 
     def file(self, path: Path) -> Path:
@@ -123,14 +124,15 @@ class _Snapshot:
             self._files[path] = path.read_text(encoding="utf-8") if path.exists() else None
         return path
 
-    def dir(self, path: Path) -> Path:
-        if path not in self._dirs:
+    def data_file(self, path: Path) -> Path:
+        """Back up a gitignored data file: put back on a hold, never committed."""
+        if path not in self._data:
             if path.exists():
-                backup = self._tmp / path.name
-                shutil.copytree(path, backup)
-                self._dirs[path] = backup
+                backup = self._tmp / f"{len(self._data)}-{path.name}"
+                shutil.copy2(path, backup)
+                self._data[path] = backup
             else:
-                self._dirs[path] = None
+                self._data[path] = None
         return path
 
     def changed_files(self) -> list[Path]:
@@ -142,10 +144,11 @@ class _Snapshot:
                 path.unlink(missing_ok=True)
             else:
                 path.write_text(text, encoding="utf-8")
-        for path, backup in self._dirs.items():
-            shutil.rmtree(path, ignore_errors=True)
-            if backup is not None:
-                shutil.copytree(backup, path)
+        for path, backup in self._data.items():
+            if backup is None:
+                path.unlink(missing_ok=True)
+            else:
+                shutil.copy2(backup, path)
         self.discard()
 
     def discard(self) -> None:
@@ -166,7 +169,7 @@ def check_against_prior_year(conf_id: str, crawled: int, data_dir: Path) -> None
     # Biennial venues skip a year, so year-2 is a candidate too.
     for prior_year in (int(year) - 1, int(year) - 2):
         prior_id = f"{prefix}_{prior_year}"
-        path = data_dir / prior_id / "papers.jsonl"
+        path = papers_path(data_dir, prior_id)
         if not path.exists():
             continue
         with open(path, encoding="utf-8") as f:
@@ -207,7 +210,8 @@ def _register_openreview(row: dict, venue: Venue, ws: Workspace, snap: _Snapshot
         extra_ids.append(track_id)
         expected += len(notes)
 
-    path = snap.file(ws.configs_dir / f"{row['conf_id']}.yaml")
+    path = snap.file(crawl_config_path(ws.configs_dir, row["conf_id"]))
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         render_openreview_config(venue.name, row["year"], venue_id, selections,
                                  extra_venue_ids=extra_ids, year_from_pdate=venue.rolling),
@@ -256,7 +260,7 @@ def register_one(row: dict, venue: Venue, ws: Workspace, *, crawl: Crawl,
     snap = _Snapshot()
     try:
         expected = _register(row, venue, ws, snap, openreview)
-        snap.dir(ws.data_dir / conf_id)
+        snap.data_file(papers_path(ws.data_dir, conf_id))
         count = crawl(conf_id, venue, ws)
         check_count(count, expected)
         # January's edition of a rolling venue is always a sliver of last year.
@@ -268,7 +272,7 @@ def register_one(row: dict, venue: Venue, ws: Workspace, *, crawl: Crawl,
                 raise Hold("paper count disagrees with DBLP (ppr validate: FAIL)")
 
         notes = []
-        value = selection_cell(_selections_in(ws.data_dir / conf_id / "papers.jsonl"))
+        value = selection_cell(_selections_in(papers_path(ws.data_dir, conf_id)))
         if not update_readme(snap.file(ws.readme), venue.name, row["year"], value):
             notes.append(f"README has no row named {venue.name!r}; cell not filled")
 
@@ -317,15 +321,15 @@ def default_crawl(openreview: Callable[[], object]) -> Crawl:
     just edited on disk and this process imported the old one.
     """
     def crawl(conf_id: str, venue: Venue, ws: Workspace) -> int:
-        out = ws.data_dir / conf_id / "papers.jsonl"
+        out = papers_path(ws.data_dir, conf_id)
         if venue.source == "openreview":
             from ppr.api_client import OpenReviewAPIClient
             from ppr.config import CrawlConfig
-            from ppr.models import write_papers
+            from ppr.store import save_crawl
 
-            config = CrawlConfig.from_yaml(ws.configs_dir / f"{conf_id}.yaml")
+            config = CrawlConfig.from_yaml(crawl_config_path(ws.configs_dir, conf_id))
             papers = OpenReviewAPIClient(config, openreview()).fetch_papers()
-            write_papers(papers, out)
+            save_crawl(papers, out)
             return len(papers)
         subprocess.run([sys.executable, "-m", "ppr.cli", "crawl", conf_id],
                        cwd=ws.root, check=True)

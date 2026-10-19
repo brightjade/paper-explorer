@@ -1,0 +1,35 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 873 papers
+  tocs:
+    - {key: db/conf/icra/icra2013.bht, selection: main}
+2014:  # 1037 papers
+  tocs:
+    - {key: db/conf/icra/icra2014.bht, selection: main}
+2015:  # 940 papers
+  tocs:
+    - {key: db/conf/icra/icra2015.bht, selection: main}
+2016:  # 693 papers
+  tocs:
+    - {key: db/conf/icra/icra2016.bht, selection: main}
+2017:  # 795 papers
+  tocs:
+    - {key: db/conf/icra/icra2017.bht, selection: main}
+2018:  # 817 papers
+  tocs:
+    - {key: db/conf/icra/icra2018.bht, selection: main}
+2019:  # 1024 papers
+  tocs:
+    - {key: db/conf/icra/icra2019.bht, selection: main}
+2020:  # 1073 papers
+  tocs:
+    - {key: db/conf/icra/icra2020.bht, selection: main}
+2021:  # 1386 papers
+  tocs:
+    - {key: db/conf/icra/icra2021.bht, selection: main}
+2022:  # 929 papers
+  tocs:
+    - {key: db/conf/icra/icra2022.bht, selection: main}

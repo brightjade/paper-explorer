@@ -14,6 +14,7 @@ from ppr.autoregister import (
     git_commit,
     outcomes_to_json,
 )
+from ppr.layout import crawl_config_path, papers_path
 from ppr.venues import Venue
 
 README = """| Field | Venue | ID | Years | Tracks |
@@ -78,7 +79,7 @@ def _crawler(counts):
         n = counts[conf_id]
         if isinstance(n, Exception):
             raise n
-        out = ws.data_dir / conf_id / "papers.jsonl"
+        out = papers_path(ws.data_dir, conf_id)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text("".join(
             json.dumps({"title": f"P{i}", "link": "L", "authors": ["A"], "selection": "main"}) + "\n"
@@ -175,13 +176,13 @@ class TestCountCheck:
         assert "250" in outcomes[0].reason
         assert ws.dblp_module.read_text() == DBLP_SRC
         assert ws.readme.read_text() == README
-        assert not (ws.data_dir / "icse_2026").exists()
+        assert not papers_path(ws.data_dir, "icse_2026").exists()
         assert commits == []
 
 
 def _prior(ws, conf_id, n):
-    path = ws.data_dir / conf_id / "papers.jsonl"
-    path.parent.mkdir(parents=True)
+    path = papers_path(ws.data_dir, conf_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps({"title": f"P{i}"}) + "\n" for i in range(n)) + "\n")
 
 
@@ -232,14 +233,14 @@ class TestRollingVenue:
         outcomes, _ = _run([row], ws, counts={"tmlr_2027": 30},
                            openreview=_openreview({"TMLR": _notes(*["Accepted by TMLR"] * 30, year=2027)}))
         assert outcomes[0].status == "registered", outcomes[0]
-        assert "year_from_pdate: true" in (ws.configs_dir / "tmlr_2027.yaml").read_text()
+        assert "year_from_pdate: true" in crawl_config_path(ws.configs_dir, "tmlr_2027").read_text()
 
     def test_selections_come_from_the_probed_years_notes_only(self, ws):
         row = _row("tmlr_2027", 30, {"venue_id": "TMLR"})
         notes = _notes(*["Some old TMLR string"] * 5, year=2026) + _notes(*["Accepted by TMLR"] * 30, year=2027)
         outcomes, _ = _run([row], ws, counts={"tmlr_2027": 30}, openreview=_openreview({"TMLR": notes}))
         assert outcomes[0].status == "registered", outcomes[0]
-        assert 'main: "Accepted by TMLR"' in (ws.configs_dir / "tmlr_2027.yaml").read_text()
+        assert 'main: "Accepted by TMLR"' in crawl_config_path(ws.configs_dir, "tmlr_2027").read_text()
 
 
 class TestRevert:
@@ -258,16 +259,14 @@ class TestRevert:
         assert "icse_2026" not in text and "icse_2027" in text
         assert len(commits) == 1
 
-    def test_preexisting_data_dir_is_restored_on_hold(self, ws):
+    def test_preexisting_year_file_is_restored_on_hold(self, ws):
         # A venue whose push failed last month: its data shipped in the release,
         # but its registration never reached main. A hold must not delete it.
-        old = ws.data_dir / "icse_2026"
-        old.mkdir()
-        (old / "papers.jsonl").write_text("old\n")
-        (old / "papers_enriched.jsonl").write_text("old-enriched\n")
+        path = papers_path(ws.data_dir, "icse_2026")
+        path.parent.mkdir(parents=True)
+        path.write_text("old\n")
         _run([ICSE], ws, counts={"icse_2026": 10})
-        assert (old / "papers.jsonl").read_text() == "old\n"
-        assert (old / "papers_enriched.jsonl").read_text() == "old-enriched\n"
+        assert path.read_text() == "old\n"
 
     def test_already_registered_is_a_hold(self, ws):
         row = _row("icse_2025", 250, {"key": "db/conf/icse/icse2025.bht"})
@@ -284,7 +283,7 @@ class TestValidate:
         outcomes, _ = _run([self.COLM], ws, counts={"colm_2026": 856},
                            validate=lambda c: "FAIL", openreview=_openreview(self.OR))
         assert outcomes[0].status == "held"
-        assert not (ws.configs_dir / "colm_2026.yaml").exists()
+        assert not crawl_config_path(ws.configs_dir, "colm_2026").exists()
 
     @pytest.mark.parametrize("status", ["PASS", "ERROR", "NO_DATA", "SKIP"])
     def test_anything_but_fail_passes(self, ws, status):
@@ -298,7 +297,7 @@ class TestOpenReview:
         row = _row("colm_2026", 856, {"venue_id": "colmweb.org/COLM/2026/Conference"})
         _run([row], ws, counts={"colm_2026": 856},
              openreview=_openreview({"colmweb.org/COLM/2026/Conference": _notes(*["COLM 2026"] * 856)}))
-        text = (ws.configs_dir / "colm_2026.yaml").read_text()
+        text = crawl_config_path(ws.configs_dir, "colm_2026").read_text()
         assert 'main: "COLM 2026"' in text
         assert "| NLP | COLM | `colm` | 2024–2026 | main |" in ws.readme.read_text()
 
@@ -308,7 +307,7 @@ class TestOpenReview:
                            openreview=_openreview({"v": _notes("COLM 2026 Long", "COLM 2026 Poster")}))
         assert outcomes[0].status == "held"
         assert 'unknown track name "COLM 2026 Long"' in outcomes[0].reason
-        assert not (ws.configs_dir / "colm_2026.yaml").exists()
+        assert not crawl_config_path(ws.configs_dir, "colm_2026").exists()
 
     def test_extra_track_included_only_when_it_has_papers(self, ws):
         main_id = "NeurIPS.cc/2026/Conference"
@@ -321,7 +320,7 @@ class TestOpenReview:
         }
         outcomes, _ = _run([row], ws, counts={"neurips_2026": 8}, openreview=_openreview(notes))
         assert (outcomes[0].status, outcomes[0].expected) == ("registered", 8)
-        text = (ws.configs_dir / "neurips_2026.yaml").read_text()
+        text = crawl_config_path(ws.configs_dir, "neurips_2026").read_text()
         assert dnb_id in text
         assert 'datasets_poster: "NeurIPS 2026 Datasets and Benchmarks Track poster"' in text
 
@@ -330,7 +329,7 @@ class TestOpenReview:
         row = _row("neurips_2026", 5, {"venue_id": main_id})
         notes = {main_id: _notes("NeurIPS 2026 oral", *["NeurIPS 2026 poster"] * 4)}
         _run([row], ws, counts={"neurips_2026": 5}, openreview=_openreview(notes))
-        assert "extra_venue_ids" not in (ws.configs_dir / "neurips_2026.yaml").read_text()
+        assert "extra_venue_ids" not in crawl_config_path(ws.configs_dir, "neurips_2026").read_text()
 
 
 class TestReadmeRowMissing:

@@ -1,0 +1,35 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 283 papers
+  tocs:
+    - {key: db/conf/icml/icml2013.bht, selection: main}
+2014:  # 310 papers
+  tocs:
+    - {key: db/conf/icml/icml2014.bht, selection: main}
+2015:  # 270 papers
+  tocs:
+    - {key: db/conf/icml/icml2015.bht, selection: main}
+2016:  # 322 papers
+  tocs:
+    - {key: db/conf/icml/icml2016.bht, selection: main}
+2017:  # 434 papers
+  tocs:
+    - {key: db/conf/icml/icml2017.bht, selection: main}
+2018:  # 621 papers
+  tocs:
+    - {key: db/conf/icml/icml2018.bht, selection: main}
+2019:  # 774 papers
+  tocs:
+    - {key: db/conf/icml/icml2019.bht, selection: main}
+2020:  # 1085 papers
+  tocs:
+    - {key: db/conf/icml/icml2020.bht, selection: main}
+2021:  # 1183 papers
+  tocs:
+    - {key: db/conf/icml/icml2021.bht, selection: main}
+2022:  # 1234 papers
+  tocs:
+    - {key: db/conf/icml/icml2022.bht, selection: main}

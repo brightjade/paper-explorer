@@ -78,7 +78,7 @@ jobs:
           gh release download "$tag" -p data.zip --clobber
           unzip -q -o data.zip
           rm data.zip
-          if ! compgen -G "data/*/papers.jsonl" > /dev/null; then
+          if ! compgen -G "data/*/[0-9][0-9][0-9][0-9].jsonl" > /dev/null; then
             echo "::error::data.zip extracted no conference data" >&2; exit 1
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"

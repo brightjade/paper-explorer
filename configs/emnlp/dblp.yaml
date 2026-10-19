@@ -1,0 +1,39 @@
+# 2013-2022 conference-years crawled from DBLP: each lists the toc pages
+# (proceedings volumes) that make up the main conference, with the selection
+# each volume's papers get. Generated once from DBLP's toc pages and
+# proceedings titles on 2026-10-16, then reviewed by hand. Past
+# proceedings do not change: edit by hand, never regenerate on a schedule.
+2013:  # 205 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2013.bht, selection: main}
+2014:  # 226 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2014.bht, selection: main}
+2015:  # 312 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2015.bht, selection: main}
+2016:  # 264 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2016.bht, selection: main}
+2017:  # 322 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2017.bht, selection: main}
+2018:  # 549 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2018.bht, selection: main}
+2019:  # 681 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2019-1.bht, selection: main}
+2020:  # 1199 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2020-1.bht, selection: main}
+    - {key: db/conf/emnlp/emnlp2020f.bht, selection: findings}
+2021:  # 1273 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2021-1.bht, selection: main}
+    - {key: db/conf/emnlp/emnlp2021f.bht, selection: findings}
+2022:  # 1440 papers
+  tocs:
+    - {key: db/conf/emnlp/emnlp2022.bht, selection: main}
+    - {key: db/conf/emnlp/emnlp2022f.bht, selection: findings}
+    - {key: db/conf/emnlp/emnlp2022i.bht, selection: industry}

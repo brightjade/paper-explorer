@@ -13,7 +13,8 @@ from ppr import dblp_client
 from ppr.api_client import note_pdate
 from ppr.archive import first_live_year
 from ppr.scrapers import crossref, researchr, roboticsproceedings
-from ppr.venues import MANUAL_SOURCES, REGISTRY_STEM, Venue
+from ppr.layout import crawl_config_ids
+from ppr.venues import MANUAL_SOURCES, Venue
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ def known_conference_ids() -> set[str]:
     """
     from ppr.scrapers import SCRAPERS
 
-    ids = {p.stem for p in CONFIGS_DIR.glob("*.yaml") if p.stem != REGISTRY_STEM}
+    ids = set(crawl_config_ids(CONFIGS_DIR))
     return ids | set(SCRAPERS.keys())
 
 

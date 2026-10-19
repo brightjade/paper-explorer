@@ -112,3 +112,9 @@ def test_the_base_release_is_the_newest_published_one():
     run = _named("Download the latest data release")["run"]
     assert "sort_by(.publishedAt)" in run
     assert "createdAt" not in run
+
+
+def test_the_extracted_data_check_matches_the_layout():
+    run = _named("Download the latest data release")["run"]
+    assert 'compgen -G "data/*/[0-9][0-9][0-9][0-9].jsonl"' in run
+    assert "papers.jsonl" not in WORKFLOW.read_text(encoding="utf-8")

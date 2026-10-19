@@ -3,6 +3,8 @@ from pathlib import Path
 
 import yaml
 
+from ppr.layout import config_conference_id, papers_path
+
 
 @dataclass
 class CrawlConfig:
@@ -10,7 +12,7 @@ class CrawlConfig:
     year: int
     venue_id: str  # e.g., "ICLR.cc/2025/Conference"
     selections: dict[str, str | list[str]]  # selection_name -> venue/decision string(s)
-    conference_id: str  # e.g., "iclr_2025" (derived from filename)
+    conference_id: str  # e.g., "iclr_2025" (derived from configs/<venue>/<year>.yaml)
     api_version: int = 2  # OpenReview API version (1 or 2)
     extra_venue_ids: list[str] = field(default_factory=list)  # additional venue IDs to query (e.g., D&B track)
     # v1 only: override the derived "<venue_id>/-/Blind_Submission" (ICLR 2017's is "/-/submission")
@@ -53,7 +55,7 @@ class CrawlConfig:
                 "selection names to venue strings"
             )
 
-        conference_id = path.stem  # e.g., "iclr_2025"
+        conference_id = config_conference_id(path)  # configs/<venue>/<year>.yaml -> "<venue>_<year>"
 
         api_version = conference.get("api_version", 2)
         extra_venue_ids = conference.get("extra_venue_ids", [])
@@ -104,4 +106,4 @@ class CrawlConfig:
         )
 
     def get_save_path(self) -> Path:
-        return Path("data") / self.conference_id / "papers.jsonl"
+        return papers_path(Path("data"), self.conference_id)
