@@ -3,7 +3,7 @@ import json
 import pytest
 
 from ppr.layout import papers_path
-from ppr.store import save_crawl
+from ppr.store import save_crawl, save_enriched
 from ppr.models import Paper
 from scripts.build_data import (
     parse_conference_id,
@@ -437,3 +437,18 @@ def test_reads_the_year_files(tmp_path):
     out = tmp_path / "web"
     build_all(tmp_path, out)
     assert [c["id"] for c in json.loads((out / "manifest.json").read_text())["conferences"]] == ["usenix_security_2024"]
+
+
+def test_no_conference_fails_instead_of_deploying_an_empty_site(tmp_path):
+    (tmp_path / "data" / "iclr_2025").mkdir(parents=True)
+    (tmp_path / "data" / "iclr_2025" / "papers_enriched.jsonl").write_text('{"title": "Old layout"}\n')
+    with pytest.raises(SystemExit, match="no conference"):
+        build_all(tmp_path / "data", tmp_path / "web")
+
+
+def test_abstract_source_never_reaches_the_site(tmp_path):
+    save_enriched([Paper(title="P", link="L", authors=["A"], abstract="S2", abstract_source="s2",
+                         citation_count=1)], papers_path(tmp_path, "iclr_2025"))
+    build_all(tmp_path, tmp_path / "web")
+    [paper] = json.loads((tmp_path / "web" / "iclr_2025.json").read_text())
+    assert paper["abstract"] == "S2" and "abstract_source" not in paper

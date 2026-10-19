@@ -31,15 +31,13 @@ class FakeGitHub:
 
 
 RELEASE_A = {
-    "data/iclr_2025/papers.jsonl": "{}\n",
-    "data/iclr_2025/papers_enriched.jsonl": "{}\n",
-    "data/old_2023/papers.jsonl": "{}\n",
+    "data/iclr/2025.jsonl": "{}\n",
+    "data/old/2023.jsonl": "{}\n",
     "data/citation_updated.txt": "2026-10-14\n",
 }
 RELEASE_B = {
-    "data/iclr_2025/papers.jsonl": "{}\n",
-    "data/iclr_2025/papers_enriched.jsonl": '{"citation_count": 3}\n',
-    "data/icse_2026/papers.jsonl": "{}\n",
+    "data/iclr/2025.jsonl": '{"citation_count": 3}\n',
+    "data/icse/2026.jsonl": "{}\n",
     "data/citation_updated.txt": "2026-11-03\n",
 }
 
@@ -98,7 +96,7 @@ class TestSync:
         installed(tmp_path, FakeGitHub(tmp_path, "data-2026-10-14", RELEASE_A))
         gh = FakeGitHub(tmp_path, "data-2026-11-03", RELEASE_B)
         assert sync(tmp_path, gh.latest_tag, gh.download) == ("updated", "data-2026-10-14", "data-2026-11-03")
-        # old_2023 is gone: data/ mirrors the release, it does not accumulate
+        # old/2023 is gone: data/ mirrors the release, it does not accumulate
         assert tree(tmp_path) == RELEASE_B
         assert not any(p.name.startswith(".data-sync") for p in tmp_path.iterdir())
 
@@ -107,11 +105,11 @@ class TestSync:
         installed(tmp_path, FakeGitHub(tmp_path, "data-2026-10-14", RELEASE_A))
         data = tmp_path / "data"
         if edit == "change":
-            (data / "iclr_2025" / "papers_enriched.jsonl").write_text('{"local": 1}\n')
+            (data / "iclr" / "2025.jsonl").write_text('{"local": 1}\n')
         elif edit == "add":
-            (data / "iclr_2025" / "papers_enriched.tmp.jsonl").write_text("{}\n")
+            (data / "iclr" / ".2025.tmp.jsonl").write_text("{}\n")
         else:
-            (data / "old_2023" / "papers.jsonl").unlink()
+            (data / "old" / "2023.jsonl").unlink()
         before = tree(tmp_path)
         gh = FakeGitHub(tmp_path, "data-2026-11-03", RELEASE_B)
         with pytest.raises(SyncRefused):
@@ -120,8 +118,8 @@ class TestSync:
         assert gh.downloads == 0
 
     def test_data_not_installed_by_sync_needs_force(self, tmp_path):
-        (tmp_path / "data" / "x_2025").mkdir(parents=True)
-        (tmp_path / "data" / "x_2025" / "papers.jsonl").write_text("mine\n")
+        (tmp_path / "data" / "x").mkdir(parents=True)
+        (tmp_path / "data" / "x" / "2025.jsonl").write_text("mine\n")
         gh = FakeGitHub(tmp_path, "data-2026-10-14", RELEASE_A)
         with pytest.raises(SyncRefused):
             sync(tmp_path, gh.latest_tag, gh.download)
@@ -129,9 +127,10 @@ class TestSync:
         assert tree(tmp_path) == RELEASE_A
 
     @pytest.mark.parametrize("files", [
-        {"data/a_2025/papers.jsonl": "{}\n", "../escape.txt": "x"},
-        {"data/a_2025/papers.jsonl": "{}\n", "README.md": "x"},
+        {"data/a/2025.jsonl": "{}\n", "../escape.txt": "x"},
+        {"data/a/2025.jsonl": "{}\n", "README.md": "x"},
         {"data/citation_updated.txt": "2026-10-14\n"},  # no conference data at all
+        {"data/iclr_2025/papers.jsonl": "{}\n", "data/iclr_2025/papers_enriched.jsonl": "{}\n"},  # the old layout
     ])
     def test_a_bad_zip_leaves_data_untouched(self, tmp_path, files):
         installed(tmp_path, FakeGitHub(tmp_path, "data-2026-10-14", RELEASE_A))

@@ -99,7 +99,9 @@ def load_papers(data_dir: Path, conf_id: str) -> list[dict]:
     if not path.exists():
         return []
     with open(path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+        # abstract_source is the pipeline's bookkeeping, not dataset content the site shows
+        return [{k: v for k, v in json.loads(line).items() if k != "abstract_source"}
+                for line in f if line.strip()]
 
 
 def build_manifest_entry(conf_id: str, papers: list[dict]) -> dict:
@@ -308,6 +310,11 @@ def build_all(data_dir: Path, out_dir: Path) -> None:
         if attached.test_of_time:
             manifest_entry["test_of_time"] = attached.test_of_time
         conferences.append(manifest_entry)
+
+    if not conferences:
+        # A data/ in another layout (an old release with new code, or the
+        # reverse) reads as empty; deploying that would publish a blank site.
+        raise SystemExit(f"no conference data under {data_dir}")
 
     # A test-of-time prize is listed where it was given; when the dataset holds
     # the paper it honors (an earlier edition of the same venue), that paper

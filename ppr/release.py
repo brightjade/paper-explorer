@@ -13,6 +13,8 @@ from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
 
+from ppr.layout import conference_ids, papers_path
+
 logger = logging.getLogger(__name__)
 
 KEEP = 3
@@ -64,8 +66,8 @@ def make_zip(data_dir: Path, zip_path: Path) -> None:
 
 def _match_counts(data_dir: Path) -> Counter:
     counts: Counter = Counter()
-    for path in data_dir.glob("*/papers_enriched.jsonl"):
-        with open(path, encoding="utf-8") as f:
+    for conf_id in conference_ids(data_dir):
+        with open(papers_path(data_dir, conf_id), encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     counts[json.loads(line).get("match_status") or "unattempted"] += 1
