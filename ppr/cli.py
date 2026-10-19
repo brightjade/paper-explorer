@@ -280,8 +280,8 @@ def cmd_enrich(args: argparse.Namespace) -> None:
 
     # `ppr enrich --all` feeds ./build.sh and a data release, so a crashed
     # conference must not read as success to the calling shell. Guard skips are
-    # a correct outcome and stay exit-0 -- except for a conference that was just
-    # re-crawled, where a skip ships the stale enriched file beside the new list.
+    # a correct outcome and stay exit-0 -- except for a required conference, where
+    # a skip keeps the crawl's papers with old enrichment and a release would ship it.
     failures = [r for r in results if r.status == "failed"]
     status = {r.conf_id: r.status for r in results}
     unmet = [c for c in args.require if status.get(c) not in ("enriched", "nothing-to-do")]

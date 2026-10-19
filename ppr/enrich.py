@@ -21,11 +21,9 @@ from ppr.layout import checkpoint_path, papers_path
 from ppr.models import Paper
 from ppr.s2_client import BATCH_CHUNK_SIZE, S2Client
 from ppr.store import (
-    MIN_COVERAGE_RATIO,
     carry_over,
     check_enrichment_coverage,
     crawl_view,
-    enrichment_coverage,
     normalize_title,
     read_papers,
     save_enriched,

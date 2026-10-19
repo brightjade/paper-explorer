@@ -125,6 +125,7 @@ A conference ID is `<venue>_<year>`, with the venue IDs listed under [Conference
 | `citation_count`, `influential_citation_count`, `reference_count` | From Semantic Scholar, refreshed monthly |
 | `publication_date`, `fields_of_study`, `open_access_pdf` | From Semantic Scholar |
 | `external_ids` | `CorpusId`, `DOI`, `ArXiv`, `DBLP`, `ACL`, ... |
+| `abstract_source` | `"s2"` when Semantic Scholar supplied the abstract; absent when it came from the venue's own listing (e.g. OpenReview) |
 | `forum_id` | OpenReview forum ID, for OpenReview venues |
 | `venue_date` | TMLR only: the date TMLR published the paper |
 | `match_status` | How the paper was bound to its Semantic Scholar record: `matched`, `matched_fuzzy`, `not_found`, ... |

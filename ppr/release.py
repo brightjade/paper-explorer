@@ -95,6 +95,17 @@ def render_notes(base_tag: str, register: dict | None, enrich: dict | None,
 
 def publish(data_dir: Path, base_tag: str, notes: str, today: str, run: Runner, *,
             zip_path: Path, dry_run: bool = False) -> str:
+    if not conference_ids(data_dir):
+        raise ReleaseAborted(
+            f"{data_dir} holds no year files in the per-venue layout -- refusing to publish it"
+        )
+    old = sorted(p for pattern in ("*/papers.jsonl", "*/papers_enriched.jsonl")
+                 for p in data_dir.glob(pattern))
+    if old:
+        raise ReleaseAborted(
+            f"{data_dir} still holds old-layout files ({old[0].relative_to(data_dir)}) "
+            "-- refusing to publish a mixed tree"
+        )
     tags = data_releases(run)
     if not tags or tags[0] != base_tag:
         raise ReleaseAborted(

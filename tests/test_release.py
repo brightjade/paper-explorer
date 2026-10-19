@@ -131,6 +131,25 @@ class TestPublish:
         assert publish(data_dir, "data-2026-10-03", "n", "2026-11-03", gh,
                        zip_path=tmp_path / "d.zip") == "data-2026-11-03"
 
+    def test_refuses_a_data_dir_without_year_files(self, tmp_path):
+        d = tmp_path / "data"
+        d.mkdir()
+        (d / "pipeline_state.json").write_text("{}\n")
+        gh = FakeGh(RELEASES)
+        with pytest.raises(ReleaseAborted, match="per-venue layout"):
+            publish(d, "data-2026-10-03", "n", "2026-11-03", gh, zip_path=tmp_path / "d.zip")
+        assert gh.calls == []
+        assert not (tmp_path / "d.zip").exists()
+
+    def test_refuses_a_data_dir_holding_an_old_layout_file(self, data_dir, tmp_path):
+        (data_dir / "iclr_2025").mkdir()
+        (data_dir / "iclr_2025" / "papers.jsonl").write_text("{}\n")
+        gh = FakeGh(RELEASES)
+        with pytest.raises(ReleaseAborted, match="old-layout"):
+            publish(data_dir, "data-2026-10-03", "n", "2026-11-03", gh, zip_path=tmp_path / "d.zip")
+        assert gh.calls == []
+        assert not (tmp_path / "d.zip").exists()
+
     def test_dry_run_touches_nothing(self, data_dir, tmp_path):
         gh = FakeGh(RELEASES)
         publish(data_dir, "data-2026-10-03", "n", "2026-11-03", gh,
