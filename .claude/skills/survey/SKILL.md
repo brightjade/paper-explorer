@@ -78,11 +78,11 @@ uv run ppr search find "data deletion" --sort relevance --limit 30 --exclude <W>
 uv run ppr search find "data deletion" --sort citations --limit 30 --exclude <W>/judged.tsv --json > <W>/round-1-find-01-cit.jsonl
 ```
 
-(one `round-1-*.jsonl` file per term and sort). To see a term's hits or match count yourself, run it without `--json`. A term with thousands of matches is too broad: narrow it with `--must` or rephrase it.
+(one `round-1-find-*.jsonl` file per term and sort). To see a term's hits or match count yourself, run it without `--json`. A term with thousands of matches is too broad: narrow it with `--must` or rephrase it.
 
 ### 5. Judge every candidate
 
-Build the batches: `uv run ppr search batch <W>/round-1-*.jsonl --out <W>/round-1-batch --exclude <W>/judged.tsv`. It dedupes papers found by several terms or tools, drops judged ones and writes compact judge records to `<W>/round-1-batch-01.jsonl`, … of 40. Give each batch to a subagent (Agent tool, `model: sonnet`), several in parallel, with `judging.md` from this skill's folder as the prompt, its `{criteria_path}`, `{batch_path}` and `{verdicts_path}` filled in; `{verdicts_path}` is the batch path with `.jsonl` replaced by `.verdicts.tsv`. Each judge writes its verdict lines there and replies `done <n>`. When all judges of the round are back, run `uv run ppr search verdicts <W>/round-N-batch --judged <W>/judged.tsv --round N --source <source>`. If it exits 1, run `ppr search batch` again on the round's files with `--exclude <W>/judged.tsv` and judge what remains. Never append verdict lines by hand. Without a subagent tool, judge the batches yourself by the same brief, writing the same verdicts files.
+Batch each source of the round separately, because `verdicts` records one `--source` per prefix: `uv run ppr search batch <W>/round-N-find-*.jsonl --out <W>/round-N-query-batch --exclude <W>/judged.tsv` for `find` files (source `query`), `<W>/round-N-cites*.jsonl` with `--out <W>/round-N-cites-batch` for `cites` files (source `cites`), `<W>/round-0-external.jsonl` with `--out <W>/round-0-external-batch` for step 9 (source `external`). Each dedupes papers found by several terms or tools, drops judged ones and writes compact judge records to `<W>/round-N-query-batch-01.jsonl`, … of 40. Give each batch to a subagent (Agent tool, `model: sonnet`), several in parallel, with `judging.md` from this skill's folder as the prompt, its `{criteria_path}`, `{batch_path}` and `{verdicts_path}` filled in; `{verdicts_path}` is the batch path with `.jsonl` replaced by `.verdicts.tsv`. Each judge writes its verdict lines there and replies `done <n>`. When all judges of a prefix are back, run `uv run ppr search verdicts <W>/round-N-query-batch --judged <W>/judged.tsv --round N --source query` (once per prefix, with its source). If it exits 1, its valid lines are already in `judged.tsv`: re-batch that source's files into a new prefix, `uv run ppr search batch <W>/round-N-find-*.jsonl --out <W>/round-N-retry-K-query --exclude <W>/judged.tsv` (K = 1, 2, …), judge those batches and run `verdicts` on the new prefix. The earlier prefix's reported problems are then superseded: do not run `verdicts` on it again. Repeat until `verdicts` exits 0 or `batch` prints `0 candidates`. Never append verdict lines by hand. Without a subagent tool, judge the batches yourself by the same brief, writing the same verdicts files.
 
 Then read full abstracts (`uv run ppr search lookup <pids> --json`; an outside paper's tldr is in its `cites` record) only for the papers the report will discuss or cite in detail, not every high and medium paper; the judged reasons and titles are enough for the rest.
 
@@ -91,9 +91,9 @@ Then read full abstracts (`uv run ppr search lookup <pids> --json`; an outside p
 Each round does at least one of:
 
 - **a. Vocabulary.** Read the high papers' titles and tldrs for phrasings you have not queried (a method's name, another community's word for the problem) and query them as in step 4: every `find` in any round uses the same two-sort, `--limit 30` pattern.
-- **b. Citations.** `uv run ppr search cites <high pids> --exclude <W>/judged.tsv --abstract --json > <W>/round-N-cites.jsonl`, with the Bash tool's timeout raised to 600000 ms (an anonymous Semantic Scholar pool can back off for minutes). Its in-dataset and outside records are judged like any candidate (source `cites`).
+- **b. Citations.** `uv run ppr search cites <high pids> --exclude <W>/judged.tsv --abstract --json > <W>/round-N-cites-01.jsonl`, with the Bash tool's timeout raised to 600000 ms (an anonymous Semantic Scholar pool can back off for minutes). Its in-dataset and outside records are judged like any candidate (source `cites`; batch `<W>/round-N-cites*.jsonl`).
 
-Batch and judge (step 5, `verdicts` included; `ppr search batch <W>/round-N-*.jsonl --out <W>/round-N-batch --exclude <W>/judged.tsv`), record, repeat.
+Batch and judge each source of the round as in step 5 (`ppr search batch`, judges, `ppr search verdicts`), repeat.
 
 ### 7. Stop on saturation
 
@@ -111,7 +111,7 @@ Check every web find with `lookup` first; it may be in the dataset under another
 When the user hands over a list (a file or pasted text from Asta, Undermind, a web search or a bibliography):
 
 1. Write one item per line to `<W>/external.txt` (an arXiv id, a DOI, or `Title ;; Authors`) and run `uv run ppr search lookup --file <W>/external.txt --json > <W>/round-0-external.jsonl`.
-2. `ppr search batch <W>/round-0-external.jsonl --out <W>/round-0-batch --exclude <W>/judged.tsv` like any round, and judge every item against the criteria (source `external`). Items not in the dataset come out as `ext:` ids: record them in `judged.tsv` with source `external`, and check acceptance elsewhere by web search when it matters. From here on, dataset papers carry their venue, track and awards.
+2. `ppr search batch <W>/round-0-external.jsonl --out <W>/round-0-external-batch --exclude <W>/judged.tsv`, judge every item against the criteria and run `verdicts` with `--round 0 --source external`, as in step 5. Items not in the dataset come out as `ext:` ids: `verdicts` records them in `judged.tsv` too; check acceptance elsewhere by web search when it matters. From here on, dataset papers carry their venue, track and awards.
 3. Use the high ones as seeds for 6a and 6b.
 4. In the report add **Accepted papers the external list missed** (your high and medium dataset papers absent from it) and **Papers this search missed** (its high papers your rounds never surfaced, with the likely reason: vocabulary, no citation path, outside the venues).
 
