@@ -9,6 +9,7 @@ is grouped by venue:
     configs/<venue>/<year>.yaml          OpenReview crawl config
     configs/<venue>/awards/<year>.yaml   hand-reviewed award list
     configs/<venue>/dblp.yaml            2013-2022 DBLP toc pages, keyed by year
+    .cache/search.sqlite                 `ppr search`'s index, rebuilt from data/
 
 `configs/venues.yaml`, `data/pipeline_state.json` and `data/citation_updated.txt`
 sit at the roots and are no conference's.
@@ -80,3 +81,9 @@ def crawl_config_ids(configs_dir: Path) -> list[str]:
 
 def dblp_config_paths(configs_dir: Path) -> list[Path]:
     return sorted(configs_dir.glob("*/dblp.yaml"))
+
+
+def search_index_path(root: Path = ROOT) -> Path:
+    """`ppr search`'s index. Derived from data/ but kept outside it: scripts/sync_data.py
+    tracks every file under data/ and would refuse the next sync as a local edit."""
+    return root / ".cache" / "search.sqlite"

@@ -98,3 +98,11 @@ def test_the_move_kept_every_config():
     configs = layout.CONFIGS_DIR
     assert len(layout.crawl_config_ids(configs)) == 33
     assert len(list(configs.glob("*/awards/*.yaml"))) == 40
+
+
+def test_search_index_path_is_outside_data(tmp_path):
+    from ppr.layout import DATA_DIR, ROOT, search_index_path
+
+    assert search_index_path(tmp_path) == tmp_path / ".cache" / "search.sqlite"
+    assert search_index_path() == ROOT / ".cache" / "search.sqlite"
+    assert DATA_DIR not in search_index_path().parents
