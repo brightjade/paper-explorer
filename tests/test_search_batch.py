@@ -3,7 +3,7 @@ import json
 import pytest
 
 from ppr import cli
-from ppr.search import batch
+from ppr.search import batch, find
 
 
 def write_jsonl(path, records):
@@ -23,6 +23,7 @@ def test_a_paper_found_twice_is_kept_once(tmp_path):
     cands = batch.collect([found, cited])
     assert [c.get("pid") or c["id"] for c in cands] == ["iclr_2024:aaaaaaaa", "iclr_2024:bbbbbbbb", "s2:900"]
     assert "links" not in cands[0]  # the first occurrence wins
+    assert cands[2] == {"id": "s2:900", "title": "Out", "year": None, "venue": None, "snippet": ""}
 
 
 def test_lookup_records_flatten(tmp_path):
@@ -36,6 +37,18 @@ def test_lookup_records_flatten(tmp_path):
     assert [c.get("pid") or c["id"] for c in cands] == [
         "a_2024:11111111", "b_2023:22222222", "ext:2501.99999", "ext:a-title-nobody-wrote", "ext:10.1000/xyz"]
     assert cands[2] == {"id": "ext:2501.99999", "title": "arXiv:2501.99999", "group": "external"}
+
+
+def test_a_full_find_record_is_reduced_to_the_judge_fields(tmp_path):
+    full = {"pid": "iclr_2024:aaaaaaaa", "conf_id": "iclr_2024", "title": "T", "authors": "A", "abstract": "word " * 200,
+            "tldr": "", "keywords": "k", "venue_name": "ICLR", "year": 2024, "selection": "oral",
+            "citation_count": 5, "awards": [], "link": "http://x", "rank": -1.5}
+    [cand] = batch.collect([write_jsonl(tmp_path / "f.jsonl", [full])])
+    assert list(cand) == ["pid", "title", "tldr", "venue_name", "year", "selection"]
+    assert cand["tldr"] == find.snippet(full) and len(cand["tldr"]) <= find.SNIPPET_CHARS + 1
+    assert cand["tldr"].endswith("…")
+    with_tldr = {**full, "tldr": "Short."}
+    assert batch.compact(with_tldr)["tldr"] == "Short."
 
 
 def test_slug_is_capped_at_60_chars():

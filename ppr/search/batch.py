@@ -1,6 +1,6 @@
 """`ppr search batch`: round files (find / cites / lookup `--json`) into judge batches.
 
-One candidate per paper however many tools found it, none the judge has seen,
+Each candidate is cut down to the fields a judge reads (`compact`). One candidate per paper however many tools found it, none the judge has seen,
 and a lookup record flattened to the papers it found (or to an `ext:` item
 when the dataset holds none).
 """
@@ -9,6 +9,7 @@ import json
 import re
 from pathlib import Path
 
+from ppr.search.find import snippet
 from ppr.search.lookup import classify
 
 SLUG_CHARS = 60
@@ -33,6 +34,18 @@ def candidates(record: dict) -> list[dict]:
     return [record]
 
 
+def compact(cand: dict) -> dict:
+    """What a judge reads of a candidate: no abstract, authors, counts or other columns."""
+    if "pid" in cand:
+        row = {"tldr": cand.get("tldr") or "", "abstract": cand.get("abstract") or ""}
+        return {"pid": cand["pid"], "title": cand.get("title"), "tldr": snippet(row),
+                "venue_name": cand.get("venue_name"), "year": cand.get("year"), "selection": cand.get("selection")}
+    if str(cand.get("id", "")).startswith("s2:"):
+        return {"id": cand["id"], "title": cand.get("title"), "year": cand.get("year"),
+                "venue": cand.get("venue"), "snippet": cand.get("snippet") or ""}
+    return {"id": cand["id"], "title": cand.get("title"), "group": "external"}
+
+
 def collect(files: list[Path], exclude: frozenset[str] = frozenset()) -> list[dict]:
     """Candidates in file order, the first of each id kept, judged ids dropped."""
     seen, out = set(exclude), []
@@ -44,7 +57,7 @@ def collect(files: list[Path], exclude: frozenset[str] = frozenset()) -> list[di
                 cid = cand.get("pid") or cand.get("id")
                 if cid and cid not in seen:
                     seen.add(cid)
-                    out.append(cand)
+                    out.append(compact(cand))
     return out
 
 

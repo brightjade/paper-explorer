@@ -239,6 +239,12 @@ def build_parser() -> argparse.ArgumentParser:
     batch_parser.add_argument("--out", required=True, help="Batch path prefix: PREFIX-01.jsonl, PREFIX-02.jsonl, ...")
     batch_parser.add_argument("--exclude", type=Path, default=None, help="Skip ids in this file's first column")
     batch_parser.add_argument("--size", type=int, default=40, help="Candidates per batch")
+    verdicts_parser = search_sub.add_parser("verdicts", help="Judges' PREFIX-NN.verdicts.tsv files into the judged file")
+    verdicts_parser.add_argument("prefix", help="Batch path prefix, as given to batch --out")
+    verdicts_parser.add_argument("--judged", required=True, type=Path, help="The judged.tsv to append to")
+    verdicts_parser.add_argument("--round", required=True, type=int, dest="round_no", help="Round number to record")
+    verdicts_parser.add_argument("--source", required=True, choices=["query", "cites", "external", "web"],
+                                 help="Source to record")
 
     return parser
 
@@ -532,7 +538,7 @@ def cmd_search(args: argparse.Namespace) -> None:
     import sqlite3
     import sys
 
-    from ppr.search import batch, cites, find, lookup
+    from ppr.search import batch, cites, find, lookup, verdicts
     from ppr.search.index import NoData, open_index
 
     if args.search_command == "batch":
@@ -551,6 +557,18 @@ def cmd_search(args: argparse.Namespace) -> None:
         for path, n in written:
             print(f"{path}\t{n}")
         print(f"{len(cands)} candidates in {len(written)} batches")
+        return
+
+    if args.search_command == "verdicts":
+        result = verdicts.collect(args.prefix, args.judged, args.round_no, args.source)
+        if not result.batches:
+            print(f"no batch files for {args.prefix}")
+            raise SystemExit(1)
+        for path, problems in result.problems:
+            print(verdicts.format_problems(path, problems))
+        print(result.summary())
+        if not result.ok:
+            raise SystemExit(1)
         return
 
     try:
