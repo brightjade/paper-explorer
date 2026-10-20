@@ -139,3 +139,12 @@ def test_linked_dataset_paper_with_another_corpus_id_is_matched_by_title(con, cl
     report = cites.chase(con, client, ["CorpusId:101", "CorpusId:104"])
     assert [x.rows[0]["title"] for x in report.inside] == [CDR]
     assert [x.corpus_id for x in report.outside] == [88888]
+
+
+@respx.mock
+def test_two_seed_ids_answered_as_one_paper_count_links_once(con, client):
+    route = respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[SEED_101, SEED_101]))
+    report = cites.chase(con, client, [pid_of(con, 101), "arXiv:2401.00001"], min_links=1)
+    assert len(json.loads(route.calls.last.request.content)["ids"]) == 2
+    assert {x.corpus_id: x.links for x in report.inside} == {102: 1, 104: 1}
+    assert {x.corpus_id: x.links for x in report.outside} == {900: 1, 901: 1}

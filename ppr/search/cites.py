@@ -89,9 +89,11 @@ def aggregate(entries: list[dict | None], direction: str) -> dict[int, Linked]:
     """Every paper linked to a seed, with how many seeds link to it; the seeds themselves left out."""
     seeds = {e.get("corpusId") for e in entries if e}
     linked: dict[int, Linked] = {}
+    answered: set[int] = set()  # two ids (a pid's CorpusId, an arXiv id) can answer as one paper
     for entry in entries:
-        if not entry:
+        if not entry or entry.get("corpusId") in answered:
             continue
+        answered.add(entry.get("corpusId"))
         seen: set[int] = set()
         for key in DIRECTIONS[direction]:
             for link in entry.get(key) or []:
