@@ -13,9 +13,9 @@ Run from the repository root. The first call builds a search index from `data/` 
 
 **`uv run ppr search find TERM… [options]`**: ranked keyword search over title, abstract, tldr and keywords.
 - Each TERM is a phrase, matched with stemming (`unlearning` finds "unlearn"); TERMs are ORed. A TERM ending in `*` is a prefix. `--must TERM` ANDs a phrase on. `--raw EXPR` takes an FTS5 expression as is.
-- `--venue iclr,neurips` · `--years 2020-2026` · `--selection oral,spotlight` · `--awarded`
+- `--venue iclr,neurips` (the ids in the Data table; an unknown id or `--selection` value is an error that lists the valid ones) · `--years 2020-2026` · `--selection oral,spotlight` · `--awarded`
 - `--sort relevance|citations|year` · `--limit N` (50) · `--offset N` · `--abstract` (adds the tldr or the abstract's first 400 characters) · `--json` (full records, one JSON object per line)
-- `--exclude FILE` skips ids in FILE's first column (your `judged.tsv`).
+- `--exclude FILE` skips ids in FILE's first column (your `judged.tsv`); it warns on stderr when FILE does not exist yet and excludes nothing.
 
 ```
 848 matches · showing 1–50 · relevance
@@ -26,18 +26,22 @@ The first field is the paper's `pid`; every command and working file uses it.
 
 **`uv run ppr search lookup ITEM… [--file F] [--json]`**: grounds arXiv ids, DOIs, `CorpusId:N`, `s2:N`, OpenReview links, pids or titles (`Title ;; Author A, Author B`) in the dataset. Each item comes back `found`, `fuzzy` (confirm it before relying on it) or `not in dataset`, with its paper lines. `--json` gives full records, abstracts included.
 
-**`uv run ppr search cites SEED… [--direction refs|citing|both] [--min-links N] [--abstract] [--exclude F] [--json]`**: Semantic Scholar references and citations of the seeds, each linked paper scored by how many seeds link to it. Two groups: **in dataset** (paper lines) and **outside** (`s2:<CorpusId>`, year, venue, arXiv id or DOI), the outside ones only when linked to at least `--min-links` seeds (default 2). `--abstract` adds outside papers' tldr. `--json` gives one record per linked paper (`group`: `dataset` or `outside`). If it exits non-zero, Semantic Scholar was unreachable: continue without citation chasing and say so in the Search log.
+**`uv run ppr search cites SEED… [--direction refs|citing|both] [--min-links N] [--abstract] [--limit N] [--exclude F] [--json]`**: Semantic Scholar references and citations of the seeds, each linked paper scored by how many seeds link to it. Two groups: **in dataset** (paper lines) and **outside** (`s2:<CorpusId>`, year, venue, arXiv id or DOI), the outside ones only when linked to at least `--min-links` seeds (default 2). `--abstract` adds outside papers' tldr. `--limit N` caps each group (50); with `--json` the totals appear on stderr when it cut a group. `--json` gives one record per linked paper (`group`: `dataset` or `outside`). If it exits non-zero, Semantic Scholar was unreachable: continue without citation chasing and say so in the Search log.
+
+**`uv run ppr search batch FILE… --out PREFIX [--exclude judged.tsv] [--size 40]`**: turns the round's `find --json`, `cites --json` and `lookup --json` files into judge batches. It keeps one record per paper (`pid`, else `id`) however many files hold it, drops ids in `--exclude`, flattens each `lookup` record into the dataset papers it found (a miss becomes `{"id": "ext:…", "title", "group": "external"}`), and writes `PREFIX-01.jsonl`, `PREFIX-02.jsonl`, … of at most `--size` records. It prints one `<path><TAB><n>` line per file, then `<total> candidates in <k> batches`, or `0 candidates` and no file.
 
 ## Data
 
-| Category | Venues |
-|----------|--------|
-| ML | ICLR, NeurIPS, ICML, TMLR, AAAI, IJCAI |
-| NLP | ACL, EMNLP, NAACL, COLM, EACL, COLING |
-| CV | CVPR, ICCV, ECCV, WACV |
-| Robotics | CoRL, ICRA, IROS, RSS |
-| Security | USENIX Security |
-| SE | ICSE, FSE, ASE, ISSTA |
+| Category | Venues | `--venue` ids |
+|----------|--------|---------------|
+| ML | ICLR, NeurIPS, ICML, TMLR, AAAI, IJCAI | `iclr, neurips, icml, tmlr, aaai, ijcai` |
+| NLP | ACL, EMNLP, NAACL, COLM, EACL, COLING | `acl, emnlp, naacl, colm, eacl, coling` |
+| CV | CVPR, ICCV, ECCV, WACV | `cvpr, iccv, eccv, wacv` |
+| Robotics | CoRL, ICRA, IROS, RSS | `corl, icra, iros, rss` |
+| Security | USENIX Security | `usenix_security` |
+| SE | ICSE, FSE, ASE, ISSTA | `icse, fse, ase, issta` |
+
+`--venue` takes these ids; an unknown one is an error that lists the valid ids.
 
 Year range varies per venue (generally 2013-2026). Before 2023 most venues come from DBLP and carry only main / findings / industry labels; OpenReview years keep their own labels: ICLR 2017-19 oral / poster, ICLR 2020-22 oral / spotlight / poster, NeurIPS 2021 oral / spotlight / poster plus `datasets`, NeurIPS 2022 only `main` + `datasets` (no oral label, so filtering it for orals finds none), CoRL 2021-22 oral / poster. Citation counts are snapshots from the data release named in `.data-release.json`.
 
@@ -61,21 +65,21 @@ Write `criteria.md`: 2–5 conditions a relevant paper meets, the core one first
 
 ### 3. Working folder
 
-`W=outputs/<slug>_<YYYY-MM-DD_HH-MM-SS>` holds `criteria.md`, `judged.tsv`, the round files and `report.md`. `judged.tsv` starts with the header `pid	verdict	round	source	reason` and gets a line for every judged paper, `no` included, so `--exclude $W/judged.tsv` keeps it out of later rounds. Outside papers use their `s2:<CorpusId>`; web finds use `web:<arXiv id, DOI or slug>`. Sources: `query`, `cites`, `external`, `web`.
+The working folder `<W>` is `outputs/<slug>_<YYYY-MM-DD_HH-MM-SS>`, e.g. `outputs/unlearning_2026-10-20_14-02-11`. Claude Code does not keep shell variables between Bash calls, so write the literal path into every command: the examples below show `<W>`; substitute the real folder. It holds `criteria.md`, `judged.tsv`, the round files and `report.md`. `judged.tsv` starts with the header `pid	verdict	round	source	reason` and gets a line for every judged paper, `no` included, so `--exclude <W>/judged.tsv` keeps it out of later rounds. Outside papers use their `s2:<CorpusId>`; web finds use `web:<arXiv id, DOI or slug>`; external items the dataset lacks use `ext:<id or title slug>`. Sources: `query`, `cites`, `external`, `web`.
 
 ### 4. Round 1: many phrasings
 
 Write 8–15 TERMs across the criteria: synonyms, older and newer names, abbreviations, the problem described without its name, method names. For each:
 
 ```bash
-uv run ppr search find "data deletion" --exclude $W/judged.tsv --json --limit 50 >> $W/round-1.raw.jsonl
+uv run ppr search find "data deletion" --exclude <W>/judged.tsv --json --limit 50 > <W>/round-1-find-01.jsonl
 ```
 
-then `sort -u $W/round-1.raw.jsonl > $W/round-1.jsonl`. To see a term's hits or match count yourself, run it without `--json`. A term with thousands of matches is too broad: narrow it with `--must` or rephrase it.
+(one `round-1-*.jsonl` file per term). To see a term's hits or match count yourself, run it without `--json`. A term with thousands of matches is too broad: narrow it with `--must` or rephrase it.
 
 ### 5. Judge every candidate
 
-Split the round file into batches of 40 (`split -l 40 $W/round-1.jsonl $W/round-1-batch-`). Give each batch to a subagent (Agent tool, `model: sonnet`), several in parallel, with `judging.md` from this skill's folder as the prompt, its `{criteria_path}` and `{batch_path}` filled in. Each replies `pid<TAB>verdict<TAB>reason` lines. Append them to `judged.tsv` with the round number and source. Without a subagent tool, judge the batches yourself by the same brief.
+Build the batches: `uv run ppr search batch <W>/round-1-*.jsonl --out <W>/round-1-batch --exclude <W>/judged.tsv`. It dedupes papers found by several terms or tools, drops judged ones and writes `<W>/round-1-batch-01.jsonl`, … of 40. Give each batch to a subagent (Agent tool, `model: sonnet`), several in parallel, with `judging.md` from this skill's folder as the prompt, its `{criteria_path}` and `{batch_path}` filled in. Each replies `pid<TAB>verdict<TAB>reason` lines. Append them to `judged.tsv` with the round number and source. Without a subagent tool, judge the batches yourself by the same brief.
 
 Then read the high and medium papers properly: `uv run ppr search lookup <pids> --json` has dataset papers' abstracts; an outside paper's tldr is in its `cites` record.
 
@@ -84,10 +88,10 @@ Then read the high and medium papers properly: `uv run ppr search lookup <pids> 
 Each round does at least one of:
 
 - **a. Vocabulary.** Read the high papers' titles and abstracts for phrasings you have not queried (a method's name, another community's word for the problem) and query them as in step 4.
-- **b. Citations.** `uv run ppr search cites <high pids> --exclude $W/judged.tsv --abstract --json > $W/round-N-cites.jsonl`. Its in-dataset and outside records are judged like any candidate (source `cites`).
+- **b. Citations.** `uv run ppr search cites <high pids> --exclude <W>/judged.tsv --abstract --json > <W>/round-N-cites.jsonl`, with the Bash tool's timeout raised to 600000 ms (an anonymous Semantic Scholar pool can back off for minutes). Its in-dataset and outside records are judged like any candidate (source `cites`).
 - **c. Classics.** Rerun the TERMs that produced high papers with `--sort citations`: BM25 ranks a foundational paper low when its abstract uses few of the words.
 
-Judge (step 5), record, repeat.
+Batch and judge (step 5; `ppr search batch <W>/round-N-*.jsonl --out <W>/round-N-batch --exclude <W>/judged.tsv`), record, repeat.
 
 ### 7. Stop on saturation
 
@@ -104,8 +108,8 @@ Check every web find with `lookup` first; it may be in the dataset under another
 
 When the user hands over a list (a file or pasted text from Asta, Undermind, a web search or a bibliography):
 
-1. Write one item per line to `$W/external.txt` (an arXiv id, a DOI, or `Title ;; Authors`) and run `uv run ppr search lookup --file $W/external.txt`.
-2. Judge every item against the criteria (source `external`). From here on, dataset papers carry their venue, track and awards.
+1. Write one item per line to `<W>/external.txt` (an arXiv id, a DOI, or `Title ;; Authors`) and run `uv run ppr search lookup --file <W>/external.txt --json > <W>/round-0-external.jsonl`.
+2. `ppr search batch <W>/round-0-external.jsonl --out <W>/round-0-batch --exclude <W>/judged.tsv` like any round, and judge every item against the criteria (source `external`). Items not in the dataset come out as `ext:` ids: record them in `judged.tsv` with source `external`, and check acceptance elsewhere by web search when it matters. From here on, dataset papers carry their venue, track and awards.
 3. Use the high ones as seeds for 6a and 6b.
 4. In the report add **Accepted papers the external list missed** (your high and medium dataset papers absent from it) and **Papers this search missed** (its high papers your rounds never surfaced, with the likely reason: vocabulary, no citation path, outside the venues).
 
@@ -115,7 +119,7 @@ In `landscape` mode (and `related-work` when asked): from the high and medium pa
 
 ### 11. Report
 
-Write `$W/report.md` in the mode's structure. Every cited paper shows where it stands: `**Title** — Authors (ICLR 2025 · oral · Outstanding Paper) · 412 cites`, or `(not from tracked venues)`. Cite only papers judged high or medium, or seminal web finds you verified.
+Write `<W>/report.md` in the mode's structure. Every cited paper shows where it stands: `**Title** — Authors (ICLR 2025 · oral · Outstanding Paper) · 412 cites`, or `(not from tracked venues)`. Cite only papers judged high or medium, or seminal web finds you verified.
 
 **Novelty**
 1. Verdict: new, partly done, or done. One paragraph.

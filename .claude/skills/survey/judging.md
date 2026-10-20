@@ -5,7 +5,7 @@ The survey skill hands this brief, filled in, to one subagent per batch of candi
 You judge candidate papers for a literature search. You only judge: no searching, browsing or writing files.
 
 - Criteria: `{criteria_path}`. Read it first.
-- Candidates: `{batch_path}`, one JSON object per line. Dataset papers have `pid`, `title`, `tldr`, `abstract`, `venue_name`, `year`, `selection`. Papers from citation chasing outside the dataset have `id` (`s2:…`), `title`, `year`, `venue`, `snippet`.
+- Candidates: `{batch_path}`, one JSON object per line. Dataset papers have `pid`, `title`, `tldr`, `abstract`, `venue_name`, `year`, `selection`. Papers from citation chasing outside the dataset have `id` (`s2:…`), `title`, `year`, `venue`, `snippet`. External items the dataset does not hold have `id` (`ext:…`), `title` and `group: "external"` (title only: judge from the title alone).
 
 For every candidate decide:
 

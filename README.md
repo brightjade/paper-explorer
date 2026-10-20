@@ -186,9 +186,9 @@ uv run ppr enrich --all --time-budget 4h     # refresh every conference in data/
 uv run ppr awards neurips_2024               # collect paper awards -> data/<venue>/awards.json
 uv run ppr awards --all --all-years     # every venue-year, including the final older ones
 uv run ppr validate iclr_2025                # compare paper counts with DBLP (10% tolerance)
-uv run ppr search find "machine unlearning" "data deletion" --abstract   # ranked search over data/ (index in .cache/)
+uv run ppr search find "machine unlearning" "data deletion" --abstract   # ranked search over data/ (the first search builds a ~720 MB index in .cache/, rebuilt when data/ changes)
 uv run ppr search lookup 2303.07345 "Certified Data Removal from Machine Learning Models"   # is it an accepted paper?
-uv run ppr search cites iclr_2024:3fa9c1d2 --abstract   # references and citations, in and outside the dataset
+uv run ppr search cites icml_2020:16b4e084 --abstract   # references and citations, in and outside the dataset
 
 # Keep it current (what the monthly pipeline runs)
 uv run ppr discover                          # which tracked venues have a list we don't have yet
