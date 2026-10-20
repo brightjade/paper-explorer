@@ -1,0 +1,579 @@
+{
+  "topic": "membership_inference",
+  "survey": [
+    {
+      "id": "ARXIV:2103.07853",
+      "title": "Membership Inference Attacks on Machine Learning: A Survey"
+    },
+    {
+      "id": "ARXIV:2412.06157",
+      "title": "Membership Inference Attacks and Defenses in Federated Learning: A Survey"
+    },
+    {
+      "id": "ARXIV:2503.19338",
+      "title": "Membership Inference Attacks on Large-Scale Models: A Survey"
+    }
+  ],
+  "criteria": [
+    "Core: membership inference, i.e. deciding whether a specific record was in a model's training data: attacks, defenses designed against them, or privacy audits and evaluations that use them.",
+    "Any model type counts: classifiers, generative models and LLMs, graph models, federated and recommender systems.",
+    "Out of scope: other privacy attacks studied alone (model inversion, attribute inference, model or data extraction) with no membership inference; differentially private training that never evaluates membership inference; general adversarial robustness."
+  ],
+  "queries": [
+    "membership inference",
+    "membership inference attack",
+    "membership privacy",
+    "training data membership",
+    "privacy audit",
+    "shadow models",
+    "membership inference defense",
+    "membership leakage",
+    "pretraining data detection",
+    "privacy leakage training data"
+  ],
+  "references_total": 465,
+  "references_in_dataset": 96,
+  "gold": [
+    {
+      "pid": "aaai_2020:c40eeb57",
+      "title": "Characterizing Membership Privacy in Stochastic Gradient Langevin Dynamics",
+      "conf_id": "aaai_2020"
+    },
+    {
+      "pid": "aaai_2021:3f07138d",
+      "title": "How Does Data Augmentation Affect Privacy in Machine Learning?",
+      "conf_id": "aaai_2021"
+    },
+    {
+      "pid": "aaai_2021:54e2c82e",
+      "title": "Membership Privacy for Machine Learning Models Through Knowledge Transfer",
+      "conf_id": "aaai_2021"
+    },
+    {
+      "pid": "acl_2023:7350f5a3",
+      "title": "Membership Inference Attacks against Language Models via Neighbourhood Comparison",
+      "conf_id": "acl_2023"
+    },
+    {
+      "pid": "colm_2024:140b7ea2",
+      "title": "Do Membership Inference Attacks Work on Large Language Models?",
+      "conf_id": "colm_2024"
+    },
+    {
+      "pid": "cvpr_2021:0d23ac4f",
+      "title": "On the Difficulty of Membership Inference Attacks",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "eccv_2020:113a17a7",
+      "title": "Segmentations-Leak: Membership Inference Attacks and Defenses in Semantic Image Segmentation",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "emnlp_2022:02e7c423",
+      "title": "Quantifying Privacy Risks of Masked Language Models Using Membership Inference Attacks",
+      "conf_id": "emnlp_2022"
+    },
+    {
+      "pid": "emnlp_2022:918c243f",
+      "title": "An Empirical Analysis of Memorization in Fine-tuned Autoregressive Language Models",
+      "conf_id": "emnlp_2022"
+    },
+    {
+      "pid": "iccv_2021:f1a50d24",
+      "title": "Membership Inference Attacks are Easier on Difficult Problems",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2023:00c53a87",
+      "title": "Practical Membership Inference Attacks Against Large-Scale Multi-Modal Models: A Pilot Study",
+      "conf_id": "iccv_2023"
+    },
+    {
+      "pid": "iclr_2022:c9a553e8",
+      "title": "On the Importance of Difficulty Calibration in Membership Inference Attacks",
+      "conf_id": "iclr_2022"
+    },
+    {
+      "pid": "iclr_2023:afe3e08c",
+      "title": "Effective passive membership inference attacks in federated learning against overparameterized models",
+      "conf_id": "iclr_2023"
+    },
+    {
+      "pid": "iclr_2024:e2ac6ae9",
+      "title": "Detecting Pretraining Data from Large Language Models",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2025:64e55916",
+      "title": "Min-K%++: Improved Baseline for Pre-Training Data Detection from Large Language Models",
+      "conf_id": "iclr_2025"
+    },
+    {
+      "pid": "icml_2019:c165d71a",
+      "title": "White-box vs Black-box: Bayes Optimal Strategies for Membership Inference",
+      "conf_id": "icml_2019"
+    },
+    {
+      "pid": "icml_2020:76643a19",
+      "title": "Alleviating Privacy Attacks via Causal Learning",
+      "conf_id": "icml_2020"
+    },
+    {
+      "pid": "icml_2021:989121f8",
+      "title": "When Does Data Augmentation Help With Membership Inference Attacks?",
+      "conf_id": "icml_2021"
+    },
+    {
+      "pid": "icml_2021:dd967b97",
+      "title": "Label-Only Membership Inference Attacks",
+      "conf_id": "icml_2021"
+    },
+    {
+      "pid": "icml_2024:36737e36",
+      "title": "Low-Cost High-Power Membership Inference Attacks",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "ijcai_2021:76e69787",
+      "title": "Against Membership Inference Attack: Pruning is All You Need",
+      "conf_id": "ijcai_2021"
+    },
+    {
+      "pid": "naacl_2025:cb28fd6b",
+      "title": "Scaling Up Membership Inference: When and How Attacks Succeed on Large Language Models",
+      "conf_id": "naacl_2025"
+    },
+    {
+      "pid": "neurips_2022:68a00a59",
+      "title": "MExMI: Pool-based Active Model Extraction Crossover Membership Inference",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2022:6ea61b18",
+      "title": "M$^4$I: Multi-modal Models Membership Inference",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2022:ab0de7f4",
+      "title": "Amplifying Membership Exposure via Data Poisoning",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2024:b8ac09eb",
+      "title": "LLM Dataset Inference: Did you train on my dataset?",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:c1532342",
+      "title": "Membership Inference Attacks against Large Vision-Language Models",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2025:ccf7ef3f",
+      "title": "Impact of Dataset Properties on Membership Inference Vulnerability of Deep Transfer Learning",
+      "conf_id": "neurips_2025"
+    },
+    {
+      "pid": "usenix_security_2019:f86b1b63",
+      "title": "Evaluating Differentially Private Machine Learning in Practice",
+      "conf_id": "usenix_security_2019"
+    },
+    {
+      "pid": "usenix_security_2020:eee4712d",
+      "title": "Stolen Memories: Leveraging Model Memorization for Calibrated White-Box Membership Inference",
+      "conf_id": "usenix_security_2020"
+    },
+    {
+      "pid": "usenix_security_2021:acd01846",
+      "title": "Systematic Evaluation of Privacy Risks of Machine Learning Models",
+      "conf_id": "usenix_security_2021"
+    },
+    {
+      "pid": "usenix_security_2022:1c4fc89d",
+      "title": "Inference Attacks Against Graph Neural Networks",
+      "conf_id": "usenix_security_2022"
+    },
+    {
+      "pid": "usenix_security_2022:40e41ecf",
+      "title": "Mitigating Membership Inference Attacks by Self-Distillation Through a Novel Ensemble Architecture",
+      "conf_id": "usenix_security_2022"
+    },
+    {
+      "pid": "usenix_security_2022:5112c6e8",
+      "title": "Membership Inference Attacks and Defenses in Neural Network Pruning",
+      "conf_id": "usenix_security_2022"
+    },
+    {
+      "pid": "usenix_security_2022:6150155e",
+      "title": "ML-Doctor: Holistic Risk Assessment of Inference Attacks Against Machine Learning Models",
+      "conf_id": "usenix_security_2022"
+    },
+    {
+      "pid": "usenix_security_2024:a8d879e4",
+      "title": "Did the Neurons Read your Book? Document-level Membership Inference for Large Language Models",
+      "conf_id": "usenix_security_2024"
+    },
+    {
+      "pid": "usenix_security_2025:47255c03",
+      "title": "Membership Inference Attacks Against Vision-Language Models",
+      "conf_id": "usenix_security_2025"
+    }
+  ],
+  "excluded": [
+    {
+      "pid": "aaai_2020:82b1d252",
+      "title": "Privacy Enhanced Multimodal Neural Representations for Emotion Recognition",
+      "conf_id": "aaai_2020",
+      "reason": "no: Attribute privacy via adversarial unlearning of demographics; no membership inference."
+    },
+    {
+      "pid": "aaai_2020:a11dbc2b",
+      "title": "On the Discrepancy between the Theoretical Analysis and Practical Implementations of Compressed Communication for Distributed Deep Learning",
+      "conf_id": "aaai_2020",
+      "reason": "no: Compressed communication convergence theory; unrelated to privacy."
+    },
+    {
+      "pid": "aaai_2020:f3daffa3",
+      "title": "Practical Federated Gradient Boosting Decision Trees",
+      "conf_id": "aaai_2020",
+      "reason": "low: Federated GBDT with privacy constraints; no membership inference evaluation indicated."
+    },
+    {
+      "pid": "acl_2018:13db8930",
+      "title": "Extreme Adaptation for Personalized Neural Machine Translation",
+      "conf_id": "acl_2018",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "cvpr_2016:7140cdda",
+      "title": "The Cityscapes Dataset for Semantic Urban Scene Understanding",
+      "conf_id": "cvpr_2016",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "cvpr_2016:a65dea4b",
+      "title": "Rethinking the Inception Architecture for Computer Vision",
+      "conf_id": "cvpr_2016",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "cvpr_2016:b580b02b",
+      "title": "Deep Residual Learning for Image Recognition",
+      "conf_id": "cvpr_2016",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "cvpr_2017:782e955a",
+      "title": "ChestX-Ray8: Hospital-Scale Chest X-Ray Database and Benchmarks on Weakly-Supervised Classification and Localization of Common Thorax Diseases",
+      "conf_id": "cvpr_2017",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "cvpr_2017:85397267",
+      "title": "Age Progression/Regression by Conditional Adversarial Autoencoder",
+      "conf_id": "cvpr_2017",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "cvpr_2017:ffcf3f8b",
+      "title": "Densely Connected Convolutional Networks",
+      "conf_id": "cvpr_2017",
+      "reason": "no: DenseNet architecture; unrelated."
+    },
+    {
+      "pid": "cvpr_2020:a3a6ec43",
+      "title": "Momentum Contrast for Unsupervised Visual Representation Learning",
+      "conf_id": "cvpr_2020",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "emnlp_2014:0c818bf5",
+      "title": "Glove: Global Vectors for Word Representation",
+      "conf_id": "emnlp_2014",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "emnlp_2017:08c2e57c",
+      "title": "Sparse Communication for Distributed Gradient Descent",
+      "conf_id": "emnlp_2017",
+      "reason": "no: Sparse gradient communication for distributed training; unrelated."
+    },
+    {
+      "pid": "iccv_2015:3678ce2a",
+      "title": "Deep Learning Face Attributes in the Wild",
+      "conf_id": "iccv_2015",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iccv_2015:c61301c6",
+      "title": "Aligning Books and Movies: Towards Story-Like Visual Explanations by Watching Movies and Reading Books",
+      "conf_id": "iccv_2015",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iccv_2017:ed7c691d",
+      "title": "The Mapillary Vistas Dataset for Semantic Understanding of Street Scenes",
+      "conf_id": "iccv_2017",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2014:e051a897",
+      "title": "Intriguing properties of neural networks",
+      "conf_id": "iclr_2014",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2015:6ddfe707",
+      "title": "Explaining and Harnessing Adversarial Examples",
+      "conf_id": "iclr_2015",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2015:f1dc649e",
+      "title": "Adam: A Method for Stochastic Optimization",
+      "conf_id": "iclr_2015",
+      "reason": "no: Adam optimizer; unrelated."
+    },
+    {
+      "pid": "iclr_2016:cfa6cd4f",
+      "title": "Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks",
+      "conf_id": "iclr_2016",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2017:05d2f06e",
+      "title": "Semi-Supervised Classification with Graph Convolutional Networks",
+      "conf_id": "iclr_2017",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2017:222d4c1d",
+      "title": "Understanding deep learning requires rethinking generalization",
+      "conf_id": "iclr_2017",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2017:7627e316",
+      "title": "Adversarial Machine Learning at Scale",
+      "conf_id": "iclr_2017",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2017:9ea9c37f",
+      "title": "Semi-supervised Knowledge Transfer for Deep Learning from Private Training Data",
+      "conf_id": "iclr_2017",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2018:72036399",
+      "title": "Towards Deep Learning Models Resistant to Adversarial Attacks",
+      "conf_id": "iclr_2018",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2018:88181f57",
+      "title": "mixup: Beyond Empirical Risk Minimization",
+      "conf_id": "iclr_2018",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2018:b6acde2e",
+      "title": "Progressive Growing of GANs for Improved Quality, Stability, and Variation",
+      "conf_id": "iclr_2018",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2018:e47dba51",
+      "title": "Learning Differentially Private Recurrent Language Models",
+      "conf_id": "iclr_2018",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2019:23f59d22",
+      "title": "signSGD with Majority Vote is Communication Efficient and Fault Tolerant",
+      "conf_id": "iclr_2019",
+      "reason": "no: signSGD communication efficiency and Byzantine tolerance; unrelated."
+    },
+    {
+      "pid": "iclr_2019:71c71deb",
+      "title": "GLUE: A Multi-Task Benchmark and Analysis Platform for Natural Language Understanding",
+      "conf_id": "iclr_2019",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "iclr_2019:bff264ee",
+      "title": "Toward Understanding the Impact of Staleness in Distributed Machine Learning",
+      "conf_id": "iclr_2019",
+      "reason": "no: Staleness in distributed ML convergence; unrelated."
+    },
+    {
+      "pid": "iclr_2020:7e7af028",
+      "title": "DBA: Distributed Backdoor Attacks against Federated Learning",
+      "conf_id": "iclr_2020",
+      "reason": "no: Backdoor attack on federated learning; not membership inference."
+    },
+    {
+      "pid": "iclr_2021:9ee620a2",
+      "title": "HeteroFL: Computation and Communication Efficient Federated Learning for Heterogeneous Clients",
+      "conf_id": "iclr_2021",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "icml_2016:3d600fe0",
+      "title": "Train faster, generalize better: Stability of stochastic gradient descent",
+      "conf_id": "icml_2016",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "icml_2016:ed097a5b",
+      "title": "Autoencoding beyond pixels using a learned similarity metric",
+      "conf_id": "icml_2016",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "icml_2018:f67e67cc",
+      "title": "Byzantine-Robust Distributed Learning: Towards Optimal Statistical Rates",
+      "conf_id": "icml_2018",
+      "reason": "no: Byzantine-robust distributed learning; general robustness, not membership."
+    },
+    {
+      "pid": "icml_2019:f425a550",
+      "title": "Analyzing Federated Learning through an Adversarial Lens",
+      "conf_id": "icml_2019",
+      "reason": "no: Model poisoning attacks on federated learning; not membership inference."
+    },
+    {
+      "pid": "icml_2021:09f2088c",
+      "title": "Learning Transferable Visual Models From Natural Language Supervision",
+      "conf_id": "icml_2021",
+      "reason": "no: CLIP pretraining; unrelated."
+    },
+    {
+      "pid": "naacl_2019:88bdceb3",
+      "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+      "conf_id": "naacl_2019",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "neurips_2013:94294230",
+      "title": "Distributed Representations of Words and Phrases and their Compositionality",
+      "conf_id": "neurips_2013",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "neurips_2014:57dee7de",
+      "title": "Do Deep Nets Really Need to be Deep?",
+      "conf_id": "neurips_2014",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "neurips_2014:658c6dea",
+      "title": "Sequence to Sequence Learning with Neural Networks",
+      "conf_id": "neurips_2014",
+      "reason": "no: Seq2seq learning; unrelated."
+    },
+    {
+      "pid": "neurips_2017:0ea83918",
+      "title": "Attention is All you Need",
+      "conf_id": "neurips_2017",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "neurips_2017:20fc043a",
+      "title": "Machine Learning with Adversaries: Byzantine Tolerant Gradient Descent",
+      "conf_id": "neurips_2017",
+      "reason": "no: Byzantine-tolerant gradient descent; unrelated to membership."
+    },
+    {
+      "pid": "neurips_2017:4e6723e8",
+      "title": "Improved Training of Wasserstein GANs",
+      "conf_id": "neurips_2017",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "neurips_2018:8151c73e",
+      "title": "Sparsified SGD with Memory",
+      "conf_id": "neurips_2018",
+      "reason": "no: Sparsified SGD communication; unrelated."
+    },
+    {
+      "pid": "neurips_2018:d694efaf",
+      "title": "Moonshine: Distilling with Cheap Convolutions",
+      "conf_id": "neurips_2018",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "neurips_2019:79bb3b8d",
+      "title": "Generalization in Generative Adversarial Networks: A Novel Perspective from Privacy Protection",
+      "conf_id": "neurips_2019",
+      "reason": "low: GAN generalization via DP; no membership inference evident"
+    },
+    {
+      "pid": "neurips_2020:4d11a222",
+      "title": "Throughput-Optimal Topology Design for Cross-Silo Federated Learning",
+      "conf_id": "neurips_2020",
+      "reason": "no: Federated learning topology design; unrelated."
+    },
+    {
+      "pid": "neurips_2020:76873ac2",
+      "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+      "conf_id": "neurips_2020",
+      "reason": "no: Retrieval-augmented generation; unrelated."
+    },
+    {
+      "pid": "neurips_2020:a7ec42d3",
+      "title": "Auditing Differentially Private Machine Learning: How Private is Private SGD?",
+      "conf_id": "neurips_2020",
+      "reason": "low: DP auditing via poisoning, not membership inference"
+    },
+    {
+      "pid": "neurips_2020:ad957fc2",
+      "title": "What Neural Networks Memorize and Why: Discovering the Long Tail via Influence Estimation",
+      "conf_id": "neurips_2020",
+      "reason": "low: Memorization and influence estimation; privacy-adjacent but no membership inference attack."
+    },
+    {
+      "pid": "neurips_2022:c6aaf8be",
+      "title": "Training language models to follow instructions with human feedback",
+      "conf_id": "neurips_2022",
+      "reason": "no: InstructGPT alignment; unrelated."
+    },
+    {
+      "pid": "usenix_security_2014:89edb960",
+      "title": "Privacy in Pharmacogenetics: An End-to-End Case Study of Personalized Warfarin Dosing",
+      "conf_id": "usenix_security_2014",
+      "reason": "low: genomic privacy attacks; not membership inference focus"
+    },
+    {
+      "pid": "usenix_security_2016:529b505f",
+      "title": "Stealing Machine Learning Models via Prediction APIs",
+      "conf_id": "usenix_security_2016",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "usenix_security_2019:0d7277e3",
+      "title": "The Secret Sharer: Evaluating and Testing Unintended Memorization in Neural Networks",
+      "conf_id": "usenix_security_2019",
+      "reason": "low: memorization testing and extraction, not membership inference"
+    },
+    {
+      "pid": "usenix_security_2020:193780e3",
+      "title": "Local Model Poisoning Attacks to Byzantine-Robust Federated Learning",
+      "conf_id": "usenix_security_2020",
+      "reason": "no: Local model poisoning of federated learning; not membership inference."
+    },
+    {
+      "pid": "usenix_security_2021:bdd11376",
+      "title": "Extracting Training Data from Large Language Models",
+      "conf_id": "usenix_security_2021",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    },
+    {
+      "pid": "usenix_security_2026:529b505f",
+      "title": "Stealing Machine Learning Models via Prediction APIs",
+      "conf_id": "usenix_security_2026",
+      "reason": "no: unrelated or out-of-scope privacy/other topic"
+    }
+  ]
+}
