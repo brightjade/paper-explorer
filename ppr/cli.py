@@ -20,13 +20,14 @@ from ppr.enrich import (
     parse_duration,
     results_to_json,
 )
-from ppr.layout import conference_ids, crawl_config_ids, crawl_config_path, papers_path
+from ppr.layout import conference_ids, crawl_config_ids, crawl_config_path, papers_path, search_index_path
 from ppr.models import Paper
 from ppr.s2_client import S2Client
 from ppr.store import save_crawl
 
 CONFIGS_DIR = Path(__file__).resolve().parent.parent / "configs"
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+SEARCH_INDEX = search_index_path(DATA_DIR.parent)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -197,6 +198,41 @@ def build_parser() -> argparse.ArgumentParser:
     release_parser.add_argument("--enrich", type=Path, default=None)
     release_parser.add_argument("--run-url", default="(manual)")
     release_parser.add_argument("--dry-run", action="store_true")
+
+    # search
+    search_parser = subparsers.add_parser("search", help="Search the dataset (the /survey skill's tool)")
+    search_sub = search_parser.add_subparsers(dest="search_command", required=True)
+
+    find_parser = search_sub.add_parser("find", help="Ranked keyword search over title, abstract, tldr, keywords")
+    find_parser.add_argument("terms", nargs="*", help="Phrases, ORed; end one with * for a prefix")
+    find_parser.add_argument("--must", action="append", default=[], help="A phrase every hit must have (repeatable)")
+    find_parser.add_argument("--raw", default=None, help="An FTS5 expression, used as is")
+    find_parser.add_argument("--venue", default="", help="Venue prefixes, comma-separated (iclr,neurips)")
+    find_parser.add_argument("--years", default=None, help="YYYY or YYYY-YYYY")
+    find_parser.add_argument("--selection", default="", help="Tracks, comma-separated (oral,spotlight)")
+    find_parser.add_argument("--awarded", action="store_true", help="Only papers with an award")
+    find_parser.add_argument("--exclude", type=Path, default=None, help="Skip ids in this file's first column")
+    find_parser.add_argument("--sort", choices=("relevance", "citations", "year"), default="relevance")
+    find_parser.add_argument("--limit", type=int, default=50)
+    find_parser.add_argument("--offset", type=int, default=0)
+    find_parser.add_argument("--abstract", action="store_true", help="Add the tldr or the abstract's start")
+    find_parser.add_argument("--json", action="store_true", help="Full records, one JSON object per line")
+
+    lookup_parser = search_sub.add_parser("lookup", help="Ground arXiv ids, DOIs, OpenReview links or titles")
+    lookup_parser.add_argument("items", nargs="*")
+    lookup_parser.add_argument("--file", type=Path, default=None, help="One item per line; # starts a comment")
+    lookup_parser.add_argument("--json", action="store_true")
+
+    cites_parser = search_sub.add_parser("cites", help="References and citations of seed papers (Semantic Scholar)")
+    cites_parser.add_argument("seeds", nargs="+", help="pids, arXiv ids, DOIs, CorpusId:N, s2:N or titles")
+    cites_parser.add_argument("--direction", choices=("refs", "citing", "both"), default="both")
+    cites_parser.add_argument("--min-links", type=int, default=2, help="Outside papers need this many seeds")
+    cites_parser.add_argument("--limit", type=int, default=50, help="Per group")
+    cites_parser.add_argument("--abstract", action="store_true", help="Fetch outside papers' tldr")
+    cites_parser.add_argument("--exclude", type=Path, default=None)
+    cites_parser.add_argument("--json", action="store_true")
+    cites_parser.add_argument("--api-key", default=os.environ.get("SEMANTIC_SCHOLAR_API_KEY", ""),
+                              help="Semantic Scholar API key (default: SEMANTIC_SCHOLAR_API_KEY env var).")
 
     return parser
 
@@ -485,6 +521,67 @@ def cmd_release(args: argparse.Namespace) -> None:
     print(tag)
 
 
+def cmd_search(args: argparse.Namespace) -> None:
+    import json
+    import sqlite3
+    import sys
+
+    from ppr.search import cites, find, lookup
+    from ppr.search.index import NoData, open_index
+
+    try:
+        con = open_index(DATA_DIR, SEARCH_INDEX)
+    except NoData as exc:
+        raise SystemExit(str(exc))
+    except (sqlite3.Error, OSError) as exc:
+        raise SystemExit(f"search index build failed: {exc}")
+
+    if args.search_command == "find":
+        try:
+            match = find.build_match(args.terms, args.must, args.raw)
+            filters = find.Filters(
+                venues=find.split_list(args.venue),
+                years=find.parse_years(args.years) if args.years else None,
+                selections=find.split_list(args.selection),
+                awarded=args.awarded,
+            )
+            total, rows = find.search(con, match, filters, find.read_exclude(args.exclude),
+                                      args.sort, args.limit, args.offset)
+        except find.QueryError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            raise SystemExit(2)
+        if args.json:
+            for row in rows:
+                print(json.dumps(find.row_dict(row), ensure_ascii=False))
+        else:
+            print(find.format_results(total, rows, args.offset, args.sort, args.abstract))
+        return
+
+    if args.search_command == "lookup":
+        items = lookup.read_items(args.items, args.file)
+        if not items:
+            raise SystemExit("Nothing to look up: pass ids or titles, or --file.")
+        results = [lookup.lookup(con, item) for item in items]
+        if args.json:
+            for result in results:
+                print(json.dumps(lookup.result_dict(result), ensure_ascii=False))
+        else:
+            print("\n".join(lookup.format_result(result) for result in results))
+        return
+
+    client = S2Client(api_key=args.api_key or None)
+    try:
+        report = cites.chase(con, client, args.seeds, args.direction, args.min_links, args.limit,
+                             find.read_exclude(args.exclude), args.abstract)
+    except cites.S2Unavailable as exc:
+        raise SystemExit(f"cites: {exc}")
+    if args.json:
+        for record in cites.report_records(report):
+            print(json.dumps(record, ensure_ascii=False))
+    else:
+        print(cites.format_report(report))
+
+
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
@@ -499,6 +596,7 @@ def main() -> None:
         "autoregister": cmd_autoregister,
         "report": cmd_report,
         "release": cmd_release,
+        "search": cmd_search,
     }
 
     if args.command in commands:
