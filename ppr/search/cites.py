@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 
 import httpx
 
+from ppr.matching import title_key
 from ppr.s2_client import S2Client
 from ppr.search.find import SNIPPET_CHARS, format_line, row_dict
 from ppr.search.lookup import classify, lookup
@@ -68,19 +69,19 @@ def _row_s2_id(row) -> str | None:
 
 
 def resolve_seeds(con, seeds: list[str]) -> tuple[list[str], list[str]]:
-    """(Semantic Scholar ids to ask for, seeds that resolve to none)."""
+    """(Semantic Scholar ids to ask for, once each in seed order, seeds that resolve to none)."""
     ids, skipped = [], []
     prefixes = {"corpus": "CorpusId:", "arxiv": "ARXIV:", "doi": "DOI:"}
     for raw in seeds:
         item = classify(raw)
         if item.kind in prefixes:
-            ids.append(prefixes[item.kind] + item.value)
-            continue
-        s2_id = next((s for row in lookup(con, raw).rows if (s := _row_s2_id(row))), None)
-        if s2_id:
-            ids.append(s2_id)
+            s2_id = prefixes[item.kind] + item.value
         else:
+            s2_id = next((s for row in lookup(con, raw).rows if (s := _row_s2_id(row))), None)
+        if not s2_id:
             skipped.append(raw)
+        elif s2_id not in ids:
+            ids.append(s2_id)
     return ids, skipped
 
 
@@ -112,6 +113,10 @@ def _attach_rows(con, linked: dict[int, Linked]) -> None:
         for row in con.execute(f"SELECT * FROM papers WHERE corpus_id IN ({', '.join('?' * len(chunk))}) "
                                "ORDER BY year, conf_id", chunk):
             linked[row["corpus_id"]].rows.append(row)
+    # A paper the dataset holds under another (or no) CorpusId is still inside: match its title.
+    for x in linked.values():
+        if not x.rows and (key := title_key(x.title)):
+            x.rows.extend(con.execute("SELECT * FROM papers WHERE title_key = ? ORDER BY year, conf_id", (key,)))
 
 
 async def _batch(client: S2Client, ids: list[str], fields: str) -> list[dict | None]:

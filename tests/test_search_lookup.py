@@ -1,3 +1,5 @@
+import itertools
+
 import pytest
 
 from ppr.search.index import open_index
@@ -95,3 +97,15 @@ def test_formats(con):
     d = result_dict(found)
     assert (d["input"], d["kind"], d["status"]) == ("CorpusId:101", "corpus", "found")
     assert d["papers"][0]["awards"][0]["label"] == "Outstanding Paper"
+
+
+def test_near_title_of_a_paper_among_many_shared_words(tmp_path):
+    data_dir = make_dataset(tmp_path)
+    target = "Language Models are Few-Shot Learners"
+    words = "Language Models are Few Shot Learner".split()
+    fillers = [{"title": " ".join(p), "authors": ["A B"]}  # same words, other order: as long as the target
+               for p in itertools.islice(itertools.permutations(words), 1, 41)]
+    write_papers(data_dir, "neurips_2020", fillers + [{"title": target, "authors": ["Tom Brown"]}])
+    con = open_index(data_dir, tmp_path / ".cache" / "search.sqlite")
+    result = lookup(con, "Language Models are Few-Shot Learner")
+    assert result.status == FUZZY and [r["title"] for r in result.rows] == [target]

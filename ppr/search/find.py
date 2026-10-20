@@ -17,10 +17,12 @@ SNIPPET_CHARS = 400
 SORTS = ("relevance", "citations", "year")
 
 _BM25 = "bm25(fts, " + ", ".join(str(w) for w in WEIGHTS) + ")"
+# bm25 normalizes by the whole row's length, so a title-only paper (no abstract, no tldr)
+# would outrank papers matching in title and abstract: relevance puts those after.
 _ORDER = {
-    "relevance": _BM25,
-    "citations": f"p.citation_count DESC, {_BM25}",
-    "year": "p.year DESC, p.citation_count DESC",
+    "relevance": f"(p.abstract = '' AND p.tldr = ''), {_BM25}, p.id",
+    "citations": f"p.citation_count DESC, {_BM25}, p.id",
+    "year": "p.year DESC, p.citation_count DESC, p.id",
 }
 _YEARS = re.compile(r"(\d{4})(?:-(\d{4}))?")
 
@@ -100,10 +102,22 @@ def fetch_rows(con: sqlite3.Connection, ids: list[int]) -> list[sqlite3.Row]:
     return [by_id[i] for i in ids]
 
 
+def _check_known(con: sqlite3.Connection, column: str, values: tuple[str, ...], flag: str) -> None:
+    """A value no paper has would silently match nothing; name it and list the ones that exist."""
+    if not values:
+        return
+    known = sorted(row[0] for row in con.execute(f"SELECT DISTINCT {column} FROM papers") if row[0])
+    for value in values:
+        if value not in known:
+            raise QueryError(f"unknown {flag} value {value!r}; known: {', '.join(known)}")
+
+
 def search(con: sqlite3.Connection, match: str, filters: Filters = Filters(),
            exclude: frozenset[str] = frozenset(), sort: str = "relevance",
            limit: int = 50, offset: int = 0) -> tuple[int, list[sqlite3.Row]]:
     """(matches left after `exclude`, the requested page of rows)."""
+    _check_known(con, "venue", filters.venues, "--venue")
+    _check_known(con, "selection", filters.selections, "--selection")
     where = ["fts MATCH ?"]
     params: list = [match]
     if filters.venues:

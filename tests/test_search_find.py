@@ -3,7 +3,7 @@ import pytest
 from ppr.search import find
 from ppr.search.find import Filters, QueryError, build_match, parse_years, phrase, read_exclude, search
 from ppr.search.index import open_index
-from tests.search_helpers import CDR, ERASE, MU, VLM, make_dataset
+from tests.search_helpers import CDR, ERASE, MU, VLM, make_dataset, write_papers
 
 UNLEARNING = ["unlearning", "data deletion", "concept erasure"]
 
@@ -93,6 +93,23 @@ class TestSearch:
     def test_missing_exclude_file_excludes_nothing(self, tmp_path):
         assert read_exclude(tmp_path / "judged.tsv") == frozenset()
         assert read_exclude(None) == frozenset()
+
+    def test_abstract_less_papers_rank_after_abstract_bearing_matches(self, tmp_path):
+        data_dir = make_dataset(tmp_path)
+        write_papers(data_dir, "icml_2022", [{"title": "Unlearning", "authors": ["Zed"], "selection": "poster",
+                                              "citation_count": 1000, "external_ids": {"CorpusId": 110}}])
+        con = open_index(data_dir, tmp_path / ".cache" / "search.sqlite")
+        match = build_match(["unlearning"])
+        assert titles(search(con, match)[1]) == [MU, "Unlearning"]
+        assert titles(search(con, match, sort="citations")[1]) == ["Unlearning", MU]
+
+    def test_unknown_venue_or_selection_is_an_error_listing_the_known(self, con):
+        match = build_match(UNLEARNING)
+        with pytest.raises(QueryError, match=r"nips.*cvpr, iclr"):
+            search(con, match, Filters(venues=("nips",)))
+        with pytest.raises(QueryError, match=r"spotlight.*main, oral, poster"):
+            search(con, match, Filters(selections=("spotlight",)))
+        assert search(con, match, Filters(venues=("iclr",), selections=("oral",)))[0] == 1
 
     def test_paging(self, con):
         total, page = search(con, build_match(UNLEARNING), limit=1, offset=1)

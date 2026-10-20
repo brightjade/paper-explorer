@@ -111,3 +111,22 @@ def test_main_dispatches_search(monkeypatch):
     monkeypatch.setattr("sys.argv", ["ppr", "search", "find", "x"])
     cli.main()
     assert called == ["find"]
+
+
+def test_cites_json_says_on_stderr_when_limit_cuts_a_group(search_env, capsys, monkeypatch):
+    x = cites.Linked(900, "T", 2022, "v", {}, 1, links=2)
+    monkeypatch.setattr(cites, "chase", lambda *a, **k: cites.CitesReport(1, 1, [], "both", 2, [], [x], 7, 3))
+    run("cites", "CorpusId:101", "--json")
+    assert capsys.readouterr().err.strip() == (
+        "cites: in dataset 7 (showing 0), outside 3 (showing 1); raise --limit for more")
+    monkeypatch.setattr(cites, "chase", lambda *a, **k: cites.CitesReport(1, 1, [], "both", 2, [], [], 0, 0))
+    run("cites", "CorpusId:101", "--json")
+    assert capsys.readouterr().err == ""
+
+
+@pytest.mark.parametrize("argv", [("find", "unlearning"), ("cites", "CorpusId:101")])
+def test_missing_exclude_file_warns(search_env, capsys, monkeypatch, argv):
+    monkeypatch.setattr(cites, "chase", lambda *a, **k: cites.CitesReport(1, 1, [], "both", 2, [], [], 0, 0))
+    missing = search_env / "judged.tsv"
+    run(*argv, "--exclude", str(missing))
+    assert f"warning: --exclude file {missing} does not exist; nothing excluded" in capsys.readouterr().err

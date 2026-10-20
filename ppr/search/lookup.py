@@ -5,6 +5,7 @@ it was accepted somewhere else is for the caller to find out. Asta and Undermind
 exports, web results and Zotero items all come through here.
 """
 
+import difflib
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -14,7 +15,8 @@ from ppr.search.find import format_line, row_dict
 from ppr.search.index import LIST_SEP
 
 FOUND, FUZZY, MISSING = "found", "fuzzy", "not in dataset"
-TITLE_CANDIDATES = 5
+TITLE_CANDIDATES = 50  # fetched by bm25 over the ORed words, then re-ranked by title similarity
+TITLE_VERDICTS = 5
 
 _PID = re.compile(r"[a-z][a-z_]*_\d{4}:[0-9a-f]{8}(?:\.\d+)?")
 _CORPUS = re.compile(r"(?:corpusid:|s2:)\s*(\d+)", re.I)
@@ -82,7 +84,8 @@ def _by_title(con, item: Item) -> Result:
     candidates = con.execute(
         "SELECT p.* FROM fts JOIN papers p ON p.id = fts.rowid WHERE fts MATCH ? ORDER BY bm25(fts) LIMIT ?",
         (match, TITLE_CANDIDATES)).fetchall()
-    accepted = [row for row in candidates
+    candidates.sort(key=lambda row: -difflib.SequenceMatcher(None, key, row["title_key"]).ratio())
+    accepted = [row for row in candidates[:TITLE_VERDICTS]
                 if match_verdict(item.value, list(item.authors), _as_s2(row)) in (MATCHED, MATCHED_FUZZY)]
     return Result(item, FUZZY, accepted) if accepted else Result(item, MISSING)
 

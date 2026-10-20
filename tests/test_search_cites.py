@@ -121,3 +121,21 @@ def test_format_and_records(con, client):
     records = cites.report_records(report)
     assert [(r["group"], r["links"]) for r in records] == [("dataset", 2), ("outside", 2)]
     assert records[0]["pid"] == pid_of(con, 102) and records[1]["id"] == "s2:900"
+
+
+@respx.mock
+def test_duplicate_seeds_are_sent_and_counted_once(con, client):
+    route = respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[SEED_101]))
+    report = cites.chase(con, client, [pid_of(con, 101), "CorpusId:101"], min_links=1)
+    assert json.loads(route.calls.last.request.content)["ids"] == ["CorpusId:101"]
+    assert report.seeds == 1 and [(x.corpus_id, x.links) for x in report.inside] == [(102, 1), (104, 1)]
+
+
+@respx.mock
+def test_linked_dataset_paper_with_another_corpus_id_is_matched_by_title(con, client):
+    seeds = [{"corpusId": 101, "references": [link(77777, CDR.upper() + "."), link(88888, "Nobody Wrote This")]},
+             {"corpusId": 104, "references": [link(77777, CDR), link(88888, "Nobody Wrote This")]}]
+    respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=seeds))
+    report = cites.chase(con, client, ["CorpusId:101", "CorpusId:104"])
+    assert [x.rows[0]["title"] for x in report.inside] == [CDR]
+    assert [x.corpus_id for x in report.outside] == [88888]

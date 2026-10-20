@@ -536,6 +536,9 @@ def cmd_search(args: argparse.Namespace) -> None:
     except (sqlite3.Error, OSError) as exc:
         raise SystemExit(f"search index build failed: {exc}")
 
+    if args.search_command in ("find", "cites") and args.exclude and not args.exclude.exists():
+        print(f"warning: --exclude file {args.exclude} does not exist; nothing excluded", file=sys.stderr)
+
     if args.search_command == "find":
         try:
             match = find.build_match(args.terms, args.must, args.raw)
@@ -578,6 +581,10 @@ def cmd_search(args: argparse.Namespace) -> None:
     if args.json:
         for record in cites.report_records(report):
             print(json.dumps(record, ensure_ascii=False))
+        if len(report.inside) < report.inside_total or len(report.outside) < report.outside_total:
+            print(f"cites: in dataset {report.inside_total} (showing {len(report.inside)}), "
+                  f"outside {report.outside_total} (showing {len(report.outside)}); raise --limit for more",
+                  file=sys.stderr)
     else:
         print(cites.format_report(report))
 
