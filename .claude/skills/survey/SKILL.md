@@ -28,7 +28,9 @@ The first field is the paper's `pid`; every command and working file uses it.
 
 **`uv run ppr search cites SEED… [--direction refs|citing|both] [--min-links N] [--abstract] [--limit N] [--exclude F] [--json]`**: Semantic Scholar references and citations of the seeds, each linked paper scored by how many seeds link to it. Two groups: **in dataset** (paper lines) and **outside** (`s2:<CorpusId>`, year, venue, arXiv id or DOI), the outside ones only when linked to at least `--min-links` seeds (default 2). `--abstract` adds outside papers' tldr. `--limit N` caps each group (50); with `--json` the totals appear on stderr when it cut a group. `--json` gives one record per linked paper (`group`: `dataset` or `outside`). If it exits non-zero, Semantic Scholar was unreachable: continue without citation chasing and say so in the Search log.
 
-**`uv run ppr search batch FILE… --out PREFIX [--exclude judged.tsv] [--size 40]`**: turns the round's `find --json`, `cites --json` and `lookup --json` files into judge batches. It keeps one record per paper (`pid`, else `id`) however many files hold it, drops ids in `--exclude`, flattens each `lookup` record into the dataset papers it found (a miss becomes `{"id": "ext:…", "title", "group": "external"}`), and writes `PREFIX-01.jsonl`, `PREFIX-02.jsonl`, … of at most `--size` records. It prints one `<path><TAB><n>` line per file, then `<total> candidates in <k> batches`, or `0 candidates` and no file.
+**`uv run ppr search batch FILE… --out PREFIX [--exclude judged.tsv] [--size 40]`**: turns the round's `find --json`, `cites --json` and `lookup --json` files into judge batches. It keeps one record per paper (`pid`, else `id`) however many files hold it, drops ids in `--exclude`, flattens each `lookup` record into the dataset papers it found (a miss becomes `{"id": "ext:…", "title", "group": "external"}`), cuts each record to the compact fields a judge reads (dataset paper: `pid`, `title`, `tldr` (the tldr, else the abstract's first 400 characters), `venue_name`, `year`, `selection`; outside paper: `id`, `title`, `year`, `venue`, `snippet`), and writes `PREFIX-01.jsonl`, `PREFIX-02.jsonl`, … of at most `--size` records. It prints one `<path><TAB><n>` line per file, then `<total> candidates in <k> batches`, or `0 candidates` and no file.
+
+**`uv run ppr search verdicts PREFIX --judged FILE --round N --source query|cites|external|web`**: collects the judges' verdicts. For every `PREFIX-NN.jsonl` it reads `PREFIX-NN.verdicts.tsv` (lines `id<TAB>verdict<TAB>reason`) and reports, per batch, a missing verdict file, ids with no verdict (`missing`), ids not in the batch (`unknown`), an id given twice (`duplicate`, the first kept) and a verdict that is not `high|medium|low|no` (`bad label`). Every valid line is appended to FILE as `id<TAB>verdict<TAB>N<TAB>S<TAB>reason` (FILE gets its header when new; ids it already holds are skipped and counted `already judged`), whether or not other lines had problems. It prints one line per batch with problems, then `appended <n> (high a, medium b, low c, no d); already judged <k>; batches with problems <p>`. Exit 1 when any batch has a problem or no batch file exists, else 0. It needs no index.
 
 ## Data
 
@@ -69,33 +71,33 @@ The working folder `<W>` is `outputs/<slug>_<YYYY-MM-DD_HH-MM-SS>`, e.g. `output
 
 ### 4. Round 1: many phrasings
 
-Write 8–15 TERMs across the criteria: synonyms, older and newer names, abbreviations, the problem described without its name, method names. For each:
+Write 8–15 TERMs across the criteria: synonyms, older and newer names, abbreviations, the problem described without its name, method names. Run every TERM twice, once per sort, because citation order surfaces the foundational papers BM25 ranks low:
 
 ```bash
-uv run ppr search find "data deletion" --exclude <W>/judged.tsv --json --limit 50 > <W>/round-1-find-01.jsonl
+uv run ppr search find "data deletion" --sort relevance --limit 30 --exclude <W>/judged.tsv --json > <W>/round-1-find-01-rel.jsonl
+uv run ppr search find "data deletion" --sort citations --limit 30 --exclude <W>/judged.tsv --json > <W>/round-1-find-01-cit.jsonl
 ```
 
-(one `round-1-*.jsonl` file per term). To see a term's hits or match count yourself, run it without `--json`. A term with thousands of matches is too broad: narrow it with `--must` or rephrase it.
+(one `round-1-*.jsonl` file per term and sort). To see a term's hits or match count yourself, run it without `--json`. A term with thousands of matches is too broad: narrow it with `--must` or rephrase it.
 
 ### 5. Judge every candidate
 
-Build the batches: `uv run ppr search batch <W>/round-1-*.jsonl --out <W>/round-1-batch --exclude <W>/judged.tsv`. It dedupes papers found by several terms or tools, drops judged ones and writes `<W>/round-1-batch-01.jsonl`, … of 40. Give each batch to a subagent (Agent tool, `model: sonnet`), several in parallel, with `judging.md` from this skill's folder as the prompt, its `{criteria_path}` and `{batch_path}` filled in. Each replies `pid<TAB>verdict<TAB>reason` lines. Append them to `judged.tsv` with the round number and source. Without a subagent tool, judge the batches yourself by the same brief.
+Build the batches: `uv run ppr search batch <W>/round-1-*.jsonl --out <W>/round-1-batch --exclude <W>/judged.tsv`. It dedupes papers found by several terms or tools, drops judged ones and writes compact judge records to `<W>/round-1-batch-01.jsonl`, … of 40. Give each batch to a subagent (Agent tool, `model: sonnet`), several in parallel, with `judging.md` from this skill's folder as the prompt, its `{criteria_path}`, `{batch_path}` and `{verdicts_path}` filled in; `{verdicts_path}` is the batch path with `.jsonl` replaced by `.verdicts.tsv`. Each judge writes its verdict lines there and replies `done <n>`. When all judges of the round are back, run `uv run ppr search verdicts <W>/round-N-batch --judged <W>/judged.tsv --round N --source <source>`. If it exits 1, run `ppr search batch` again on the round's files with `--exclude <W>/judged.tsv` and judge what remains. Never append verdict lines by hand. Without a subagent tool, judge the batches yourself by the same brief, writing the same verdicts files.
 
-Then read the high and medium papers properly: `uv run ppr search lookup <pids> --json` has dataset papers' abstracts; an outside paper's tldr is in its `cites` record.
+Then read full abstracts (`uv run ppr search lookup <pids> --json`; an outside paper's tldr is in its `cites` record) only for the papers the report will discuss or cite in detail, not every high and medium paper; the judged reasons and titles are enough for the rest.
 
 ### 6. Rounds 2 and on: expand from what is relevant
 
 Each round does at least one of:
 
-- **a. Vocabulary.** Read the high papers' titles and abstracts for phrasings you have not queried (a method's name, another community's word for the problem) and query them as in step 4.
+- **a. Vocabulary.** Read the high papers' titles and tldrs for phrasings you have not queried (a method's name, another community's word for the problem) and query them as in step 4: every `find` in any round uses the same two-sort, `--limit 30` pattern.
 - **b. Citations.** `uv run ppr search cites <high pids> --exclude <W>/judged.tsv --abstract --json > <W>/round-N-cites.jsonl`, with the Bash tool's timeout raised to 600000 ms (an anonymous Semantic Scholar pool can back off for minutes). Its in-dataset and outside records are judged like any candidate (source `cites`).
-- **c. Classics.** Rerun the TERMs that produced high papers with `--sort citations`: BM25 ranks a foundational paper low when its abstract uses few of the words.
 
-Batch and judge (step 5; `ppr search batch <W>/round-N-*.jsonl --out <W>/round-N-batch --exclude <W>/judged.tsv`), record, repeat.
+Batch and judge (step 5, `verdicts` included; `ppr search batch <W>/round-N-*.jsonl --out <W>/round-N-batch --exclude <W>/judged.tsv`), record, repeat.
 
 ### 7. Stop on saturation
 
-After each round, count the new high and medium papers. Stop when vocabulary expansion and citation chasing have each run at least once and the last round added under 10% of the total found so far. Caps: `novelty` 6 rounds, `related-work` 5, `landscape` 4 per subtopic. Keep the per-round counts (e.g. 34 → 12 → 3 → 0) for the Search log.
+After each round, count the new high and medium papers. Stop when vocabulary expansion and citation chasing have each run at least once and the last round added under 10% of the total found so far. Caps: rounds — `novelty` 5, `related-work` 3, `landscape` 3 per subtopic; judged candidates — `novelty` 1,500, `related-work` 1,000, `landscape` 600 per subtopic. Stop at saturation or the first cap reached, and say which in the Search log. Keep the per-round counts (e.g. 34 → 12 → 3 → 0) for the Search log.
 
 ### 8. Web search
 
