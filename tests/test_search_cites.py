@@ -148,3 +148,14 @@ def test_two_seed_ids_answered_as_one_paper_count_links_once(con, client):
     assert len(json.loads(route.calls.last.request.content)["ids"]) == 2
     assert {x.corpus_id: x.links for x in report.inside} == {102: 1, 104: 1}
     assert {x.corpus_id: x.links for x in report.outside} == {900: 1, 901: 1}
+
+
+@respx.mock
+def test_string_corpus_ids_count_as_the_int_they_spell(con, client):
+    as_string = {"corpusId": 101, "references": [link("102", CDR), link("abc", "Not A Paper")]}
+    as_int = {"corpusId": 104, "citations": [link(102, CDR)]}
+    respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[as_string, as_int]))
+    report = cites.chase(con, client, ["CorpusId:101", "CorpusId:104"])
+    assert [(x.corpus_id, x.links) for x in report.inside] == [(102, 2)]
+    assert report.inside[0].rows[0]["title"] == CDR
+    assert report.outside == []

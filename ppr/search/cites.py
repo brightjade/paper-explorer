@@ -85,19 +85,29 @@ def resolve_seeds(con, seeds: list[str]) -> tuple[list[str], list[str]]:
     return ids, skipped
 
 
+def _corpus_id(value) -> int | None:
+    """A Semantic Scholar corpusId as an int; S2 sometimes sends it as a string of digits. Anything else is missing."""
+    if isinstance(value, int) and not isinstance(value, bool):
+        return value
+    if isinstance(value, str) and value.isascii() and value.isdigit():
+        return int(value)
+    return None
+
+
 def aggregate(entries: list[dict | None], direction: str) -> dict[int, Linked]:
     """Every paper linked to a seed, with how many seeds link to it; the seeds themselves left out."""
-    seeds = {e.get("corpusId") for e in entries if e}
+    seeds = {_corpus_id(e.get("corpusId")) for e in entries if e}
     linked: dict[int, Linked] = {}
-    answered: set[int] = set()  # two ids (a pid's CorpusId, an arXiv id) can answer as one paper
+    answered: set[int | None] = set()  # two ids (a pid's CorpusId, an arXiv id) can answer as one paper
     for entry in entries:
-        if not entry or entry.get("corpusId") in answered:
+        seed = _corpus_id(entry.get("corpusId")) if entry else None
+        if not entry or seed in answered:
             continue
-        answered.add(entry.get("corpusId"))
+        answered.add(seed)
         seen: set[int] = set()
         for key in DIRECTIONS[direction]:
             for link in entry.get(key) or []:
-                cid = (link or {}).get("corpusId")
+                cid = _corpus_id((link or {}).get("corpusId"))
                 if cid is None or cid in seen or cid in seeds:
                     continue
                 seen.add(cid)
