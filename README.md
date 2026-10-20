@@ -46,19 +46,18 @@ Paper Explorer collects every accepted paper from the venues below, matches each
 
 ### Write a grounded literature survey with Claude Code
 
-The repository ships a `/survey` skill for [Claude Code](https://claude.com/claude-code). Describe a research idea, and it searches the accepted papers in `data/` (after [Quick start](#quick-start)), ranks them by citations, and writes a survey whose related work is drawn from real accepted papers: seminal and influential work, related work grouped by theme, common datasets, benchmarks and baselines, and open gaps. Papers it adds from web search, for seminal work outside these venues, are marked as such.
+The repository ships a `/survey` skill for [Claude Code](https://claude.com/claude-code). Describe a research idea and it searches the accepted papers in `data/` (after [Quick start](#quick-start)) the way Asta or Undermind search, in rounds: many phrasings through a ranked search index, every candidate judged against criteria it writes down, new phrasings and citation chasing from the relevant papers, and a stop once new finds dry up. It checks an idea's novelty, drafts a paper's related work, or maps a new field, and every paper it cites shows where it was accepted (`ICLR 2025 · oral · Outstanding Paper`). Hand it a paper list from Asta, Undermind or a web search and it marks which are accepted papers and adds the accepted ones the list missed. Papers from outside these venues (web search, citation chasing) are marked as such.
 
 ```text
-# Name the venues and years
-/survey I'm exploring efficient inference methods for large language models,
-like speculative decoding and early exit strategies. Search NLP and ML
-conferences from 2023-2025.
+/survey Is there work on unlearning specific facts from LLMs without retraining?
 
-# Or let it ask you for the scope
+/survey Related work for my paper on speculative decoding and early-exit inference,
+NLP and ML venues from 2023 on.
+
 /survey What papers exist on 3D object detection from point clouds?
 ```
 
-The report is saved to `outputs/<topic>_<timestamp>.md`.
+The report and its working files (criteria, every judged paper, a search log) are saved under `outputs/<topic>_<timestamp>/`.
 
 ### Query the data in Python
 
@@ -102,7 +101,7 @@ cp .env.example .env    # then fill it in
 ```
 
 - `OPENREVIEW_USERNAME` / `OPENREVIEW_PASSWORD`: a [free OpenReview account](https://openreview.net/signup), needed only for ICLR, NeurIPS, ICML, COLM, CoRL and TMLR. Every other venue is read from public pages without auth.
-- `SEMANTIC_SCHOLAR_API_KEY` (optional): an [API key](https://www.semanticscholar.org/product/api#api-key) raises the rate limits `ppr enrich` runs under.
+- `SEMANTIC_SCHOLAR_API_KEY` (optional): an [API key](https://www.semanticscholar.org/product/api#api-key) raises the rate limits `ppr enrich` and `ppr search cites` run under.
 
 ## Data format
 
@@ -187,6 +186,9 @@ uv run ppr enrich --all --time-budget 4h     # refresh every conference in data/
 uv run ppr awards neurips_2024               # collect paper awards -> data/<venue>/awards.json
 uv run ppr awards --all --all-years     # every venue-year, including the final older ones
 uv run ppr validate iclr_2025                # compare paper counts with DBLP (10% tolerance)
+uv run ppr search find "machine unlearning" "data deletion" --abstract   # ranked search over data/ (index in .cache/)
+uv run ppr search lookup 2303.07345 "Certified Data Removal from Machine Learning Models"   # is it an accepted paper?
+uv run ppr search cites iclr_2024:3fa9c1d2 --abstract   # references and citations, in and outside the dataset
 
 # Keep it current (what the monthly pipeline runs)
 uv run ppr discover                          # which tracked venues have a list we don't have yet
