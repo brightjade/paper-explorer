@@ -234,6 +234,12 @@ def build_parser() -> argparse.ArgumentParser:
     cites_parser.add_argument("--api-key", default=os.environ.get("SEMANTIC_SCHOLAR_API_KEY", ""),
                               help="Semantic Scholar API key (default: SEMANTIC_SCHOLAR_API_KEY env var).")
 
+    batch_parser = search_sub.add_parser("batch", help="Round files (find/cites/lookup --json) into judge batches")
+    batch_parser.add_argument("files", nargs="+", type=Path, help="JSONL from find, cites or lookup --json")
+    batch_parser.add_argument("--out", required=True, help="Batch path prefix: PREFIX-01.jsonl, PREFIX-02.jsonl, ...")
+    batch_parser.add_argument("--exclude", type=Path, default=None, help="Skip ids in this file's first column")
+    batch_parser.add_argument("--size", type=int, default=40, help="Candidates per batch")
+
     return parser
 
 
@@ -526,8 +532,26 @@ def cmd_search(args: argparse.Namespace) -> None:
     import sqlite3
     import sys
 
-    from ppr.search import cites, find, lookup
+    from ppr.search import batch, cites, find, lookup
     from ppr.search.index import NoData, open_index
+
+    if args.search_command == "batch":
+        if args.size < 1:
+            raise SystemExit("--size must be at least 1")
+        missing = [str(f) for f in args.files if not f.exists()]
+        if missing:
+            raise SystemExit(f"batch: no such file: {', '.join(missing)}")
+        if args.exclude and not args.exclude.exists():
+            print(f"warning: --exclude file {args.exclude} does not exist; nothing excluded", file=sys.stderr)
+        cands = batch.collect(args.files, find.read_exclude(args.exclude))
+        written = batch.write_batches(cands, args.out, args.size)
+        if not cands:
+            print("0 candidates")
+            return
+        for path, n in written:
+            print(f"{path}\t{n}")
+        print(f"{len(cands)} candidates in {len(written)} batches")
+        return
 
     try:
         con = open_index(DATA_DIR, SEARCH_INDEX)
