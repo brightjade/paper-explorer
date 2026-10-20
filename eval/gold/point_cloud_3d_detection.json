@@ -1,0 +1,1477 @@
+{
+  "topic": "point_cloud_3d_detection",
+  "survey": {
+    "id": "ARXIV:2206.09474",
+    "title": "3D Object Detection for Autonomous Driving: A Comprehensive Survey"
+  },
+  "criteria": [
+    "Core: detects 3D objects (3D bounding boxes) from LiDAR or other point clouds, alone or fused with camera images.",
+    "Detectors, backbones and representations (point, voxel, pillar, range view, BEV), training schemes (semi-/self-supervised, domain adaptation, augmentation) and datasets or benchmarks for this task count, in driving or indoor scenes.",
+    "Out of scope: camera-only 3D detection (monocular, stereo, multi-view) with no point cloud input; 2D detection; point cloud classification or segmentation without detection; tracking or motion forecasting that takes detections as given; generic architectures never applied to 3D detection."
+  ],
+  "queries": [
+    "3D object detection",
+    "LiDAR detection",
+    "point cloud detection",
+    "3D detector",
+    "voxel-based",
+    "bird's eye view",
+    "LiDAR-camera fusion",
+    "pillar",
+    "3D bounding box",
+    "multi-modal 3D detection"
+  ],
+  "references_total": 381,
+  "references_in_dataset": 266,
+  "gold": [
+    {
+      "pid": "aaai_2020:db2f27ae",
+      "title": "TANet: Robust 3D Object Detection from Point Clouds with Triple Attention",
+      "conf_id": "aaai_2020"
+    },
+    {
+      "pid": "aaai_2020:e5b85c75",
+      "title": "PI-RCNN: An Efficient Multi-Sensor 3D Object Detector with Point-Based Attentive Cont-Conv Fusion Module",
+      "conf_id": "aaai_2020"
+    },
+    {
+      "pid": "aaai_2021:48328480",
+      "title": "Voxel R-CNN: Towards High Performance Voxel-based 3D Object Detection",
+      "conf_id": "aaai_2021"
+    },
+    {
+      "pid": "aaai_2021:5120b69e",
+      "title": "CIA-SSD: Confident IoU-Aware Single-Stage Object Detector From Point Cloud",
+      "conf_id": "aaai_2021"
+    },
+    {
+      "pid": "aaai_2022:12ffdd44",
+      "title": "SVGA-Net: Sparse Voxel-Graph Attention Network for 3D Object Detection from Point Clouds",
+      "conf_id": "aaai_2022"
+    },
+    {
+      "pid": "aaai_2022:1440f1ab",
+      "title": "AFDetV2: Rethinking the Necessity of the Second Stage for Object Detection from Point Clouds",
+      "conf_id": "aaai_2022"
+    },
+    {
+      "pid": "aaai_2022:4fdaaae8",
+      "title": "SimIPU: Simple 2D Image and 3D Point Cloud Unsupervised Pre-training for Spatial-Aware Visual Representations",
+      "conf_id": "aaai_2022"
+    },
+    {
+      "pid": "aaai_2022:a6001361",
+      "title": "Behind the Curtain: Learning Occluded Shapes for 3D Object Detection",
+      "conf_id": "aaai_2022"
+    },
+    {
+      "pid": "corl_2018:1cd2047f",
+      "title": "IntentNet: Learning to Predict Intention from Raw Sensor Data",
+      "conf_id": "corl_2018"
+    },
+    {
+      "pid": "corl_2018:34043f09",
+      "title": "HDNET: Exploiting HD Maps for 3D Object Detection",
+      "conf_id": "corl_2018"
+    },
+    {
+      "pid": "corl_2020:90228d38",
+      "title": "Reconfigurable Voxels: A New Representation for LiDAR-Based Point Clouds",
+      "conf_id": "corl_2020"
+    },
+    {
+      "pid": "corl_2020:ae0d3fd0",
+      "title": "Learning to Communicate and Correct Pose Errors",
+      "conf_id": "corl_2020"
+    },
+    {
+      "pid": "corl_2020:b1f6b55c",
+      "title": "StrObe: Streaming Object Detection from LiDAR Packets",
+      "conf_id": "corl_2020"
+    },
+    {
+      "pid": "corl_2020:df199ac5",
+      "title": "Range Conditioned Dilated Convolutions for Scale Invariant 3D Object Detection",
+      "conf_id": "corl_2020"
+    },
+    {
+      "pid": "corl_2021:7c43761a",
+      "title": "Exploring Adversarial Robustness of Multi-sensor Perception Systems in Self Driving",
+      "conf_id": "corl_2021"
+    },
+    {
+      "pid": "cvpr_2015:dd2e8518",
+      "title": "SUN RGB-D: A RGB-D scene understanding benchmark suite",
+      "conf_id": "cvpr_2015"
+    },
+    {
+      "pid": "cvpr_2017:2ba7bd81",
+      "title": "Multi-view 3D Object Detection Network for Autonomous Driving",
+      "conf_id": "cvpr_2017"
+    },
+    {
+      "pid": "cvpr_2018:4061afc2",
+      "title": "PIXOR: Real-Time 3D Object Detection From Point Clouds",
+      "conf_id": "cvpr_2018"
+    },
+    {
+      "pid": "cvpr_2018:79144b3a",
+      "title": "Frustum PointNets for 3D Object Detection From RGB-D Data",
+      "conf_id": "cvpr_2018"
+    },
+    {
+      "pid": "cvpr_2018:cdb6b028",
+      "title": "Fast and Furious: Real Time End-to-End 3D Detection, Tracking and Motion Forecasting With a Single Convolutional Net",
+      "conf_id": "cvpr_2018"
+    },
+    {
+      "pid": "cvpr_2018:f2885593",
+      "title": "VoxelNet: End-to-End Learning for Point Cloud Based 3D Object Detection",
+      "conf_id": "cvpr_2018"
+    },
+    {
+      "pid": "cvpr_2018:f52644a6",
+      "title": "PointFusion: Deep Sensor Fusion for 3D Bounding Box Estimation",
+      "conf_id": "cvpr_2018"
+    },
+    {
+      "pid": "cvpr_2019:049ce917",
+      "title": "Pseudo-LiDAR From Visual Depth Estimation: Bridging the Gap in 3D Object Detection for Autonomous Driving",
+      "conf_id": "cvpr_2019"
+    },
+    {
+      "pid": "cvpr_2019:2ea25dd3",
+      "title": "LaserNet: An Efficient Probabilistic 3D Object Detector for Autonomous Driving",
+      "conf_id": "cvpr_2019"
+    },
+    {
+      "pid": "cvpr_2019:49185d0f",
+      "title": "Multi-Task Multi-Sensor Fusion for 3D Object Detection",
+      "conf_id": "cvpr_2019"
+    },
+    {
+      "pid": "cvpr_2019:4d733e8d",
+      "title": "PointRCNN: 3D Object Proposal Generation and Detection From Point Cloud",
+      "conf_id": "cvpr_2019"
+    },
+    {
+      "pid": "cvpr_2019:99faabaa",
+      "title": "Argoverse: 3D Tracking and Forecasting With Rich Maps",
+      "conf_id": "cvpr_2019"
+    },
+    {
+      "pid": "cvpr_2019:d5d26686",
+      "title": "PointPillars: Fast Encoders for Object Detection From Point Clouds",
+      "conf_id": "cvpr_2019"
+    },
+    {
+      "pid": "cvpr_2020:026437ef",
+      "title": "MotionNet: Joint Perception and Motion Prediction for Autonomous Driving Based on Bird's Eye View Maps",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:16f6976e",
+      "title": "PnPNet: End-to-End Perception and Prediction With Tracking in the Loop",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:23889a45",
+      "title": "Train in Germany, Test in the USA: Making 3D Object Detectors Generalize",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:26c1d50e",
+      "title": "PV-RCNN: Point-Voxel Feature Set Abstraction for 3D Object Detection",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:3af9a749",
+      "title": "nuScenes: A Multimodal Dataset for Autonomous Driving",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:47d28b9f",
+      "title": "Learning to Evaluate Perception Models Using Planner-Centric Metrics",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:4a2a6f92",
+      "title": "3DSSD: Point-Based 3D Single Stage Object Detector",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:561535ee",
+      "title": "HVNet: Hybrid Voxel Network for LiDAR Based 3D Object Detection",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:5ee80275",
+      "title": "Scalability in Perception for Autonomous Driving: Waymo Open Dataset",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:616bad69",
+      "title": "Associate-3Ddet: Perceptual-to-Conceptual Association for 3D Point Cloud Object Detection",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:7c3bcd7f",
+      "title": "ImVoteNet: Boosting 3D Object Detection in Point Clouds With Image Votes",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:81a6df60",
+      "title": "STINet: Spatio-Temporal-Interactive Network for Pedestrian Detection and Trajectory Prediction",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:82a47eaa",
+      "title": "Structure Aware Single-Stage 3D Object Detection From Point Cloud",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:94e734ba",
+      "title": "LiDAR-Based Online 3D Video Object Detection With Graph-Based Message Passing and Spatiotemporal Transformer Attention",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:a3489066",
+      "title": "PointPainting: Sequential Fusion for 3D Object Detection",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:ce26ae8f",
+      "title": "Physically Realizable Adversarial Examples for LiDAR Object Detection",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:cf878848",
+      "title": "Joint 3D Instance Segmentation and Object Detection for Autonomous Driving",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:d30dfe02",
+      "title": "Point-GNN: Graph Neural Network for 3D Object Detection in a Point Cloud",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:d674c075",
+      "title": "Autolabeling 3D Objects With Differentiable Rendering of SDF Shape Priors",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:e45f537a",
+      "title": "What You See is What You Get: Exploiting Visibility for 3D Object Detection",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2020:f6ad5b96",
+      "title": "DOPS: Learning to Detect 3D Objects and Predict Their 3D Shapes",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2021:01e68078",
+      "title": "Deep Multi-Task Learning for Joint Localization, Perception, and Prediction",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:05d937e6",
+      "title": "HVPR: Hybrid Voxel-Point Representation for Single-Stage 3D Object Detection",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:06bb599b",
+      "title": "LiDAR R-CNN: An Efficient and Universal 3D Object Detector",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:136e8547",
+      "title": "3D-MAN: 3D Multi-Frame Attention Network for Object Detection",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:3797c64c",
+      "title": "SE-SSD: Self-Ensembling Single-Stage Object Detector From Point Cloud",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:39d1b8fb",
+      "title": "PointAugmenting: Cross-Modal Augmentation for 3D Object Detection",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:44967092",
+      "title": "PVGNet: A Bottom-Up One-Stage 3D Object Detector With Integrated Multi-Level Features",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:5181fb81",
+      "title": "To the Point: Efficient 3D Object Detection in the Range Image With Graph Convolution Kernels",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:69a454e0",
+      "title": "SRDAN: Scale-Aware and Range-Aware Domain Adaptation Network for Cross-Dataset 3D Object Detection",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:6edcec6f",
+      "title": "3D Object Detection With Pointformer",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:758faa72",
+      "title": "3DIoUMatch: Leveraging IoU Prediction for Semi-Supervised 3D Object Detection",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:7e06a21e",
+      "title": "RSN: Range Sparse Net for Efficient, Accurate LiDAR 3D Object Detection",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:907560ab",
+      "title": "ST3D: Self-Training for Unsupervised Domain Adaptation on 3D Object Detection",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:9bb42d15",
+      "title": "Offboard 3D Object Detection From Point Cloud Sequences",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:b680c066",
+      "title": "Robust Multimodal Vehicle Detection in Foggy Weather Using Complementary Lidar and Radar Signals",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:bc58023f",
+      "title": "RangeIoUDet: Range Image Based Real-Time 3D Object Detector Optimized by Intersection Over Union",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:fa20185c",
+      "title": "LiDAR-Aug: A General Rendering-Based Augmentation Framework for 3D Object Detection",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2021:ff7d6fbc",
+      "title": "Center-Based 3D Object Detection and Tracking",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2022:128a0aad",
+      "title": "Point Density-Aware Voxels for LiDAR 3D Object Detection",
+      "conf_id": "cvpr_2022"
+    },
+    {
+      "pid": "cvpr_2022:1e6fca02",
+      "title": "LIFT: Learning 4D LiDAR Image Fusion Transformer for 3D Object Detection",
+      "conf_id": "cvpr_2022"
+    },
+    {
+      "pid": "cvpr_2022:1f894216",
+      "title": "Embracing Single Stride 3D Object Detector with Sparse Transformer",
+      "conf_id": "cvpr_2022"
+    },
+    {
+      "pid": "cvpr_2022:6b34a9bf",
+      "title": "TransFusion: Robust LiDAR-Camera Fusion for 3D Object Detection with Transformers",
+      "conf_id": "cvpr_2022"
+    },
+    {
+      "pid": "cvpr_2022:7b203ffd",
+      "title": "DeepFusion: Lidar-Camera Deep Fusion for Multi-Modal 3D Object Detection",
+      "conf_id": "cvpr_2022"
+    },
+    {
+      "pid": "cvpr_2022:7fdc40b8",
+      "title": "CAT-Det: Contrastively Augmented Transformer for Multimodal 3D Object Detection",
+      "conf_id": "cvpr_2022"
+    },
+    {
+      "pid": "cvpr_2022:9bee478e",
+      "title": "Voxel Field Fusion for 3D Object Detection",
+      "conf_id": "cvpr_2022"
+    },
+    {
+      "pid": "cvpr_2022:cfc1c02f",
+      "title": "Point2Seq: Detecting 3D Objects as Sequences",
+      "conf_id": "cvpr_2022"
+    },
+    {
+      "pid": "cvpr_2022:dd6d06c0",
+      "title": "Focal Sparse Convolutional Networks for 3D Object Detection",
+      "conf_id": "cvpr_2022"
+    },
+    {
+      "pid": "cvpr_2022:e7a1a039",
+      "title": "VISTA: Boosting 3D Object Detection via Dual Cross-VIew SpaTial Attention",
+      "conf_id": "cvpr_2022"
+    },
+    {
+      "pid": "eccv_2018:72d8b8e8",
+      "title": "Deep Continuous Fusion for Multi-sensor 3D Object Detection",
+      "conf_id": "eccv_2018"
+    },
+    {
+      "pid": "eccv_2020:1d314071",
+      "title": "Searching Efficient 3D Architectures with Sparse Point-Voxel Convolution",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:20f05755",
+      "title": "Rethinking Pseudo-LiDAR Representation",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:2dd574cf",
+      "title": "3D-CVF: Generating Joint Camera and LiDAR Features Using Cross-view Spatial Feature Fusion for 3D Object Detection",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:3c6eb8da",
+      "title": "An LSTM Approach to Temporal 3D Object Detection in LiDAR Point Clouds",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:542db271",
+      "title": "InfoFocus: 3D Object Detection for Autonomous Driving with Dynamic Information Modeling",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:7541ca6e",
+      "title": "SSN: Shape Signature Networks for Multi-class Object Detection from Point Clouds",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:765eb8ba",
+      "title": "RadarNet: Exploiting Radar for Robust Perception of Dynamic Objects",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:796b9e13",
+      "title": "Pillar-Based Object Detection for Autonomous Driving",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:8111a585",
+      "title": "EPNet: Enhancing Point Features with Image Semantics for 3D Object Detection",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:b4f0d62f",
+      "title": "Object as Hotspots: An Anchor-Free 3D Object Detection Approach via Firing of Hotspots",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:b4f84a83",
+      "title": "V2VNet: Vehicle-to-Vehicle Communication for Joint Perception and Prediction",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:c5b5326e",
+      "title": "PointContrast: Unsupervised Pre-training for 3D Point Cloud Understanding",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:d1cc1825",
+      "title": "Weakly Supervised 3D Object Detection from Lidar Point Cloud",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2020:e87e8a02",
+      "title": "Streaming Object Detection for 3-D Point Clouds",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2022:08d560b6",
+      "title": "PillarNet: Real-Time and High-Performance Pillar-Based 3D Object Detection",
+      "conf_id": "eccv_2022"
+    },
+    {
+      "pid": "eccv_2022:858800ae",
+      "title": "SWFormer: Sparse Window Transformer for 3D Object Detection in Point Clouds",
+      "conf_id": "eccv_2022"
+    },
+    {
+      "pid": "iccv_2019:1880022f",
+      "title": "Interpolated Convolutional Networks for 3D Point Cloud Understanding",
+      "conf_id": "iccv_2019"
+    },
+    {
+      "pid": "iccv_2019:25f11c67",
+      "title": "Deep Hough Voting for 3D Object Detection in Point Clouds",
+      "conf_id": "iccv_2019"
+    },
+    {
+      "pid": "iccv_2019:330f0c69",
+      "title": "STD: Sparse-to-Dense 3D Object Detector for Point Cloud",
+      "conf_id": "iccv_2019"
+    },
+    {
+      "pid": "iccv_2019:affddacb",
+      "title": "Fast Point R-CNN",
+      "conf_id": "iccv_2019"
+    },
+    {
+      "pid": "iccv_2021:1bf400bd",
+      "title": "LIGA-Stereo: Learning LiDAR Geometry Aware Representations for Stereo-based 3D Detector",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:390101b2",
+      "title": "Fooling LiDAR Perception via Adversarial Trajectory Perturbation",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:4700dc01",
+      "title": "Exploring Geometry-aware Contrast and Clustering Harmonization for Self-supervised 3D Object Detection",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:5e29a75a",
+      "title": "An End-to-End Transformer Model for 3D Object Detection",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:600855d4",
+      "title": "Unsupervised Domain Adaptive 3D Detection with Multi-Level Consistency",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:652cb9d5",
+      "title": "Pyramid R-CNN: Towards Better Performance and Adaptability for 3D Object Detection",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:7a091c6c",
+      "title": "RangeDet: In Defense of Range View for LiDAR-based 3D Object Detection",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:c587d966",
+      "title": "Self-Supervised Pretraining of 3D Features on any Point-Cloud",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:c6de690e",
+      "title": "Group-Free 3D Object Detection via Transformers",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:cfdf5fc9",
+      "title": "SPG: Unsupervised Domain Adaptation for 3D Object Detection via Semantic Point Generation",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:dd791c1c",
+      "title": "Voxel Transformer for 3D Object Detection",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:f247398d",
+      "title": "Improving 3D Object Detection with Channel-wise Transformer",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:f2b40f76",
+      "title": "Fog Simulation on Real LiDAR Point Clouds for 3D Object Detection in Adverse Weather",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iccv_2021:f79cf9ce",
+      "title": "4D-Net for Learned Multi-Modal Alignment",
+      "conf_id": "iccv_2021"
+    },
+    {
+      "pid": "iclr_2020:3a5d0c4f",
+      "title": "Pseudo-LiDAR++: Accurate Depth for 3D Object Detection in Autonomous Driving",
+      "conf_id": "iclr_2020"
+    },
+    {
+      "pid": "icra_2017:8fc83372",
+      "title": "Vote3Deep: Fast object detection in 3D point clouds using efficient convolutional neural networks",
+      "conf_id": "icra_2017"
+    },
+    {
+      "pid": "icra_2018:4ed90012",
+      "title": "A General Pipeline for 3D Detection of Vehicles",
+      "conf_id": "icra_2018"
+    },
+    {
+      "pid": "icra_2019:38e6e13a",
+      "title": "The H3D Dataset for Full-Surround 3D Multi-Object Detection and Tracking in Crowded Urban Scenes",
+      "conf_id": "icra_2019"
+    },
+    {
+      "pid": "icra_2019:6473b95a",
+      "title": "SEG-VoxelNet for 3D Vehicle Detection from RGB and LiDAR Data",
+      "conf_id": "icra_2019"
+    },
+    {
+      "pid": "icra_2019:b001aa65",
+      "title": "MVX-Net: Multimodal VoxelNet for 3D Object Detection",
+      "conf_id": "icra_2019"
+    },
+    {
+      "pid": "icra_2020:3498c664",
+      "title": "SegVoxelNet: Exploring Semantic Context and Depth-aware Features for 3D Vehicle Detection from Point Cloud",
+      "conf_id": "icra_2020"
+    },
+    {
+      "pid": "icra_2020:98401d0e",
+      "title": "A*3D Dataset: Towards Autonomous Driving in Challenging Environments",
+      "conf_id": "icra_2020"
+    },
+    {
+      "pid": "icra_2021:60bcc42e",
+      "title": "Cirrus: A Long-range Bi-pattern LiDAR Dataset",
+      "conf_id": "icra_2021"
+    },
+    {
+      "pid": "icra_2021:a3f723e9",
+      "title": "FGR: Frustum-Aware Geometric Reasoning for Weakly Supervised 3D Vehicle Detection",
+      "conf_id": "icra_2021"
+    },
+    {
+      "pid": "icra_2022:f91ee878",
+      "title": "Exploiting Playbacks in Unsupervised Domain Adaptation for 3D Object Detection in Self-Driving Cars",
+      "conf_id": "icra_2022"
+    },
+    {
+      "pid": "icra_2023:62d4da2c",
+      "title": "BEVFusion: Multi-Task Multi-Sensor Fusion with Unified Bird's-Eye View Representation",
+      "conf_id": "icra_2023"
+    },
+    {
+      "pid": "ijcai_2022:0cbb441e",
+      "title": "AutoAlign: Pixel-Instance Feature Aggregation for Multi-Modal 3D Object Detection",
+      "conf_id": "ijcai_2022"
+    },
+    {
+      "pid": "iros_2017:932d0df4",
+      "title": "3D fully convolutional network for vehicle detection in point cloud",
+      "conf_id": "iros_2017"
+    },
+    {
+      "pid": "iros_2018:e85a7d06",
+      "title": "Joint 3D Proposal Generation and Object Detection from View Aggregation",
+      "conf_id": "iros_2018"
+    },
+    {
+      "pid": "iros_2019:e32ebaba",
+      "title": "Frustum ConvNet: Sliding Frustums to Aggregate Local Point-Wise Features for Amodal",
+      "conf_id": "iros_2019"
+    },
+    {
+      "pid": "iros_2020:2ae8a134",
+      "title": "CLOCs: Camera-LiDAR Object Candidates Fusion for 3D Object Detection",
+      "conf_id": "iros_2020"
+    },
+    {
+      "pid": "iros_2020:33329892",
+      "title": "End-to-end Contextual Perception and Prediction with Interaction Transformer",
+      "conf_id": "iros_2020"
+    },
+    {
+      "pid": "iros_2021:ab29d7a2",
+      "title": "RV-FuseNet: Range View Based Fusion of Time-Series LiDAR Data for Joint 3D Object Detection and Motion Forecasting",
+      "conf_id": "iros_2021"
+    },
+    {
+      "pid": "iros_2021:cf7d8d70",
+      "title": "MapFusion: A General Framework for 3D Object Detection with HDMaps",
+      "conf_id": "iros_2021"
+    },
+    {
+      "pid": "neurips_2020:d6be346c",
+      "title": "Every View Counts: Cross-View Consistency in 3D Object Detection with Hybrid-Cylindrical-Spherical Voxelization",
+      "conf_id": "neurips_2020"
+    },
+    {
+      "pid": "neurips_2021:02f6f0f1",
+      "title": "Learning Distilled Collaboration Graph for Multi-Agent Perception",
+      "conf_id": "neurips_2021"
+    },
+    {
+      "pid": "neurips_2021:5d73e52d",
+      "title": "Argoverse 2: Next Generation Datasets for Self-Driving Perception and Forecasting",
+      "conf_id": "neurips_2021"
+    },
+    {
+      "pid": "neurips_2021:6aeed159",
+      "title": "Multimodal Virtual Point 3D Detection",
+      "conf_id": "neurips_2021"
+    },
+    {
+      "pid": "neurips_2021:707555ab",
+      "title": "Object DGCNN: 3D Object Detection using Dynamic Graphs",
+      "conf_id": "neurips_2021"
+    },
+    {
+      "pid": "neurips_2021:c8fe14fa",
+      "title": "Revisiting 3D Object Detection From an Egocentric Perspective",
+      "conf_id": "neurips_2021"
+    },
+    {
+      "pid": "neurips_2021:d337df8a",
+      "title": "One Million Scenes for Autonomous Driving: ONCE Dataset",
+      "conf_id": "neurips_2021"
+    },
+    {
+      "pid": "neurips_2021:d39ae06d",
+      "title": "Learning Transferable Features for Point Cloud Detection via 3D Contrastive Co-training",
+      "conf_id": "neurips_2021"
+    },
+    {
+      "pid": "neurips_2022:8112d67f",
+      "title": "BEVFusion: A Simple and Robust LiDAR-Camera Fusion Framework",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2022:8ffc5e4d",
+      "title": "Unifying Voxel-based Representation with Transformer for 3D Object Detection",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "rss_2015:6482a679",
+      "title": "Voting for Voting in Online Point Cloud Object Detection",
+      "conf_id": "rss_2015"
+    },
+    {
+      "pid": "rss_2016:3ca43be5",
+      "title": "Vehicle Detection from 3D Lidar Using Fully Convolutional Network",
+      "conf_id": "rss_2016"
+    },
+    {
+      "pid": "usenix_security_2020:a44fee79",
+      "title": "Towards Robust LiDAR-based Perception in Autonomous Driving: General Black-box Adversarial Sensor Attack and Countermeasures",
+      "conf_id": "usenix_security_2020"
+    },
+    {
+      "pid": "wacv_2021:6a3e8a00",
+      "title": "Cross-Modality 3D Object Detection",
+      "conf_id": "wacv_2021"
+    },
+    {
+      "pid": "wacv_2021:bd0504fb",
+      "title": "CenterFusion: Center-based Radar and Camera Fusion for 3D Object Detection",
+      "conf_id": "wacv_2021"
+    },
+    {
+      "pid": "wacv_2022:23cd0213",
+      "title": "Fast-CLOCs: Fast Camera-LiDAR Object Candidates Fusion for 3D Object Detection",
+      "conf_id": "wacv_2022"
+    },
+    {
+      "pid": "wacv_2022:c3ffac10",
+      "title": "M3DETR: Multi-representation, Multi-scale, Mutual-relation 3D Object Detection with Transformers",
+      "conf_id": "wacv_2022"
+    }
+  ],
+  "excluded": [
+    {
+      "pid": "aaai_2019:3da2c52d",
+      "title": "TrafficPredict: Trajectory Prediction for Heterogeneous Traffic-Agents",
+      "conf_id": "aaai_2019",
+      "reason": "low: trajectory prediction only"
+    },
+    {
+      "pid": "aaai_2019:71eac2f7",
+      "title": "MonoGRNet: A Geometric Reasoning Network for Monocular 3D Object Localization",
+      "conf_id": "aaai_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "aaai_2019:75689d04",
+      "title": "Mono3D++: Monocular 3D Vehicle Detection with Two-Scale 3D Hypotheses and Task Priors",
+      "conf_id": "aaai_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "aaai_2020:0bfcd764",
+      "title": "ZoomNet: Part-Aware Adaptive Zooming Neural Network for 3D Object Detection",
+      "conf_id": "aaai_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "aaai_2020:1b2e02a8",
+      "title": "Task-Aware Monocular Depth Estimation for 3D Object Detection",
+      "conf_id": "aaai_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "aaai_2020:fcc19764",
+      "title": "Monocular 3D Object Detection with Decoupled Structured Polygon Estimation and Height-Guided Depth Estimation",
+      "conf_id": "aaai_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "aaai_2023:d6f41b81",
+      "title": "BEVDepth: Acquisition of Reliable Depth for Multi-View 3D Object Detection",
+      "conf_id": "aaai_2023",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "corl_2017:f466d78d",
+      "title": "CARLA: An Open Urban Driving Simulator",
+      "conf_id": "corl_2017",
+      "reason": "low: driving simulator"
+    },
+    {
+      "pid": "corl_2021:2a7b9a3c",
+      "title": "Probabilistic and Geometric Depth: Detecting Objects in Perspective",
+      "conf_id": "corl_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "corl_2021:d02b9310",
+      "title": "DETR3D: 3D Object Detection from Multi-view Images via 3D-to-2D Queries",
+      "conf_id": "corl_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2014:28e37d6e",
+      "title": "Are Cars Just 3D Boxes? Jointly Estimating the 3D Shape of Multiple Objects",
+      "conf_id": "cvpr_2014",
+      "reason": "low: image-based car shape estimation"
+    },
+    {
+      "pid": "cvpr_2015:74af987c",
+      "title": "Data-driven 3D Voxel Patterns for object category recognition",
+      "conf_id": "cvpr_2015",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2015:fcfb1ff1",
+      "title": "Fully convolutional networks for semantic segmentation",
+      "conf_id": "cvpr_2015",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2016:0bea1b92",
+      "title": "Monocular 3D Object Detection for Autonomous Driving",
+      "conf_id": "cvpr_2016",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2016:165e07ec",
+      "title": "A Large Dataset to Train Convolutional Networks for Disparity, Optical Flow, and Scene Flow Estimation",
+      "conf_id": "cvpr_2016",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2016:179930a5",
+      "title": "The SYNTHIA Dataset: A Large Collection of Synthetic Images for Semantic Segmentation of Urban Scenes",
+      "conf_id": "cvpr_2016",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2016:b580b02b",
+      "title": "Deep Residual Learning for Image Recognition",
+      "conf_id": "cvpr_2016",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2017:09534904",
+      "title": "3D Bounding Box Estimation Using Deep Learning and Geometry",
+      "conf_id": "cvpr_2017",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2017:3cfb485e",
+      "title": "Feature Pyramid Networks for Object Detection",
+      "conf_id": "cvpr_2017",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2017:44995150",
+      "title": "ScanNet: Richly-Annotated 3D Reconstructions of Indoor Scenes",
+      "conf_id": "cvpr_2017",
+      "reason": "low: indoor scan dataset, not detection"
+    },
+    {
+      "pid": "cvpr_2017:4d505539",
+      "title": "Deep MANTA: A Coarse-to-Fine Many-Task Network for Joint 2D and 3D Vehicle Analysis from Monocular Image",
+      "conf_id": "cvpr_2017",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2017:6e501a38",
+      "title": "Unsupervised Monocular Depth Estimation with Left-Right Consistency",
+      "conf_id": "cvpr_2017",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2017:a7ca0e37",
+      "title": "PointNet: Deep Learning on Point Sets for 3D Classification and Segmentation",
+      "conf_id": "cvpr_2017",
+      "reason": "low: point set classification/segmentation backbone"
+    },
+    {
+      "pid": "cvpr_2018:0aec9288",
+      "title": "Multi-Level Fusion Based 3D Object Detection From Monocular Images",
+      "conf_id": "cvpr_2018",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2018:1f91d524",
+      "title": "Deep Parametric Continuous Convolutional Neural Networks",
+      "conf_id": "cvpr_2018",
+      "reason": "low: generic point cloud convolution"
+    },
+    {
+      "pid": "cvpr_2018:530cab41",
+      "title": "Deep Ordinal Regression Network for Monocular Depth Estimation",
+      "conf_id": "cvpr_2018",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2018:5ae7c7ae",
+      "title": "3D Semantic Segmentation With Submanifold Sparse Convolutional Networks",
+      "conf_id": "cvpr_2018",
+      "reason": "low: point cloud segmentation"
+    },
+    {
+      "pid": "cvpr_2018:624553ee",
+      "title": "Pyramid Stereo Matching Network",
+      "conf_id": "cvpr_2018",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2018:72c683be",
+      "title": "Deep Layer Aggregation",
+      "conf_id": "cvpr_2018",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2018:bd646af2",
+      "title": "3D-RCNN: Instance-Level 3D Object Reconstruction via Render-and-Compare",
+      "conf_id": "cvpr_2018",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2019:40cc662b",
+      "title": "Robustness of 3D Deep Learning in an Adversarial Setting",
+      "conf_id": "cvpr_2019",
+      "reason": "low: adversarial robustness of point cloud nets"
+    },
+    {
+      "pid": "cvpr_2019:9704aff9",
+      "title": "Stereo R-CNN Based 3D Object Detection for Autonomous Driving",
+      "conf_id": "cvpr_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2019:a934592c",
+      "title": "ROI-10D: Monocular Lifting of 2D Detection to 6D Pose and Metric Shape",
+      "conf_id": "cvpr_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2019:bac3b0a8",
+      "title": "GS3D: An Efficient 3D Object Detection Framework for Autonomous Driving",
+      "conf_id": "cvpr_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2019:bfa37f4b",
+      "title": "Triangulation Learning Network: From Monocular to Stereo 3D Object Detection",
+      "conf_id": "cvpr_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2019:ce7c7d19",
+      "title": "DeepSDF: Learning Continuous Signed Distance Functions for Shape Representation",
+      "conf_id": "cvpr_2019",
+      "reason": "low: shape representation, no detection"
+    },
+    {
+      "pid": "cvpr_2019:d16fce8a",
+      "title": "Deep Fitting Degree Scoring Network for Monocular 3D Object Detection",
+      "conf_id": "cvpr_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2019:e3a98515",
+      "title": "Monocular 3D Object Detection Leveraging Accurate Proposals and Shape Reconstruction",
+      "conf_id": "cvpr_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2020:092a1dc6",
+      "title": "DSGN: Deep Stereo Geometry Network for 3D Object Detection",
+      "conf_id": "cvpr_2020",
+      "reason": "low: stereo-based 3D detection"
+    },
+    {
+      "pid": "cvpr_2020:102a4be7",
+      "title": "Learning Depth-Guided Convolutions for Monocular 3D Object Detection",
+      "conf_id": "cvpr_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2020:48a6cf7c",
+      "title": "Disp R-CNN: Stereo 3D Object Detection via Shape Prior Guided Instance Disparity Estimation",
+      "conf_id": "cvpr_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2020:52869051",
+      "title": "When2com: Multi-Agent Perception via Communication Graph Grouping",
+      "conf_id": "cvpr_2020",
+      "reason": "low: multi-agent perception communication"
+    },
+    {
+      "pid": "cvpr_2020:8d6a38fb",
+      "title": "SurfelGAN: Synthesizing Realistic Sensor Data for Autonomous Driving",
+      "conf_id": "cvpr_2020",
+      "reason": "low: LiDAR sensor simulation"
+    },
+    {
+      "pid": "cvpr_2020:983d8734",
+      "title": "IDA-3D: Instance-Depth-Aware 3D Object Detection From Stereo Vision for Autonomous Driving",
+      "conf_id": "cvpr_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2020:a3a6ec43",
+      "title": "Momentum Contrast for Unsupervised Visual Representation Learning",
+      "conf_id": "cvpr_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2020:b8ce275b",
+      "title": "LiDARsim: Realistic LiDAR Simulation by Leveraging the Real World",
+      "conf_id": "cvpr_2020",
+      "reason": "low: LiDAR simulation"
+    },
+    {
+      "pid": "cvpr_2020:e9dcb8de",
+      "title": "MonoPair: Monocular 3D Object Detection Using Pairwise Spatial Relationships",
+      "conf_id": "cvpr_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2021:1c7ce37a",
+      "title": "SceneGen: Learning To Generate Realistic Traffic Scenes",
+      "conf_id": "cvpr_2021",
+      "reason": "low: traffic scene generation"
+    },
+    {
+      "pid": "cvpr_2021:24add265",
+      "title": "GeoSim: Realistic Video Simulation via Geometry-Aware Composition for Self-Driving",
+      "conf_id": "cvpr_2021",
+      "reason": "low: sensor simulation"
+    },
+    {
+      "pid": "cvpr_2021:3deac2b5",
+      "title": "GrooMeD-NMS: Grouped Mathematically Differentiable NMS for Monocular 3D Object Detection",
+      "conf_id": "cvpr_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2021:41da2dc5",
+      "title": "Objects Are Different: Flexible Monocular 3D Object Detection",
+      "conf_id": "cvpr_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2021:64f20e0a",
+      "title": "TrafficSim: Learning To Simulate Realistic Multi-Agent Behaviors",
+      "conf_id": "cvpr_2021",
+      "reason": "low: traffic simulation"
+    },
+    {
+      "pid": "cvpr_2021:6567c350",
+      "title": "AdvSim: Generating Safety-Critical Scenarios for Self-Driving Vehicles",
+      "conf_id": "cvpr_2021",
+      "reason": "low: scenario generation"
+    },
+    {
+      "pid": "cvpr_2021:6b5f5417",
+      "title": "Monocular 3D Object Detection: An Extrinsic Parameter Free Approach",
+      "conf_id": "cvpr_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2021:8013dbfa",
+      "title": "Depth-Conditioned Dynamic Message Propagation for Monocular 3D Object Detection",
+      "conf_id": "cvpr_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2021:9523966c",
+      "title": "Delving Into Localization Errors for Monocular 3D Object Detection",
+      "conf_id": "cvpr_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2021:bf15138a",
+      "title": "M3DSSD: Monocular 3D Single Stage Object Detector",
+      "conf_id": "cvpr_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2021:c70f5eaf",
+      "title": "MP3: A Unified Model To Map, Perceive, Predict and Plan",
+      "conf_id": "cvpr_2021",
+      "reason": "low: mapping and planning end-to-end"
+    },
+    {
+      "pid": "cvpr_2021:cb6a685d",
+      "title": "DriveGAN: Towards a Controllable High-Quality Neural Simulation",
+      "conf_id": "cvpr_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2021:d551a7e8",
+      "title": "MonoRUn: Monocular 3D Object Detection by Reconstruction and Uncertainty Propagation",
+      "conf_id": "cvpr_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2021:f1a9f563",
+      "title": "Categorical Depth Distribution Network for Monocular 3D Object Detection",
+      "conf_id": "cvpr_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "cvpr_2022:996918aa",
+      "title": "MonoDTR: Monocular 3D Object Detection with Depth-Aware Transformer",
+      "conf_id": "cvpr_2022",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "eccv_2014:3e9c5fe5",
+      "title": "Microsoft COCO: Common Objects in Context",
+      "conf_id": "eccv_2014",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "eccv_2020:017f4564",
+      "title": "Testing the Safety of Self-driving Vehicles by Simulating Perception and Prediction",
+      "conf_id": "eccv_2020",
+      "reason": "low: perception simulation for safety"
+    },
+    {
+      "pid": "eccv_2020:3f7da8ae",
+      "title": "Kinematic 3D Object Detection in Monocular Video",
+      "conf_id": "eccv_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "eccv_2020:57ac3a55",
+      "title": "Perceive, Predict, and Plan: Safe Motion Planning Through Interpretable Semantic Representations",
+      "conf_id": "eccv_2020",
+      "reason": "low: planning with perception"
+    },
+    {
+      "pid": "eccv_2020:5ad1dee5",
+      "title": "End-to-End Object Detection with Transformers",
+      "conf_id": "eccv_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "eccv_2020:5d33818f",
+      "title": "Towards Generalization Across Depth for Monocular 3D Object Detection",
+      "conf_id": "eccv_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "eccv_2020:5d8f6476",
+      "title": "Lift, Splat, Shoot: Encoding Images from Arbitrary Camera Rigs by Implicitly Unprojecting to 3D",
+      "conf_id": "eccv_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "eccv_2020:8704dac3",
+      "title": "RTM3D: Real-Time Monocular 3D Detection from Object Keypoints for Autonomous Driving",
+      "conf_id": "eccv_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "eccv_2020:99264da1",
+      "title": "Monocular Differentiable Rendering for Self-supervised 3D Object Detection",
+      "conf_id": "eccv_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "eccv_2020:ac4683f1",
+      "title": "DSDNet: Deep Structured Self-driving Network",
+      "conf_id": "eccv_2020",
+      "reason": "low: motion planning model"
+    },
+    {
+      "pid": "eccv_2020:c3d517ca",
+      "title": "Monocular 3D Object Detection via Feature Domain Adaptation",
+      "conf_id": "eccv_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "eccv_2020:f7f2b89f",
+      "title": "Distance-Normalized Unified Representation for Monocular 3D Object Detection",
+      "conf_id": "eccv_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "eccv_2022:180f3da0",
+      "title": "SpatialDETR: Robust Scalable Transformer-Based 3D Object Detection From Multi-view Camera Images With Global Cross-Sensor Attention",
+      "conf_id": "eccv_2022",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "eccv_2022:65960fa5",
+      "title": "PETR: Position Embedding Transformation for Multi-view 3D Object Detection",
+      "conf_id": "eccv_2022",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "eccv_2022:9356b4c1",
+      "title": "BEVFormer: Learning Bird's-Eye-View Representation from Multi-camera Images via Spatiotemporal Transformers",
+      "conf_id": "eccv_2022",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2017:5275d749",
+      "title": "Focal Loss for Dense Object Detection",
+      "conf_id": "iccv_2017",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2017:c38b70bf",
+      "title": "Unpaired Image-to-Image Translation Using Cycle-Consistent Adversarial Networks",
+      "conf_id": "iccv_2017",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2019:0dab5da7",
+      "title": "FCOS: Fully Convolutional One-Stage Object Detection",
+      "conf_id": "iccv_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2019:cf065daf",
+      "title": "Accurate Monocular 3D Object Detection via Color-Embedded 3D Reconstruction for Autonomous Driving",
+      "conf_id": "iccv_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2019:d86496a6",
+      "title": "M3D-RPN: Monocular 3D Region Proposal Network for Object Detection",
+      "conf_id": "iccv_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2019:dc4ccf4c",
+      "title": "Joint Monocular 3D Vehicle Detection and Tracking",
+      "conf_id": "iccv_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2019:f16c748e",
+      "title": "WoodScape: A Multi-Task, Multi-Camera Fisheye Dataset for Autonomous Driving",
+      "conf_id": "iccv_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2019:fc28d868",
+      "title": "Deep Optics for Monocular Depth Estimation and 3D Object Detection",
+      "conf_id": "iccv_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2021:0ece4343",
+      "title": "The Devil is in the Task: Exploiting Reciprocal Appearance-Localization Features for Monocular 3D Object Detection",
+      "conf_id": "iccv_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2021:10c33caa",
+      "title": "Geometry Uncertainty Projection Network for Monocular 3D Object Detection",
+      "conf_id": "iccv_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2021:343c538f",
+      "title": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows",
+      "conf_id": "iccv_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2021:85af294e",
+      "title": "Is Pseudo-Lidar needed for Monocular 3D Object detection?",
+      "conf_id": "iccv_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2021:8b3908f9",
+      "title": "PIT: Position-Invariant Transform for Cross-FoV Domain Adaptation",
+      "conf_id": "iccv_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2021:bf9fd71d",
+      "title": "LookOut: Diverse Multi-Future Prediction and Planning for Self-Driving",
+      "conf_id": "iccv_2021",
+      "reason": "low: prediction and planning"
+    },
+    {
+      "pid": "iccv_2021:c8be890c",
+      "title": "Geometry-based Distance Decomposition for Monocular 3D Object Detection",
+      "conf_id": "iccv_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iccv_2021:fc015252",
+      "title": "Adversarial Attacks On Multi-Agent Communication",
+      "conf_id": "iccv_2021",
+      "reason": "low: multi-agent communication attacks"
+    },
+    {
+      "pid": "iclr_2021:5b76c39b",
+      "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+      "conf_id": "iclr_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iclr_2022:fa17ca61",
+      "title": "WeakM3D: Towards Weakly Supervised Monocular 3D Object Detection",
+      "conf_id": "iclr_2022",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "iclr_2023:f422fd90",
+      "title": "Time Will Tell: New Outlooks and A Baseline for Temporal Multi-View 3D Object Detection",
+      "conf_id": "iclr_2023",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "icml_2020:18636486",
+      "title": "MoNet3D: Towards Accurate Monocular 3D Object Localization in Real Time",
+      "conf_id": "icml_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "icra_2018:6de01f9f",
+      "title": "End-to-End Driving Via Conditional Imitation Learning",
+      "conf_id": "icra_2018",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "icra_2019:781227bb",
+      "title": "Distant Vehicle Detection Using Radar and Vision",
+      "conf_id": "icra_2019",
+      "reason": "low: radar-vision detection, not point cloud 3D"
+    },
+    {
+      "pid": "icra_2019:d94502f0",
+      "title": "Learning to Drive in a Day",
+      "conf_id": "icra_2019",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "icra_2020:495c6030",
+      "title": "Who2com: Collaborative Perception via Learnable Handshake Communication",
+      "conf_id": "icra_2020",
+      "reason": "low: collaborative perception communication"
+    },
+    {
+      "pid": "icra_2020:8a67ae1f",
+      "title": "Object-Centric Stereo Matching for 3D Object Detection",
+      "conf_id": "icra_2020",
+      "reason": "low: stereo-based 3D detection"
+    },
+    {
+      "pid": "icra_2021:0870bdb9",
+      "title": "YOLOStereo3D: A Step Back to 2D for Efficient Stereo 3D Detection",
+      "conf_id": "icra_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "icra_2021:ce6c3b17",
+      "title": "Perceive, Attend, and Drive: Learning Spatial Attention for Safe Self-Driving",
+      "conf_id": "icra_2021",
+      "reason": "low: driving planning attention"
+    },
+    {
+      "pid": "iros_2020:5d7b7bb0",
+      "title": "Confidence Guided Stereo 3D Object Detection with Split Depth Estimation",
+      "conf_id": "iros_2020",
+      "reason": "low: stereo-based 3D detection"
+    },
+    {
+      "pid": "iros_2021:141c44e8",
+      "title": "Learning to Drop Points for LiDAR Scan Synthesis",
+      "conf_id": "iros_2021",
+      "reason": "low: LiDAR scan synthesis"
+    },
+    {
+      "pid": "iros_2021:7132e987",
+      "title": "PLUMENet: Efficient 3D Object Detection from Stereo Images",
+      "conf_id": "iros_2021",
+      "reason": "low: stereo-based 3D detection"
+    },
+    {
+      "pid": "neurips_2015:3c9e1983",
+      "title": "3D Object Proposals for Accurate Object Class Detection",
+      "conf_id": "neurips_2015",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "neurips_2015:d85fd4b0",
+      "title": "Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks",
+      "conf_id": "neurips_2015",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "neurips_2017:0ea83918",
+      "title": "Attention is All you Need",
+      "conf_id": "neurips_2017",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "neurips_2017:fd19941b",
+      "title": "PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space",
+      "conf_id": "neurips_2017",
+      "reason": "low: point set backbone, no detection"
+    },
+    {
+      "pid": "neurips_2019:6410d945",
+      "title": "Point-Voxel CNN for Efficient 3D Deep Learning",
+      "conf_id": "neurips_2019",
+      "reason": "low: point-voxel backbone, not detection"
+    },
+    {
+      "pid": "neurips_2020:3f587768",
+      "title": "Wasserstein Distances for Stereo Disparity Estimation",
+      "conf_id": "neurips_2020",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "neurips_2021:245b192d",
+      "title": "Progressive Coordinate Transforms for Monocular 3D Object Detection",
+      "conf_id": "neurips_2021",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "wacv_2017:6db05f2d",
+      "title": "Subcategory-Aware Convolutional Neural Networks for Object Proposals and Detection",
+      "conf_id": "wacv_2017",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "wacv_2022:96664dae",
+      "title": "ImVoxelNet: Image to Voxels Projection for Monocular and Multi-View General-Purpose 3D Object Detection",
+      "conf_id": "wacv_2022",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    },
+    {
+      "pid": "wacv_2022:f8d28cdf",
+      "title": "SIDE: Center-based Stereo 3D Detector with Structure-aware Instance Depth Estimation",
+      "conf_id": "wacv_2022",
+      "reason": "no: camera-only, 2D or generic, not point-cloud detection"
+    }
+  ]
+}

@@ -7,6 +7,8 @@ import respx
 
 from ppr.s2_client import (
     BATCH_CHUNK_SIZE,
+    BATCH_URL,
+    ENRICHMENT_FIELDS,
     MATCH_URL,
     S2Client,
 )
@@ -325,3 +327,22 @@ class TestBulkSearch:
         async with httpx.AsyncClient() as client:
             out = await _client().bulk_search(client, "ICML", 2026)
         assert [e["title"] for e in out] == ["A"]
+
+
+class TestBatchFields:
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_default_fields_are_the_enrichment_fields(self):
+        route = respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[{"corpusId": 1}]))
+        async with httpx.AsyncClient() as client:
+            await _client().get_batch(client, ["CorpusId:1"])
+        assert route.calls.last.request.url.params["fields"] == ENRICHMENT_FIELDS
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_fields_can_be_chosen(self):
+        route = respx.post(BATCH_URL).mock(return_value=httpx.Response(200, json=[{"corpusId": 1}]))
+        async with httpx.AsyncClient() as client:
+            out = await _client().get_batch(client, ["CorpusId:1"], fields="corpusId,references.corpusId")
+        assert route.calls.last.request.url.params["fields"] == "corpusId,references.corpusId"
+        assert out == [{"corpusId": 1}]

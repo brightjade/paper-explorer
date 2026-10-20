@@ -20,6 +20,9 @@ web/public/data/
 # Survey outputs
 outputs/
 
+# Search index (ppr search), rebuilt from data/
+.cache/
+
 # Claude Code worktrees
 .claude/worktrees/
 

@@ -1,0 +1,1528 @@
+{
+  "topic": "vla_robot_learning",
+  "survey": {
+    "id": "ARXIV:2510.07077",
+    "title": "Vision-Language-Action Models for Robotics: A Review Towards Real-World Applications"
+  },
+  "criteria": [
+    "Core: learns robot policies that map visual observations and natural-language instructions to actions or skills (vision-language-action models, language-conditioned imitation or reinforcement learning, generalist robot policies), including VLM/LLM-based planners whose output drives a robot.",
+    "Robot datasets, simulators, benchmarks and pretrained visual or action representations built for training or evaluating such policies also count.",
+    "Out of scope: vision-language models or LLMs with no robot or action component; robot learning without language conditioning or visual input; classical planning and control; pure navigation agents in non-robotic web or game environments."
+  ],
+  "queries": [
+    "vision-language-action",
+    "language-conditioned",
+    "robot manipulation",
+    "robot policy",
+    "generalist robot",
+    "instruction following robot",
+    "embodied instruction",
+    "robot foundation model",
+    "imitation learning language",
+    "language model robot planning"
+  ],
+  "references_total": 405,
+  "references_in_dataset": 273,
+  "gold": [
+    {
+      "pid": "aaai_2026:07534b4d",
+      "title": "MoLe-VLA: Dynamic Layer-skipping Vision Language Action Model via Mixture-of-Layers for Efficient Robot Manipulation",
+      "conf_id": "aaai_2026"
+    },
+    {
+      "pid": "aaai_2026:c8a329d2",
+      "title": "DexGraspVLA: A Vision-Language-Action Framework Towards General Dexterous Grasping",
+      "conf_id": "aaai_2026"
+    },
+    {
+      "pid": "acl_2025:a09c94bc",
+      "title": "Emma-X: An Embodied Multimodal Action Model with Grounded Chain of Thought and Look-ahead Spatial Reasoning",
+      "conf_id": "acl_2025"
+    },
+    {
+      "pid": "corl_2018:1246a399",
+      "title": "Multiple Interactions Made Easy (MIME): Large Scale Demonstrations Data for Imitation",
+      "conf_id": "corl_2018"
+    },
+    {
+      "pid": "corl_2021:8f28da2e",
+      "title": "BC-Z: Zero-Shot Task Generalization with Robotic Imitation Learning",
+      "conf_id": "corl_2021"
+    },
+    {
+      "pid": "corl_2021:be6f0760",
+      "title": "CLIPort: What and Where Pathways for Robotic Manipulation",
+      "conf_id": "corl_2021"
+    },
+    {
+      "pid": "corl_2022:d6dfcf77",
+      "title": "Do As I Can, Not As I Say: Grounding Language in Robotic Affordances",
+      "conf_id": "corl_2022"
+    },
+    {
+      "pid": "corl_2023:037cce96",
+      "title": "Open-World Object Manipulation using Pre-Trained Vision-Language Models",
+      "conf_id": "corl_2023"
+    },
+    {
+      "pid": "corl_2023:08767130",
+      "title": "BridgeData V2: A Dataset for Robot Learning at Scale",
+      "conf_id": "corl_2023"
+    },
+    {
+      "pid": "corl_2023:1eb61118",
+      "title": "VoxPoser: Composable 3D Value Maps for Robotic Manipulation with Language Models",
+      "conf_id": "corl_2023"
+    },
+    {
+      "pid": "corl_2023:21f8f465",
+      "title": "RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control",
+      "conf_id": "corl_2023"
+    },
+    {
+      "pid": "corl_2023:dfa5b667",
+      "title": "Language Embedded Radiance Fields for Zero-Shot Task-Oriented Grasping",
+      "conf_id": "corl_2023"
+    },
+    {
+      "pid": "corl_2024:0b71a061",
+      "title": "OpenVLA: An Open-Source Vision-Language-Action Model",
+      "conf_id": "corl_2024"
+    },
+    {
+      "pid": "corl_2024:38f0d15f",
+      "title": "Scaling Cross-Embodied Learning: One Policy for Manipulation, Navigation, Locomotion and Aviation",
+      "conf_id": "corl_2024"
+    },
+    {
+      "pid": "corl_2024:3f42eb22",
+      "title": "3D Diffuser Actor: Policy Diffusion with 3D Scene Representations",
+      "conf_id": "corl_2024"
+    },
+    {
+      "pid": "corl_2024:41421065",
+      "title": "General Flow as Foundation Affordance for Scalable Robot Learning",
+      "conf_id": "corl_2024"
+    },
+    {
+      "pid": "corl_2024:5ed538aa",
+      "title": "ReMix: Optimizing Data Mixtures for Large Scale Imitation Learning",
+      "conf_id": "corl_2024"
+    },
+    {
+      "pid": "corl_2024:7c2c60c7",
+      "title": "Mobility VLA: Multimodal Instruction Navigation with Long-Context VLMs and Topological Graphs",
+      "conf_id": "corl_2024"
+    },
+    {
+      "pid": "corl_2024:826eb780",
+      "title": "Splat-MOVER: Multi-Stage, Open-Vocabulary Robotic Manipulation via Editable Gaussian Splatting",
+      "conf_id": "corl_2024"
+    },
+    {
+      "pid": "corl_2024:8fb5ab80",
+      "title": "Scaling Robot Policy Learning via Zero-Shot Labeling with Foundation Models",
+      "conf_id": "corl_2024"
+    },
+    {
+      "pid": "corl_2024:a1bd3832",
+      "title": "RT-Sketch: Goal-Conditioned Imitation Learning from Hand-Drawn Sketches",
+      "conf_id": "corl_2024"
+    },
+    {
+      "pid": "corl_2024:c7a37355",
+      "title": "Evaluating Real-World Robot Manipulation Policies in Simulation",
+      "conf_id": "corl_2024"
+    },
+    {
+      "pid": "corl_2024:deb65c70",
+      "title": "Robotic Control via Embodied Chain-of-Thought Reasoning",
+      "conf_id": "corl_2024"
+    },
+    {
+      "pid": "corl_2025:0223aa8f",
+      "title": "Humanoid Policy ~ Human Policy",
+      "conf_id": "corl_2025"
+    },
+    {
+      "pid": "corl_2025:25b55243",
+      "title": "Training Strategies for Efficient Embodied Reasoning",
+      "conf_id": "corl_2025"
+    },
+    {
+      "pid": "corl_2025:335bace6",
+      "title": "UniSkill: Imitating Human Videos via Cross-Embodiment Skill Representations",
+      "conf_id": "corl_2025"
+    },
+    {
+      "pid": "corl_2025:365fa9b6",
+      "title": "DreamGen: Unlocking Generalization in Robot Learning through Video World Models",
+      "conf_id": "corl_2025"
+    },
+    {
+      "pid": "corl_2025:3c53b023",
+      "title": "Steering Your Diffusion Policy with Latent Space Reinforcement Learning",
+      "conf_id": "corl_2025"
+    },
+    {
+      "pid": "corl_2025:5ecf1e43",
+      "title": "$\\pi_{0.5}$: a Vision-Language-Action Model with Open-World Generalization",
+      "conf_id": "corl_2025"
+    },
+    {
+      "pid": "corl_2025:6d46e81b",
+      "title": "DexVLA: Vision-Language Model with Plug-In Diffusion Expert for General Robot Control",
+      "conf_id": "corl_2025"
+    },
+    {
+      "pid": "corl_2025:969ac016",
+      "title": "RoboArena: Distributed Real-World Evaluation of Generalist Robot Policies",
+      "conf_id": "corl_2025"
+    },
+    {
+      "pid": "corl_2025:9c011a54",
+      "title": "GraspVLA: a Grasping Foundation Model Pre-trained on Billion-scale Synthetic Action Data",
+      "conf_id": "corl_2025"
+    },
+    {
+      "pid": "corl_2025:d3cd746d",
+      "title": "FLARE: Robot Learning with Implicit World Modeling",
+      "conf_id": "corl_2025"
+    },
+    {
+      "pid": "corl_2025:ead7f7ca",
+      "title": "TrackVLA: Embodied Visual Tracking in the Wild",
+      "conf_id": "corl_2025"
+    },
+    {
+      "pid": "corl_2026:f628c90b",
+      "title": "BitVLA: 1-bit Vision-Language-Action Models for Robotics Manipulation",
+      "conf_id": "corl_2026"
+    },
+    {
+      "pid": "cvpr_2024:1ddc2424",
+      "title": "Unified-IO 2: Scaling Autoregressive Multimodal Models with Vision Language Audio and Action",
+      "conf_id": "cvpr_2024"
+    },
+    {
+      "pid": "cvpr_2024:c541e8c3",
+      "title": "SPOC: Imitating Shortest Paths in Simulation Enables Effective Navigation and Manipulation in the Real World",
+      "conf_id": "cvpr_2024"
+    },
+    {
+      "pid": "cvpr_2025:2da357f7",
+      "title": "RoboBrain: A Unified Brain Model for Robotic Manipulation from Abstract to Concrete",
+      "conf_id": "cvpr_2025"
+    },
+    {
+      "pid": "cvpr_2025:5cd532a6",
+      "title": "VidBot: Learning Generalizable 3D Actions from In-the-Wild 2D Human Videos for Zero-Shot Robotic Manipulation",
+      "conf_id": "cvpr_2025"
+    },
+    {
+      "pid": "cvpr_2025:6c43598e",
+      "title": "CoT-VLA: Visual Chain-of-Thought Reasoning for Vision-Language-Action Models",
+      "conf_id": "cvpr_2025"
+    },
+    {
+      "pid": "cvpr_2025:8395c8e3",
+      "title": "RoboGround: Robotic Manipulation with Grounded Vision-Language Priors",
+      "conf_id": "cvpr_2025"
+    },
+    {
+      "pid": "cvpr_2025:9b528deb",
+      "title": "RoboTwin: Dual-Arm Robot Benchmark with Generative Digital Twins",
+      "conf_id": "cvpr_2025"
+    },
+    {
+      "pid": "cvpr_2025:c5b830ab",
+      "title": "Universal Actions for Enhanced Embodied Foundation Models",
+      "conf_id": "cvpr_2025"
+    },
+    {
+      "pid": "cvpr_2025:f7b5b546",
+      "title": "Think Small, Act Big: Primitive Prompt Learning for Lifelong Robot Manipulation",
+      "conf_id": "cvpr_2025"
+    },
+    {
+      "pid": "eccv_2024:9ffe301f",
+      "title": "Track2Act: Predicting Point Tracks from Internet Videos enables Generalizable Robot Manipulation",
+      "conf_id": "eccv_2024"
+    },
+    {
+      "pid": "eccv_2024:a8637df0",
+      "title": "QUAR-VLA: Vision-Language-Action Model for Quadruped Robots",
+      "conf_id": "eccv_2024"
+    },
+    {
+      "pid": "emnlp_2025:5437f5fe",
+      "title": "ChatVLA: Unified Multimodal Understanding and Robot Control with Vision-Language-Action Model",
+      "conf_id": "emnlp_2025"
+    },
+    {
+      "pid": "emnlp_2025:96b4abcd",
+      "title": "Astra: Efficient Transformer Architecture and Contrastive Dynamics Learning for Embodied Instruction Following",
+      "conf_id": "emnlp_2025"
+    },
+    {
+      "pid": "fse_2025:939e075d",
+      "title": "VLATest: Testing and Evaluating Vision-Language-Action Models for Robotic Manipulation",
+      "conf_id": "fse_2025"
+    },
+    {
+      "pid": "iccv_2025:3a1e7a1c",
+      "title": "iManip: Skill-Incremental Learning for Robotic Manipulation",
+      "conf_id": "iccv_2025"
+    },
+    {
+      "pid": "iccv_2025:4483b63e",
+      "title": "RoboTron-Mani: All-in-One Multimodal Large Model for Robotic Manipulation",
+      "conf_id": "iccv_2025"
+    },
+    {
+      "pid": "iccv_2025:470ef732",
+      "title": "Moto: Latent Motion Token as the Bridging Language for Learning Robot Manipulation from Videos",
+      "conf_id": "iccv_2025"
+    },
+    {
+      "pid": "iccv_2025:4e2fa86b",
+      "title": "CoA-VLA: Improving Vision-Language-Action Models via Visual-Text Chain-of-Affordance",
+      "conf_id": "iccv_2025"
+    },
+    {
+      "pid": "iccv_2025:e7780cf5",
+      "title": "Exploring the Adversarial Vulnerabilities of Vision-Language-Action Models in Robotics",
+      "conf_id": "iccv_2025"
+    },
+    {
+      "pid": "iccv_2025:ed5bfefe",
+      "title": "A₀ : An Affordance-Aware Hierarchical Model for General Robotic Manipulation",
+      "conf_id": "iccv_2025"
+    },
+    {
+      "pid": "iclr_2024:00de6297",
+      "title": "Learning to Act from Actionless Videos through Dense Correspondences",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:39fddabb",
+      "title": "Unleashing Large-Scale Video Generative Pre-training for Visual Robot Manipulation",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:6b2630e9",
+      "title": "RT-Trajectory: Robotic Task Generalization via Hindsight Trajectory Sketches",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:a5c34e5c",
+      "title": "Vision-Language Foundation Models as Effective Robot Imitators",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2025:02ef67a0",
+      "title": "LLaRA: Supercharging Robot Learning Data for Vision-Language Policy",
+      "conf_id": "iclr_2025"
+    },
+    {
+      "pid": "iclr_2025:0485491c",
+      "title": "Latent Action Pretraining from Videos",
+      "conf_id": "iclr_2025"
+    },
+    {
+      "pid": "iclr_2025:34df4eae",
+      "title": "VLAS: Vision-Language-Action Model with Speech Instructions for Customized Robot Manipulation",
+      "conf_id": "iclr_2025"
+    },
+    {
+      "pid": "iclr_2025:5442bcf1",
+      "title": "TraceVLA: Visual Trace Prompting Enhances Spatial-Temporal Awareness for Generalist Robotic Policies",
+      "conf_id": "iclr_2025"
+    },
+    {
+      "pid": "iclr_2025:8c95b440",
+      "title": "RDT-1B: a Diffusion Foundation Model for Bimanual Manipulation",
+      "conf_id": "iclr_2025"
+    },
+    {
+      "pid": "iclr_2025:a3bce1dd",
+      "title": "GEVRM: Goal-Expressive Video Generation Model For Robust Visual Manipulation",
+      "conf_id": "iclr_2025"
+    },
+    {
+      "pid": "iclr_2025:aa8b79a9",
+      "title": "HAMSTER: Hierarchical Action Models for Open-World Robot Manipulation",
+      "conf_id": "iclr_2025"
+    },
+    {
+      "pid": "iclr_2026:457a9099",
+      "title": "OneTwoVLA: A Unified Vision-Language-Action Model with Adaptive Reasoning",
+      "conf_id": "iclr_2026"
+    },
+    {
+      "pid": "iclr_2026:9879f66c",
+      "title": "HybridVLA: Collaborative Diffusion and Autoregression in a Unified Vision-Language-Action Model",
+      "conf_id": "iclr_2026"
+    },
+    {
+      "pid": "icml_2023:5f335fb1",
+      "title": "VIMA: Robot Manipulation with Multimodal Prompts",
+      "conf_id": "icml_2023"
+    },
+    {
+      "pid": "icml_2023:b931286b",
+      "title": "PaLM-E: An Embodied Multimodal Language Model",
+      "conf_id": "icml_2023"
+    },
+    {
+      "pid": "icml_2024:45971e77",
+      "title": "3D-VLA: A 3D Vision-Language-Action Generative World Model",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "icml_2024:b38ece79",
+      "title": "An Embodied Generalist Agent in 3D World",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "icml_2025:30258399",
+      "title": "UP-VLA:  A Unified Understanding and Prediction Model for Embodied Agent",
+      "conf_id": "icml_2025"
+    },
+    {
+      "pid": "icml_2025:4d50b21d",
+      "title": "Pre-training Auto-regressive Robotic Models with 4D Representations",
+      "conf_id": "icml_2025"
+    },
+    {
+      "pid": "icml_2025:854d7a1e",
+      "title": "Hi Robot: Open-Ended Instruction Following with Hierarchical Vision-Language-Action Models",
+      "conf_id": "icml_2025"
+    },
+    {
+      "pid": "icml_2025:d83dbf99",
+      "title": "SAM2Act: Integrating Visual Foundation Model with A Memory Architecture for Robotic Manipulation",
+      "conf_id": "icml_2025"
+    },
+    {
+      "pid": "icml_2026:3e38374b",
+      "title": "RoboTwin 2.0: A Scalable Data Generator and Benchmark with Strong Domain Randomization for Robust Bimanual Robotic Manipulation",
+      "conf_id": "icml_2026"
+    },
+    {
+      "pid": "icra_2023:cb9ebd00",
+      "title": "Code as Policies: Language Model Programs for Embodied Control",
+      "conf_id": "icra_2023"
+    },
+    {
+      "pid": "icra_2023:dd1b8edc",
+      "title": "Grounding Language with Visual Affordances over Unstructured Data",
+      "conf_id": "icra_2023"
+    },
+    {
+      "pid": "icra_2024:0ff819a0",
+      "title": "Open X-Embodiment: Robotic Learning Datasets and RT-X Models : Open X-Embodiment Collaboration",
+      "conf_id": "icra_2024"
+    },
+    {
+      "pid": "icra_2024:159b4dab",
+      "title": "RoboVQA: Multimodal Long-Horizon Reasoning for Robotics",
+      "conf_id": "icra_2024"
+    },
+    {
+      "pid": "icra_2024:414ec571",
+      "title": "SARA-RT: Scaling up Robotics Transformers with Self-Adaptive Robust Attention",
+      "conf_id": "icra_2024"
+    },
+    {
+      "pid": "icra_2025:06d79fbd",
+      "title": "Beyond Sight: Finetuning Generalist Robot Policies with Heterogeneous Sensors via Language Grounding",
+      "conf_id": "icra_2025"
+    },
+    {
+      "pid": "icra_2025:14f2a649",
+      "title": "Improving Vision-Language-Action Model with Online Reinforcement Learning",
+      "conf_id": "icra_2025"
+    },
+    {
+      "pid": "icra_2025:1cef0487",
+      "title": "MoRE: Unlocking Scalability in Reinforcement Learning for Quadruped Vision-Language-Action Models",
+      "conf_id": "icra_2025"
+    },
+    {
+      "pid": "icra_2025:4240b3bd",
+      "title": "ReVLA: Reverting Visual Domain Limitation of Robotic Foundation Models",
+      "conf_id": "icra_2025"
+    },
+    {
+      "pid": "icra_2025:5e77cff9",
+      "title": "LUMOS: Language-Conditioned Imitation Learning with World Models",
+      "conf_id": "icra_2025"
+    },
+    {
+      "pid": "icra_2025:806e1616",
+      "title": "ICRT: In-Context Imitation Learning via Next-Token Prediction",
+      "conf_id": "icra_2025"
+    },
+    {
+      "pid": "icra_2025:e304b4ef",
+      "title": "Run-time Observation Interventions Make Vision-Language-Action Models More Visually Robust",
+      "conf_id": "icra_2025"
+    },
+    {
+      "pid": "icra_2025:f8429175",
+      "title": "RT-Affordance: Affordances are Versatile Intermediate Representations for Robot Manipulation",
+      "conf_id": "icra_2025"
+    },
+    {
+      "pid": "icra_2026:22506554",
+      "title": "FP3: A 3D Foundation Policy for Robotic Manipulation",
+      "conf_id": "icra_2026"
+    },
+    {
+      "pid": "icra_2026:2a9f5fd4",
+      "title": "Fast ECoT: Efficient Embodied Chain-of-Thought via Thoughts Reuse",
+      "conf_id": "icra_2026"
+    },
+    {
+      "pid": "icra_2026:7bf4cac9",
+      "title": "ViSA-Flow: Accelerating Robot Skill Learning via Large-Scale Video Semantic Action Flow",
+      "conf_id": "icra_2026"
+    },
+    {
+      "pid": "iros_2024:d3312846",
+      "title": "Depth Helps: Improving Pre-trained RGB-based Policy with Depth Information Injection",
+      "conf_id": "iros_2024"
+    },
+    {
+      "pid": "iros_2025:157bb5d9",
+      "title": "Refined Policy Distillation: From VLA Generalists to RL Experts",
+      "conf_id": "iros_2025"
+    },
+    {
+      "pid": "iros_2025:3fc0d378",
+      "title": "RoboNurse-VLA: Robotic Scrub Nurse System based on Vision-Language-Action Model",
+      "conf_id": "iros_2025"
+    },
+    {
+      "pid": "iros_2025:a5706b8c",
+      "title": "Affordance-Guided Reinforcement Learning via Visual Prompting",
+      "conf_id": "iros_2025"
+    },
+    {
+      "pid": "neurips_2023:0ec1e91c",
+      "title": "Compositional Foundation Models for Hierarchical Planning",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:6af0f670",
+      "title": "LIBERO: Benchmarking Knowledge Transfer for Lifelong Robot Learning",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:794b0451",
+      "title": "Learning Universal Policies via Text-Guided Video Generation",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2024:08dbce6c",
+      "title": "RoboMamba: Efficient Vision-Language-Action Model for Robotic Reasoning and Manipulation",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:1ad649fc",
+      "title": "DeeR-VLA: Dynamic Inference of Multimodal Large Language Models for Efficient Robot Execution",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:3ade3fcd",
+      "title": "BAKU: An Efficient Transformer for Multi-Task Policy Learning",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2025:22728b4d",
+      "title": "BridgeVLA: Input-Output Alignment for Efficient 3D Manipulation Learning with Vision-Language Models",
+      "conf_id": "neurips_2025"
+    },
+    {
+      "pid": "neurips_2025:42a042fa",
+      "title": "Real-Time Execution of Action Chunking Flow Policies",
+      "conf_id": "neurips_2025"
+    },
+    {
+      "pid": "neurips_2025:84ab4bca",
+      "title": "SAFE: Multitask Failure Detection for Vision-Language-Action Models",
+      "conf_id": "neurips_2025"
+    },
+    {
+      "pid": "neurips_2025:894208ca",
+      "title": "VLA-Cache: Efficient Vision-Language-Action Manipulation via Adaptive Token Caching",
+      "conf_id": "neurips_2025"
+    },
+    {
+      "pid": "neurips_2025:89cf91bf",
+      "title": "Fast-in-Slow: A Dual-System VLA Model Unifying Fast Manipulation within Slow Reasoning",
+      "conf_id": "neurips_2025"
+    },
+    {
+      "pid": "neurips_2025:b30b08bf",
+      "title": "Temporal Representation Alignment: Successor Features Enable Emergent Compositionality in Robot Instruction Following",
+      "conf_id": "neurips_2025"
+    },
+    {
+      "pid": "neurips_2025:c798225f",
+      "title": "SoFar: Language-Grounded Orientation Bridges Spatial Reasoning and Object Manipulation",
+      "conf_id": "neurips_2025"
+    },
+    {
+      "pid": "neurips_2025:d8935612",
+      "title": "ForceVLA: Enhancing VLA Models with a Force-aware MoE for Contact-rich Manipulation",
+      "conf_id": "neurips_2025"
+    },
+    {
+      "pid": "neurips_2025:de6f072d",
+      "title": "Knowledge Insulating Vision-Language-Action Models: Train Fast, Run Fast, Generalize Better",
+      "conf_id": "neurips_2025"
+    },
+    {
+      "pid": "rss_2022:3a0ca648",
+      "title": "Bridge Data: Boosting Generalization of Robotic Skills with Cross-Domain Datasets",
+      "conf_id": "rss_2022"
+    },
+    {
+      "pid": "rss_2023:2900047e",
+      "title": "Robotic Skill Acquisition via Instruction Augmentation with Vision-Language Models",
+      "conf_id": "rss_2023"
+    },
+    {
+      "pid": "rss_2023:52d3ef9d",
+      "title": "Scaling Robot Learning with Semantically Imagined Experience",
+      "conf_id": "rss_2023"
+    },
+    {
+      "pid": "rss_2023:99655189",
+      "title": "RT-1: Robotics Transformer for Real-World Control at Scale",
+      "conf_id": "rss_2023"
+    },
+    {
+      "pid": "rss_2023:a3944d04",
+      "title": "StructDiffusion: Language-Guided Creation of Physically-Valid Structures using Unseen Objects",
+      "conf_id": "rss_2023"
+    },
+    {
+      "pid": "rss_2024:213c3ba9",
+      "title": "Multimodal Diffusion Transformer: Learning Versatile Behavior from Multimodal Goals",
+      "conf_id": "rss_2024"
+    },
+    {
+      "pid": "rss_2024:300a96ec",
+      "title": "RVT-2: Learning Precise Manipulation from Few Demonstrations",
+      "conf_id": "rss_2024"
+    },
+    {
+      "pid": "rss_2024:56fb9e87",
+      "title": "RoboCasa: Large-Scale Simulation of Household Tasks for Generalist Robots",
+      "conf_id": "rss_2024"
+    },
+    {
+      "pid": "rss_2024:5ac3010c",
+      "title": "Pushing the Limits of Cross-Embodiment Learning for Manipulation and Navigation",
+      "conf_id": "rss_2024"
+    },
+    {
+      "pid": "rss_2024:622574a4",
+      "title": "Any-point Trajectory Modeling for Policy Learning",
+      "conf_id": "rss_2024"
+    },
+    {
+      "pid": "rss_2024:8d4dfac7",
+      "title": "THE COLOSSEUM: A Benchmark for Evaluating Generalization for Robotic Manipulation",
+      "conf_id": "rss_2024"
+    },
+    {
+      "pid": "rss_2024:8dab991e",
+      "title": "RT-H: Action Hierarchies using Language",
+      "conf_id": "rss_2024"
+    },
+    {
+      "pid": "rss_2024:c931701e",
+      "title": "HRP: Human affordances for Robotic Pre-training",
+      "conf_id": "rss_2024"
+    },
+    {
+      "pid": "rss_2024:daad34ec",
+      "title": "DROID: A Large-Scale In-The-Wild Robot Manipulation Dataset",
+      "conf_id": "rss_2024"
+    },
+    {
+      "pid": "rss_2024:dffda450",
+      "title": "Octo: An Open-Source Generalist Robot Policy",
+      "conf_id": "rss_2024"
+    },
+    {
+      "pid": "rss_2024:f3d29f08",
+      "title": "Yell At Your Robot: Improving On-the-Fly from Language Corrections",
+      "conf_id": "rss_2024"
+    },
+    {
+      "pid": "rss_2025:16aa8099",
+      "title": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
+      "conf_id": "rss_2025"
+    },
+    {
+      "pid": "rss_2025:27e5ce45",
+      "title": "SpatialVLA: Exploring Spatial Representations for Visual-Language-Action Models",
+      "conf_id": "rss_2025"
+    },
+    {
+      "pid": "rss_2025:32c6bf7d",
+      "title": "RoboMIND: Benchmark on Multi-embodiment Intelligence Normative Data for Robot Manipulation",
+      "conf_id": "rss_2025"
+    },
+    {
+      "pid": "rss_2025:5d0d38a0",
+      "title": "π₀: A Vision-Language-Action Flow Model for General Robot Control",
+      "conf_id": "rss_2025"
+    },
+    {
+      "pid": "rss_2025:697f3d46",
+      "title": "Fine-Tuning Vision-Language-Action Models: Optimizing Speed and Success",
+      "conf_id": "rss_2025"
+    },
+    {
+      "pid": "rss_2025:8284c1c8",
+      "title": "From Foresight to Forethought: VLM-In-the-Loop Policy Steering via Latent Alignment",
+      "conf_id": "rss_2025"
+    },
+    {
+      "pid": "rss_2025:88b7932c",
+      "title": "ConRFT: A Reinforced Fine-tuning Method for VLA Models via Consistency Policy",
+      "conf_id": "rss_2025"
+    },
+    {
+      "pid": "rss_2025:a01c97fc",
+      "title": "RLDG: Robotic Generalist Policy Distillation via Reinforcement Learning",
+      "conf_id": "rss_2025"
+    },
+    {
+      "pid": "rss_2025:b1d2f33b",
+      "title": "FAST: Efficient Action Tokenization for Vision-Language-Action Models",
+      "conf_id": "rss_2025"
+    },
+    {
+      "pid": "rss_2025:c2d020c1",
+      "title": "Unified Video Action Model",
+      "conf_id": "rss_2025"
+    },
+    {
+      "pid": "rss_2025:d638e00b",
+      "title": "Learning to Act Anywhere with Task-centric Latent Actions",
+      "conf_id": "rss_2025"
+    },
+    {
+      "pid": "tmlr_2022:2d4584b9",
+      "title": "A Generalist Agent",
+      "conf_id": "tmlr_2022"
+    }
+  ],
+  "excluded": [
+    {
+      "pid": "aaai_2018:29661e70",
+      "title": "FiLM: Visual Reasoning with a General Conditioning Layer",
+      "conf_id": "aaai_2018",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "aaai_2026:87d2ce24",
+      "title": "OpenDriveVLA: Towards End-to-end Autonomous Driving with Large Vision Language Action Model",
+      "conf_id": "aaai_2026",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "acl_2024:8bfc5de6",
+      "title": "AnyGPT: Unified Multimodal LLM with Discrete Sequence Modeling",
+      "conf_id": "acl_2024",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "colm_2025:44397427",
+      "title": "SmolLM2: When Smol Goes Big — Data-Centric Training of a Fully Open Small Language Model",
+      "conf_id": "colm_2025",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "corl_2018:2861b2a2",
+      "title": "Scalable Deep Reinforcement Learning for Vision-Based Robotic Manipulation",
+      "conf_id": "corl_2018",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2018:38adaa0b",
+      "title": "ROBOTURK: A Crowdsourcing Platform for Robotic Skill Learning through Imitation",
+      "conf_id": "corl_2018",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2019:9252620b",
+      "title": "RoboNet: Large-Scale Multi-Robot Learning",
+      "conf_id": "corl_2019",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2019:9bacfdd6",
+      "title": "Meta-World: A Benchmark and Evaluation for Multi-Task and Meta Reinforcement Learning",
+      "conf_id": "corl_2019",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2020:81a4e16e",
+      "title": "Transporter Networks: Rearranging the Visual World for Robotic Manipulation",
+      "conf_id": "corl_2020",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2021:3a4c6a13",
+      "title": "Rapid Exploration for Open-World Navigation with Latent Goal Models",
+      "conf_id": "corl_2021",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2021:490d8dde",
+      "title": "What Matters in Learning from Offline Human Demonstrations for Robot Manipulation",
+      "conf_id": "corl_2021",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2022:575f907b",
+      "title": "MegaPose: 6D Pose Estimation of Novel Objects via Render & Compare",
+      "conf_id": "corl_2022",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "corl_2022:74ea4f0d",
+      "title": "Latent Plans for Task-Agnostic Offline Reinforcement Learning",
+      "conf_id": "corl_2022",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2023:e2f3a1d6",
+      "title": "MimicGen: A Data Generation System for Scalable Robot Learning using Human Demonstrations",
+      "conf_id": "corl_2023",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2024:05158bb4",
+      "title": "Dreamitate: Real-World Visuomotor Policy Learning via Video Generation",
+      "conf_id": "corl_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2024:61882b8d",
+      "title": "Open-TeleVision: Teleoperation with Immersive Active Visual Feedback",
+      "conf_id": "corl_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2024:7c687653",
+      "title": "ACE: A Cross-platform and visual-Exoskeletons System for Low-Cost Dexterous Teleoperation",
+      "conf_id": "corl_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2024:ce04258c",
+      "title": "Mobile ALOHA: Learning Bimanual Mobile Manipulation using Low-Cost Whole-Body Teleoperation",
+      "conf_id": "corl_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2024:e029140a",
+      "title": "ALOHA Unleashed: A Simple Recipe for Robot Dexterity",
+      "conf_id": "corl_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "corl_2025:8218633b",
+      "title": "DexUMI: Using Human Hand as the Universal Manipulation Interface for Dexterous Manipulation",
+      "conf_id": "corl_2025",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2016:b580b02b",
+      "title": "Deep Residual Learning for Image Recognition",
+      "conf_id": "cvpr_2016",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2017:a7ca0e37",
+      "title": "PointNet: Deep Learning on Point Sets for 3D Classification and Segmentation",
+      "conf_id": "cvpr_2017",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2019:93fb66c7",
+      "title": "Expressive Body Capture: 3D Hands, Face, and Body From a Single Image",
+      "conf_id": "cvpr_2019",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2020:1961ad14",
+      "title": "GraspNet-1Billion: A Large-Scale Benchmark for General Object Grasping",
+      "conf_id": "cvpr_2020",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2020:2536277a",
+      "title": "RoboTHOR: An Open Simulation-to-Real Embodied AI Platform",
+      "conf_id": "cvpr_2020",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2020:403a7b90",
+      "title": "Understanding Human Hands in Contact at Internet Scale",
+      "conf_id": "cvpr_2020",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2020:8ad88572",
+      "title": "SAPIEN: A SimulAted Part-Based Interactive ENvironment",
+      "conf_id": "cvpr_2020",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2020:d50d700f",
+      "title": "BDD100K: A Diverse Driving Dataset for Heterogeneous Multitask Learning",
+      "conf_id": "cvpr_2020",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2021:00622a94",
+      "title": "Taming Transformers for High-Resolution Image Synthesis",
+      "conf_id": "cvpr_2021",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2022:046aab32",
+      "title": "Masked Autoencoders Are Scalable Vision Learners",
+      "conf_id": "cvpr_2022",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2022:1b9d8fde",
+      "title": "GMFlow: Learning Optical Flow via Global Matching",
+      "conf_id": "cvpr_2022",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2022:5127519d",
+      "title": "Egocentric Prediction of Action Target in 3D",
+      "conf_id": "cvpr_2022",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2022:b2f84709",
+      "title": "Ego4D: Around the World in 3, 000 Hours of Egocentric Video",
+      "conf_id": "cvpr_2022",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2022:cee704ee",
+      "title": "High-Resolution Image Synthesis with Latent Diffusion Models",
+      "conf_id": "cvpr_2022",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2022:fb4c7ecc",
+      "title": "HOI4D: A 4D Egocentric Dataset for Category-Level Human-Object Interaction",
+      "conf_id": "cvpr_2022",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2023:277b1e07",
+      "title": "Affordances From Human Videos as a Versatile Representation for Robotics",
+      "conf_id": "cvpr_2023",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2023:5d373544",
+      "title": "InstructPix2Pix: Learning To Follow Image Editing Instructions",
+      "conf_id": "cvpr_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2023:6dc99041",
+      "title": "Reproducible Scaling Laws for Contrastive Language-Image Learning",
+      "conf_id": "cvpr_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2023:7bb2ba58",
+      "title": "Imagen Editor and EditBench: Advancing and Evaluating Text-Guided Image Inpainting",
+      "conf_id": "cvpr_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2023:885a2fdb",
+      "title": "ARCTIC: A Dataset for Dexterous Bimanual Hand-Object Manipulation",
+      "conf_id": "cvpr_2023",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2023:aea562e6",
+      "title": "DexArt: Benchmarking Generalizable Dexterous Manipulation With Articulated Objects",
+      "conf_id": "cvpr_2023",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2024:1643f0af",
+      "title": "On Scaling Up a Multilingual Vision and Language Model",
+      "conf_id": "cvpr_2024",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2024:2eb9c545",
+      "title": "Depth Anything: Unleashing the Power of Large-Scale Unlabeled Data",
+      "conf_id": "cvpr_2024",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2024:5cdb4e8b",
+      "title": "VILA: On Pre-training for Visual Language Models",
+      "conf_id": "cvpr_2024",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2024:7d728831",
+      "title": "Putting the Object Back into Video Object Segmentation",
+      "conf_id": "cvpr_2024",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2024:b2fea4a4",
+      "title": "OAKINK2: A Dataset of Bimanual Hands-Object Manipulation in Complex Task Completion",
+      "conf_id": "cvpr_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2024:f4ed90ec",
+      "title": "Ego-Exo4D: Understanding Skilled Human Activity from First- and Third-Person Perspectives",
+      "conf_id": "cvpr_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2025:0f1cba43",
+      "title": "HD-EPIC: A Highly-Detailed Egocentric Video Dataset",
+      "conf_id": "cvpr_2025",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2025:2c494f46",
+      "title": "HOT3D: Hand and Object Tracking in 3D from Egocentric Multi-View Videos",
+      "conf_id": "cvpr_2025",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2025:899e4e8e",
+      "title": "VGGT: Visual Geometry Grounded Transformer",
+      "conf_id": "cvpr_2025",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "cvpr_2025:b0d982f8",
+      "title": "SOLAMI: Social Vision-Language-Action Modeling for Immersive Interaction with 3D Autonomous Characters",
+      "conf_id": "cvpr_2025",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "cvpr_2025:e7db249a",
+      "title": "Molmo and PixMo: Open Weights and Open Data for State-of-the-Art Vision-Language Models",
+      "conf_id": "cvpr_2025",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "eccv_2014:3e9c5fe5",
+      "title": "Microsoft COCO: Common Objects in Context",
+      "conf_id": "eccv_2014",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "eccv_2018:96e14184",
+      "title": "Scaling Egocentric Vision: The Dataset",
+      "conf_id": "eccv_2018",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "eccv_2020:09137784",
+      "title": "RAFT: Recurrent All-Pairs Field Transforms for Optical Flow",
+      "conf_id": "eccv_2020",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "eccv_2022:675c7d96",
+      "title": "Detecting Twenty-Thousand Classes Using Image-Level Supervision",
+      "conf_id": "eccv_2022",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "eccv_2022:caca78df",
+      "title": "Simple Open-Vocabulary Object Detection",
+      "conf_id": "eccv_2022",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "eccv_2024:bfe02619",
+      "title": "CoTracker: It is Better to Track Together",
+      "conf_id": "eccv_2024",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "eccv_2024:efee850f",
+      "title": "Grounding DINO: Marrying DINO with Grounded Pre-Training for Open-Set Object Detection",
+      "conf_id": "eccv_2024",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "emnlp_2019:7dbff1be",
+      "title": "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks",
+      "conf_id": "emnlp_2019",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iccv_2015:97a715c8",
+      "title": "VQA: Visual Question Answering",
+      "conf_id": "iccv_2015",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iccv_2017:25f36202",
+      "title": "The \"Something Something\" Video Database for Learning and Evaluating Visual Common Sense",
+      "conf_id": "iccv_2017",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iccv_2019:47a20663",
+      "title": "HowTo100M: Learning a Text-Video Embedding by Watching Hundred Million Narrated Video Clips",
+      "conf_id": "iccv_2019",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iccv_2019:d7aa51b2",
+      "title": "Habitat: A Platform for Embodied AI Research",
+      "conf_id": "iccv_2019",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "iccv_2021:87a096aa",
+      "title": "H2O: Two Hands Manipulating Objects for First Person Interaction Recognition",
+      "conf_id": "iccv_2021",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "iccv_2021:eea7ac29",
+      "title": "Emerging Properties in Self-Supervised Vision Transformers",
+      "conf_id": "iccv_2021",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iccv_2023:2739f02a",
+      "title": "Scalable Diffusion Models with Transformers",
+      "conf_id": "iccv_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iccv_2023:73454b56",
+      "title": "Sigmoid Loss for Language Image Pre-Training",
+      "conf_id": "iccv_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iccv_2023:a26d5773",
+      "title": "LERF: Language Embedded Radiance Fields",
+      "conf_id": "iccv_2023",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "iccv_2023:ed53024c",
+      "title": "Segment Anything",
+      "conf_id": "iccv_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iccv_2025:0e4a3ab3",
+      "title": "ORION: A Holistic End-to-End Autonomous Driving Framework by Vision-Language Instructed Action Generation",
+      "conf_id": "iccv_2025",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "iccv_2025:4b39312c",
+      "title": "CombatVLA: An Efficient Vision-Language-Action Model for Combat Tasks in 3D Action Role-Playing Games",
+      "conf_id": "iccv_2025",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "iclr_2021:39c85545",
+      "title": "Denoising Diffusion Implicit Models",
+      "conf_id": "iclr_2021",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iclr_2021:5b76c39b",
+      "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+      "conf_id": "iclr_2021",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iclr_2022:35d6d978",
+      "title": "LoRA: Low-Rank Adaptation of Large Language Models",
+      "conf_id": "iclr_2022",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iclr_2023:304be6b8",
+      "title": "Flow Matching for Generative Modeling",
+      "conf_id": "iclr_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iclr_2023:c34d4c9f",
+      "title": "ManiSkill2: A Unified Benchmark for Generalizable Manipulation Skills",
+      "conf_id": "iclr_2023",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "iclr_2024:8618a214",
+      "title": "CCIL: Continuity-Based Data Augmentation for Corrective Imitation Learning",
+      "conf_id": "iclr_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "iclr_2024:87508ba5",
+      "title": "Habitat 3.0: A Co-Habitat for Humans, Avatars, and Robots",
+      "conf_id": "iclr_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "iclr_2024:87c3d0c6",
+      "title": "Uni3D: Exploring Unified 3D Representation at Scale",
+      "conf_id": "iclr_2024",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iclr_2025:3160f0c9",
+      "title": "ManiSkill-HAB: A Benchmark for Low-Level Manipulation in Home Rearrangement Tasks",
+      "conf_id": "iclr_2025",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "iclr_2025:fa7a4507",
+      "title": "Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model",
+      "conf_id": "iclr_2025",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "icml_2018:81f5ffab",
+      "title": "Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor",
+      "conf_id": "icml_2018",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "icml_2019:25415f10",
+      "title": "EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",
+      "conf_id": "icml_2019",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "icml_2021:09f2088c",
+      "title": "Learning Transferable Visual Models From Natural Language Supervision",
+      "conf_id": "icml_2021",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "icml_2023:0a05b0cb",
+      "title": "Pythia: A Suite for Analyzing Large Language Models Across Training and Scaling",
+      "conf_id": "icml_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "icml_2023:5b9e9e8a",
+      "title": "BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models",
+      "conf_id": "icml_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "icml_2023:9a42e2f1",
+      "title": "Robust Speech Recognition via Large-Scale Weak Supervision",
+      "conf_id": "icml_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "icml_2023:a6190473",
+      "title": "Efficient Online Reinforcement Learning with Offline Data",
+      "conf_id": "icml_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "icml_2024:2e4af04c",
+      "title": "Prismatic VLMs: Investigating the Design Space of Visually-Conditioned Language Models",
+      "conf_id": "icml_2024",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "icml_2024:dc3c0502",
+      "title": "A Touch, Vision, and Language Dataset for Multimodal Alignment",
+      "conf_id": "icml_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "icra_2021:5caad8c3",
+      "title": "Reset-Free Reinforcement Learning via Multi-Task Learning: Learning Dexterous Manipulation Behaviors without Human Intervention",
+      "conf_id": "icra_2021",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "icra_2023:e8295a72",
+      "title": "Train Offline, Test Online: A Real Robot Learning Benchmark",
+      "conf_id": "icra_2023",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "icra_2023:e850e11f",
+      "title": "CuRobo: Parallelized Collision-Free Robot Motion Generation",
+      "conf_id": "icra_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "icra_2024:8735e886",
+      "title": "NoMaD: Goal Masked Diffusion Policies for Navigation and Exploration",
+      "conf_id": "icra_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "icra_2024:e8b994f7",
+      "title": "SERL: A Software Suite for Sample-Efficient Robotic Reinforcement Learning",
+      "conf_id": "icra_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "icra_2025:9f14ddcd",
+      "title": "Robot Utility Models: General Policies for Zero-Shot Deployment in New Environments",
+      "conf_id": "icra_2025",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "icra_2025:cde06367",
+      "title": "EgoMimic: Scaling Imitation Learning via Egocentric Video",
+      "conf_id": "icra_2025",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "icra_2026:b89e137d",
+      "title": "Grasp-MPC: Closed-Loop Visual Grasping via Value-Guided Model Predictive Control",
+      "conf_id": "icra_2026",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "ijcai_2021:614ed3d0",
+      "title": "RAFT: Recurrent All-Pairs Field Transforms for Optical Flow (Extended Abstract)",
+      "conf_id": "ijcai_2021",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iros_2013:b1649b45",
+      "title": "V-REP: A versatile and scalable robot simulation framework",
+      "conf_id": "iros_2013",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iros_2015:70e4f589",
+      "title": "Learning compound multi-step controllers under unknown dynamics",
+      "conf_id": "iros_2015",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iros_2020:e89ae0e6",
+      "title": "Joint-Level Control of the DLR Lightweight Robot SARA",
+      "conf_id": "iros_2020",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "iros_2024:a6a84b07",
+      "title": "GELLO: A General, Low-Cost, and Intuitive Teleoperation Framework for Robot Manipulators",
+      "conf_id": "iros_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "iros_2025:113c784d",
+      "title": "Bunny-VisionPro: Real-Time Bimanual Dexterous Teleoperation for Imitation Learning",
+      "conf_id": "iros_2025",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "neurips_2014:08fa0ec7",
+      "title": "Semi-supervised Learning with Deep Generative Models",
+      "conf_id": "neurips_2014",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "neurips_2017:0ea83918",
+      "title": "Attention is All you Need",
+      "conf_id": "neurips_2017",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "neurips_2017:73fd4591",
+      "title": "Neural Discrete Representation Learning",
+      "conf_id": "neurips_2017",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "neurips_2017:fd19941b",
+      "title": "PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space",
+      "conf_id": "neurips_2017",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "neurips_2018:bc730839",
+      "title": "PointCNN: Convolution On X-Transformed Points",
+      "conf_id": "neurips_2018",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "neurips_2020:6d71ca4b",
+      "title": "Denoising Diffusion Probabilistic Models",
+      "conf_id": "neurips_2020",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "neurips_2021:04d2cef5",
+      "title": "TokenLearner: Adaptive Space-Time Tokenization for Videos",
+      "conf_id": "neurips_2021",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "neurips_2021:8d818a4e",
+      "title": "Habitat 2.0: Training Home Assistants to Rearrange their Habitat",
+      "conf_id": "neurips_2021",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "neurips_2021:a5d5c474",
+      "title": "ManiSkill: Generalizable Manipulation Skill Benchmark with Large-Scale Demonstrations",
+      "conf_id": "neurips_2021",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "neurips_2022:39789ea7",
+      "title": "🏘️ ProcTHOR: Large-Scale Embodied AI Using Procedural Generation",
+      "conf_id": "neurips_2022",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "neurips_2022:4688537c",
+      "title": "Flamingo: a Visual Language Model for Few-Shot Learning",
+      "conf_id": "neurips_2022",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "neurips_2022:58fb98b6",
+      "title": "LAION-5B: An open large-scale dataset for training next generation image-text models",
+      "conf_id": "neurips_2022",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "neurips_2022:59568445",
+      "title": "PointNeXt: Revisiting PointNet++ with Improved Training and Scaling Strategies",
+      "conf_id": "neurips_2022",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "neurips_2022:825b6505",
+      "title": "Video Diffusion Models",
+      "conf_id": "neurips_2022",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "neurips_2023:0a8b7d6b",
+      "title": "Visual Instruction Tuning",
+      "conf_id": "neurips_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "neurips_2023:d70592fa",
+      "title": "MotionGPT: Human Motion as a Foreign Language",
+      "conf_id": "neurips_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "rss_2021:f69e90f8",
+      "title": "Safe Reinforcement Learning via Statistical Model Predictive Shielding",
+      "conf_id": "rss_2021",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "rss_2023:2cf12ce7",
+      "title": "Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware",
+      "conf_id": "rss_2023",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "rss_2023:55844b4e",
+      "title": "GenAug: Retargeting behaviors to unseen situations via Generative Augmentation",
+      "conf_id": "rss_2023",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "rss_2023:686ef0c7",
+      "title": "LEAP Hand: Low-Cost, Efficient, and Anthropomorphic Hand for Robot Learning",
+      "conf_id": "rss_2023",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "rss_2023:84012c9e",
+      "title": "Diffusion Policy: Visuomotor Policy Learning via Action Diffusion",
+      "conf_id": "rss_2023",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "rss_2023:e95eee54",
+      "title": "AnyTeleop: A General Vision-Based Dexterous Robot Arm-Hand Teleoperation System",
+      "conf_id": "rss_2023",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "rss_2024:1b4599d3",
+      "title": "Safe & Accurate at Speed with Tendons: A Robot Arm for Exploring Dynamic Motion",
+      "conf_id": "rss_2024",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "rss_2024:7fdbc48e",
+      "title": "DexCap: Scalable and Portable Mocap Data Collection System for Dexterous Manipulation",
+      "conf_id": "rss_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "rss_2024:f733721f",
+      "title": "Universal Manipulation Interface: In-The-Wild Robot Teaching Without In-The-Wild Robots",
+      "conf_id": "rss_2024",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "rss_2025:25f3a4fc",
+      "title": "DexWild: Dexterous Human Interactions for In-the-Wild Robot Policies",
+      "conf_id": "rss_2025",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    },
+    {
+      "pid": "tmlr_2024:cd2ad0c5",
+      "title": "DINOv2: Learning Robust Visual Features without Supervision",
+      "conf_id": "tmlr_2024",
+      "reason": "no: unrelated or out of scope"
+    },
+    {
+      "pid": "wacv_2025:474fc597",
+      "title": "CoVLA: Comprehensive Vision-Language-Action Dataset for Autonomous Driving",
+      "conf_id": "wacv_2025",
+      "reason": "low: robotics/embodied area, no language-conditioned policy"
+    }
+  ]
+}

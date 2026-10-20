@@ -1,0 +1,375 @@
+{
+  "topic": "llm_program_repair",
+  "survey": {
+    "id": "ARXIV:2405.01466",
+    "title": "A Systematic Literature Review on Large Language Models for Automated Program Repair"
+  },
+  "criteria": [
+    "Core: automatically repairs bugs or security vulnerabilities in programs (automated program repair) using large language models or pretrained language models of code.",
+    "Fine-tuning, prompting, conversational and agent-based repair, repair-specific benchmarks and empirical evaluations of LLM-based repair all count.",
+    "Out of scope: repair without learned language models (search-, template- or constraint-based APR); code generation or completion that does not repair existing code; fault localization, test generation or code review alone."
+  ],
+  "queries": [
+    "program repair",
+    "automated program repair",
+    "vulnerability repair",
+    "bug fixing",
+    "repair bugs",
+    "neural program repair",
+    "LLM-based repair",
+    "ChatGPT repair",
+    "SWE-bench",
+    "patch generation"
+  ],
+  "references_total": 171,
+  "references_in_dataset": 63,
+  "gold": [
+    {
+      "pid": "aaai_2023:ab5f1bcb",
+      "title": "Repair Is Nearly Generation: Multilingual Program Repair with LLMs",
+      "conf_id": "aaai_2023"
+    },
+    {
+      "pid": "acl_2024:30ecd52a",
+      "title": "RePair: Automated Program Repair with Process-based Feedback",
+      "conf_id": "acl_2024"
+    },
+    {
+      "pid": "ase_2020:a1622b40",
+      "title": "Evaluating Representation Learning of Code Changes for Predicting Patch Correctness in Program Repair",
+      "conf_id": "ase_2020"
+    },
+    {
+      "pid": "ase_2022:01f4c75a",
+      "title": "SelfAPR: Self-supervised Program Repair with Test Execution Diagnostics",
+      "conf_id": "ase_2022"
+    },
+    {
+      "pid": "ase_2022:1b09f73c",
+      "title": "Is this Change the Answer to that Problem?: Correlating Descriptions of Bug and Code Changes for Evaluating Patch Correctness",
+      "conf_id": "ase_2022"
+    },
+    {
+      "pid": "ase_2023:6bac3ff9",
+      "title": "Gamma: Revisiting Template-Based Automated Program Repair Via Mask Prediction",
+      "conf_id": "ase_2023"
+    },
+    {
+      "pid": "fse_2021:fe6264ad",
+      "title": "A syntax-guided edit decoder for neural program repair",
+      "conf_id": "fse_2021"
+    },
+    {
+      "pid": "fse_2022:6839b655",
+      "title": "DeepDev-PERF: a deep learning-based approach for improving software performance",
+      "conf_id": "fse_2022"
+    },
+    {
+      "pid": "fse_2022:8ce10b65",
+      "title": "Less training, more repairing please: revisiting automated program repair via zero-shot learning",
+      "conf_id": "fse_2022"
+    },
+    {
+      "pid": "fse_2022:a3a5fc63",
+      "title": "VulRepair: a T5-based automated software vulnerability repair",
+      "conf_id": "fse_2022"
+    },
+    {
+      "pid": "fse_2022:e307b7f0",
+      "title": "An empirical study of deep transfer learning-based program repair for Kotlin projects",
+      "conf_id": "fse_2022"
+    },
+    {
+      "pid": "fse_2023:602c80c2",
+      "title": "RAP-Gen: Retrieval-Augmented Patch Generation with CodeT5 for Automatic Program Repair",
+      "conf_id": "fse_2023"
+    },
+    {
+      "pid": "iclr_2024:28575732",
+      "title": "SWE-bench: Can Language Models Resolve Real-world Github Issues?",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:ed568734",
+      "title": "Is Self-Repair a Silver Bullet for Code Generation?",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "icml_2021:88252f3f",
+      "title": "TFix: Learning to Fix Coding Errors with a Text-to-Text Transformer",
+      "conf_id": "icml_2021"
+    },
+    {
+      "pid": "icse_2020:4ecfdf4a",
+      "title": "DLFix: context-based code transformation learning for automated program repair",
+      "conf_id": "icse_2020"
+    },
+    {
+      "pid": "icse_2021:5cfb83e9",
+      "title": "CURE: Code-Aware Neural Machine Translation for Automatic Program Repair",
+      "conf_id": "icse_2021"
+    },
+    {
+      "pid": "icse_2022:1232689d",
+      "title": "Neural Program Repair with Execution-based Backpropagation",
+      "conf_id": "icse_2022"
+    },
+    {
+      "pid": "icse_2023:102f45be",
+      "title": "Tare: Type-Aware Neural Program Repair",
+      "conf_id": "icse_2023"
+    },
+    {
+      "pid": "icse_2024:0ac11321",
+      "title": "ITER: Iterative Neural Repair for Multi-Location Patches",
+      "conf_id": "icse_2024"
+    },
+    {
+      "pid": "icse_2024:3ee49e2b",
+      "title": "Out of Sight, Out of Mind: Better Automatic Vulnerability Repair by Broadening Input Ranges and Sources",
+      "conf_id": "icse_2024"
+    },
+    {
+      "pid": "icse_2024:4f03fab6",
+      "title": "PyTy: Repairing Static Type Errors in Python",
+      "conf_id": "icse_2024"
+    },
+    {
+      "pid": "icse_2024:aa7b2708",
+      "title": "Domain Knowledge Matters: Improving Prompts with Fix Templates for Repairing Python Type Errors",
+      "conf_id": "icse_2024"
+    },
+    {
+      "pid": "icse_2024:c2d35685",
+      "title": "Exploring Experiences with Automated Program Repair in Practice",
+      "conf_id": "icse_2024"
+    },
+    {
+      "pid": "icse_2025:375567fa",
+      "title": "RepairAgent: An Autonomous, LLM-Based Agent for Program Repair",
+      "conf_id": "icse_2025"
+    },
+    {
+      "pid": "issta_2014:5bd183cb",
+      "title": "Defects4J: a database of existing faults to enable controlled testing studies for Java programs",
+      "conf_id": "issta_2014"
+    },
+    {
+      "pid": "issta_2020:c8f7d619",
+      "title": "CoCoNuT: combining context-aware neural translation models using ensemble for program repair",
+      "conf_id": "issta_2020"
+    },
+    {
+      "pid": "issta_2022:0fcec560",
+      "title": "CIRCLE: continual repair across programming languages",
+      "conf_id": "issta_2022"
+    },
+    {
+      "pid": "issta_2023:caa4f347",
+      "title": "How Effective Are Neural Networks for Fixing Security Vulnerabilities",
+      "conf_id": "issta_2023"
+    },
+    {
+      "pid": "neurips_2024:8bad23db",
+      "title": "MAGIS: LLM-Based Multi-Agent Framework for GitHub Issue Resolution",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:8cb10c55",
+      "title": "SWT-Bench: Testing and Validating Real-World Bug-Fixes with Code Agents",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:bde9f193",
+      "title": "SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:cbbfcff5",
+      "title": "Code Repair with LLMs gives an Exploration-Exploitation Tradeoff",
+      "conf_id": "neurips_2024"
+    }
+  ],
+  "excluded": [
+    {
+      "pid": "aaai_2024:9c6363f6",
+      "title": "Hot or Cold? Adaptive Temperature Sampling for Code Generation with Large Language Models",
+      "conf_id": "aaai_2024",
+      "reason": "no: Code generation decoding, not repair"
+    },
+    {
+      "pid": "acl_2022:0dcce227",
+      "title": "UniXcoder: Unified Cross-Modal Pre-training for Code Representation",
+      "conf_id": "acl_2022",
+      "reason": "low: Code pretraining model; no repair focus"
+    },
+    {
+      "pid": "acl_2023:876f3f3d",
+      "title": "Self-Edit: Fault-Aware Code Editor for Code Generation",
+      "conf_id": "acl_2023",
+      "reason": "low: Edits generated code for generation; not repairing existing programs"
+    },
+    {
+      "pid": "ase_2019:1d31fbf7",
+      "title": "Re-Factoring Based Program Repair Applied to Programming Assignments",
+      "conf_id": "ase_2019",
+      "reason": "no: Non-learned refactoring-based repair"
+    },
+    {
+      "pid": "ase_2022:ac21df80",
+      "title": "Compressing Pre-trained Models of Code into 3 MB",
+      "conf_id": "ase_2022",
+      "reason": "low: Compressing code models; not repair"
+    },
+    {
+      "pid": "emnlp_2020:2900932c",
+      "title": "CodeBERT: A Pre-Trained Model for Programming and Natural Languages",
+      "conf_id": "emnlp_2020",
+      "reason": "low: General code pretrained model; no repair"
+    },
+    {
+      "pid": "emnlp_2021:674acb06",
+      "title": "CodeT5: Identifier-aware Unified Pre-trained Encoder-Decoder Models for Code Understanding and Generation",
+      "conf_id": "emnlp_2021",
+      "reason": "low: General code pretrained model; repair not the focus"
+    },
+    {
+      "pid": "fse_2014:3bd29f90",
+      "title": "Automatically generated patches as debugging aids: a human study",
+      "conf_id": "fse_2014",
+      "reason": "no: Human study of non-learned auto patches"
+    },
+    {
+      "pid": "fse_2022:d599fbbb",
+      "title": "Automating code review activities by large-scale pre-training",
+      "conf_id": "fse_2022",
+      "reason": "low: Code review pretraining; review alone out of scope"
+    },
+    {
+      "pid": "fse_2023:1e4e3f2b",
+      "title": "Natural Language to Code: How Far Are We?",
+      "conf_id": "fse_2023",
+      "reason": "no: NL-to-code evaluation, not repair"
+    },
+    {
+      "pid": "iclr_2021:cb07f28e",
+      "title": "GraphCodeBERT: Pre-training Code Representations with Data Flow",
+      "conf_id": "iclr_2021",
+      "reason": "low: Code pretraining model; no repair"
+    },
+    {
+      "pid": "iclr_2023:6d4be999",
+      "title": "InCoder: A Generative Model for Code Infilling and Synthesis",
+      "conf_id": "iclr_2023",
+      "reason": "low: Code infilling model; not repair"
+    },
+    {
+      "pid": "iclr_2023:e505d0ba",
+      "title": "CodeGen: An Open Large Language Model for Code with Multi-Turn Program Synthesis",
+      "conf_id": "iclr_2023",
+      "reason": "no: Code synthesis LLM, not repair"
+    },
+    {
+      "pid": "iclr_2024:82178011",
+      "title": "LoftQ: LoRA-Fine-Tuning-aware Quantization for Large Language Models",
+      "conf_id": "iclr_2024",
+      "reason": "no: LLM quantization, unrelated"
+    },
+    {
+      "pid": "icse_2017:79fb2544",
+      "title": "Precise condition synthesis for program repair",
+      "conf_id": "icse_2017",
+      "reason": "no: Condition synthesis repair, no learned model"
+    },
+    {
+      "pid": "icse_2018:f3713a2d",
+      "title": "Automatic software repair: a survey",
+      "conf_id": "icse_2018",
+      "reason": "no: Survey of general automatic repair, pre-LLM"
+    },
+    {
+      "pid": "icse_2018:f9fda400",
+      "title": "Identifying patch correctness in test-based program repair",
+      "conf_id": "icse_2018",
+      "reason": "no: Test-based patch correctness heuristics, no learned model"
+    },
+    {
+      "pid": "icse_2022:b9609d6c",
+      "title": "TOGA: A Neural Method for Test Oracle Generation",
+      "conf_id": "icse_2022",
+      "reason": "no: Test oracle generation, not repair"
+    },
+    {
+      "pid": "icse_2023:82e230cd",
+      "title": "SkCoder: A Sketch-based Approach for Automatic Code Generation",
+      "conf_id": "icse_2023",
+      "reason": "no: Code generation, not repair"
+    },
+    {
+      "pid": "icse_2024:1a22b3b1",
+      "title": "Exploring the Potential of ChatGPT in Automated Code Refinement: An Empirical Study",
+      "conf_id": "icse_2024",
+      "reason": "low: ChatGPT code refinement from reviews; review-based, not bug repair"
+    },
+    {
+      "pid": "issta_2018:1b8b2ddf",
+      "title": "Shaping program repair space with existing patches and similar code",
+      "conf_id": "issta_2018",
+      "reason": "no: Non-learned patch and similar-code repair"
+    },
+    {
+      "pid": "issta_2019:978ab390",
+      "title": "TBar: revisiting template-based automated program repair",
+      "conf_id": "issta_2019",
+      "reason": "no: Template-based repair without learned model"
+    },
+    {
+      "pid": "issta_2022:40f21806",
+      "title": "Program vulnerability repair via inductive inference",
+      "conf_id": "issta_2022",
+      "reason": "no: Inductive inference vulnerability repair, no learned model"
+    },
+    {
+      "pid": "naacl_2019:88bdceb3",
+      "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+      "conf_id": "naacl_2019",
+      "reason": "no: General NLP pretraining"
+    },
+    {
+      "pid": "naacl_2021:346de82d",
+      "title": "Unified Pre-training for Program Understanding and Generation",
+      "conf_id": "naacl_2021",
+      "reason": "low: Code pretraining model; repair not focus"
+    },
+    {
+      "pid": "neurips_2017:0ea83918",
+      "title": "Attention is All you Need",
+      "conf_id": "neurips_2017",
+      "reason": "no: General Transformer architecture"
+    },
+    {
+      "pid": "neurips_2020:bf09905b",
+      "title": "Language Models are Few-Shot Learners",
+      "conf_id": "neurips_2020",
+      "reason": "no: General few-shot LLM"
+    },
+    {
+      "pid": "neurips_2021:acf2f01c",
+      "title": "CodeXGLUE: A Machine Learning Benchmark Dataset for Code Understanding and Generation",
+      "conf_id": "neurips_2021",
+      "reason": "low: Code benchmark with some tasks; not repair-specific"
+    },
+    {
+      "pid": "neurips_2022:dd42b7c7",
+      "title": "Solving Quantitative Reasoning Problems with Language Models",
+      "conf_id": "neurips_2022",
+      "reason": "no: Math reasoning LLM"
+    },
+    {
+      "pid": "neurips_2023:0e4528b0",
+      "title": "Self-Refine: Iterative Refinement with Self-Feedback",
+      "conf_id": "neurips_2023",
+      "reason": "low: General LLM self-refinement, not program repair"
+    }
+  ]
+}

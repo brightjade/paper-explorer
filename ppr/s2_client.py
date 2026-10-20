@@ -99,13 +99,15 @@ class S2Client:
             return None
 
     async def get_batch(
-        self, client: httpx.AsyncClient, ids: list[str]
+        self, client: httpx.AsyncClient, ids: list[str], fields: str = ENRICHMENT_FIELDS
     ) -> list[dict | None]:
         """Look papers up by ID, 500 per request.
 
         `ids` are prefixed Semantic Scholar identifiers (`CorpusId:…`, `DOI:…`).
         The returned list is positionally aligned with `ids`; an entry is None
         when Semantic Scholar had no record, or when its chunk failed outright.
+        `fields` defaults to the enrichment fields; `ppr search cites` asks for
+        nested references and citations instead.
         """
         results: list[dict | None] = []
         for start in range(0, len(ids), BATCH_CHUNK_SIZE):
@@ -114,7 +116,7 @@ class S2Client:
                 client,
                 "POST",
                 BATCH_URL,
-                params={"fields": ENRICHMENT_FIELDS},
+                params={"fields": fields},
                 json={"ids": chunk},
             )
             if response is None or response.status_code != 200:

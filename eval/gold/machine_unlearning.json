@@ -1,0 +1,372 @@
+{
+  "topic": "machine_unlearning",
+  "survey": {
+    "id": "ARXIV:2405.07406",
+    "title": "Machine Unlearning: A Comprehensive Survey"
+  },
+  "criteria": [
+    "Core: removes the influence of specific training data, concepts or knowledge from an already trained model (machine unlearning, data deletion, concept or knowledge erasure), or evaluates, verifies, certifies or attacks such removal.",
+    "Any model family counts: classifiers, LLMs, diffusion and other generative models, graph models, federated or recommender models.",
+    "Out of scope: catastrophic forgetting in continual learning; model editing that inserts or updates facts without removing anything; differential privacy or other privacy training with no removal; membership inference unless used to test unlearning; data valuation and dataset pruning before training."
+  ],
+  "queries": [
+    "machine unlearning",
+    "unlearning",
+    "right to be forgotten",
+    "data deletion",
+    "forget set",
+    "concept erasure",
+    "erasing concepts",
+    "approximate unlearning",
+    "certified removal",
+    "knowledge unlearning"
+  ],
+  "references_total": 168,
+  "references_in_dataset": 65,
+  "gold": [
+    {
+      "pid": "aaai_2021:ef5e7565",
+      "title": "Amnesiac Machine Learning",
+      "conf_id": "aaai_2021"
+    },
+    {
+      "pid": "aaai_2022:5077d579",
+      "title": "Hard to Forget: Poisoning Attacks on Certified Machine Unlearning",
+      "conf_id": "aaai_2022"
+    },
+    {
+      "pid": "aaai_2022:95461fdb",
+      "title": "PUMA: Performance Unchanged Model Augmentation for Training Data Removal",
+      "conf_id": "aaai_2022"
+    },
+    {
+      "pid": "aaai_2023:5206078a",
+      "title": "Can Bad Teaching Induce Forgetting? Unlearning in Deep Networks Using an Incompetent Teacher",
+      "conf_id": "aaai_2023"
+    },
+    {
+      "pid": "aaai_2024:07c01487",
+      "title": "Towards Effective and General Graph Unlearning via Mutual Evolution",
+      "conf_id": "aaai_2024"
+    },
+    {
+      "pid": "aaai_2024:9bde68ee",
+      "title": "Backdoor Attacks via Machine Unlearning",
+      "conf_id": "aaai_2024"
+    },
+    {
+      "pid": "aaai_2024:ad40bb4b",
+      "title": "Learning to Unlearn: Instance-Wise Unlearning for Pre-trained Classifiers",
+      "conf_id": "aaai_2024"
+    },
+    {
+      "pid": "aaai_2025:69aaa92a",
+      "title": "Unlearning Concepts in Diffusion Model via Concept Domain Correction and Concept Preserving Gradient",
+      "conf_id": "aaai_2025"
+    },
+    {
+      "pid": "aaai_2025:e152b203",
+      "title": "Selective Forgetting: Advancing Machine Unlearning Techniques and Evaluation in Language Models",
+      "conf_id": "aaai_2025"
+    },
+    {
+      "pid": "acl_2024:258dd247",
+      "title": "Machine Unlearning of Pre-trained Large Language Models",
+      "conf_id": "acl_2024"
+    },
+    {
+      "pid": "acl_2024:3f7fdf08",
+      "title": "Towards Safer Large Language Models through Machine Unlearning",
+      "conf_id": "acl_2024"
+    },
+    {
+      "pid": "cvpr_2020:4018d82b",
+      "title": "Eternal Sunshine of the Spotless Net: Selective Forgetting in Deep Networks",
+      "conf_id": "cvpr_2020"
+    },
+    {
+      "pid": "cvpr_2021:3c8a193d",
+      "title": "Mixed-Privacy Forgetting in Deep Networks",
+      "conf_id": "cvpr_2021"
+    },
+    {
+      "pid": "cvpr_2022:e71c637e",
+      "title": "Deep Unlearning via Randomized Conditionally Independent Hessians",
+      "conf_id": "cvpr_2022"
+    },
+    {
+      "pid": "cvpr_2023:625c2e2f",
+      "title": "ERM-KTP: Knowledge-Level Machine Unlearning via Knowledge Transfer",
+      "conf_id": "cvpr_2023"
+    },
+    {
+      "pid": "cvpr_2025:2d649ff1",
+      "title": "Erasing Undesirable Influence in Diffusion Models",
+      "conf_id": "cvpr_2025"
+    },
+    {
+      "pid": "cvpr_2025:d89f0e0f",
+      "title": "The Illusion of Unlearning: The Unstable Nature of Machine Unlearning in Text-to-Image Diffusion Models",
+      "conf_id": "cvpr_2025"
+    },
+    {
+      "pid": "eccv_2020:c9ff7667",
+      "title": "Forgetting Outside the Box: Scrubbing Deep Networks of Information Accessible from Input-Output Observations",
+      "conf_id": "eccv_2020"
+    },
+    {
+      "pid": "eccv_2022:4cd79b11",
+      "title": "Learning with Recoverable Forgetting",
+      "conf_id": "eccv_2022"
+    },
+    {
+      "pid": "iccv_2023:ec7bf2b7",
+      "title": "MUter: Machine Unlearning on Adversarially Trained Models",
+      "conf_id": "iccv_2023"
+    },
+    {
+      "pid": "iclr_2022:35c120a5",
+      "title": "Knowledge Removal in Sampling-based Bayesian Inference",
+      "conf_id": "iclr_2022"
+    },
+    {
+      "pid": "iclr_2023:af14862d",
+      "title": "Efficient Model Updates for Approximate Unlearning of Graph-Structured Data",
+      "conf_id": "iclr_2023"
+    },
+    {
+      "pid": "iclr_2024:3c819952",
+      "title": "Machine Unlearning for Image-to-Image Generative Models",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2025:4b196fd9",
+      "title": "Score Forgetting Distillation: A Swift, Data-Free Method for Machine Unlearning in Diffusion Models",
+      "conf_id": "iclr_2025"
+    },
+    {
+      "pid": "iclr_2025:6be09612",
+      "title": "Data Unlearning in Diffusion Models",
+      "conf_id": "iclr_2025"
+    },
+    {
+      "pid": "icml_2020:16b4e084",
+      "title": "Certified Data Removal from Machine Learning Models",
+      "conf_id": "icml_2020"
+    },
+    {
+      "pid": "icml_2020:824715d3",
+      "title": "DeltaGrad: Rapid retraining of machine learning models",
+      "conf_id": "icml_2020"
+    },
+    {
+      "pid": "icml_2021:303afc70",
+      "title": "Machine Unlearning for Random Forests",
+      "conf_id": "icml_2021"
+    },
+    {
+      "pid": "icml_2025:3fda8058",
+      "title": "SAeUron: Interpretable Concept Unlearning in Diffusion Models with Sparse Autoencoders",
+      "conf_id": "icml_2025"
+    },
+    {
+      "pid": "ijcai_2021:bbd78cac",
+      "title": "Learning with Selective Forgetting",
+      "conf_id": "ijcai_2021"
+    },
+    {
+      "pid": "ijcai_2022:3f05a19e",
+      "title": "ARCANE: An Efficient Architecture for Exact Machine Unlearning",
+      "conf_id": "ijcai_2022"
+    },
+    {
+      "pid": "neurips_2019:7a713183",
+      "title": "Making AI Forget You: Data Deletion in Machine Learning",
+      "conf_id": "neurips_2019"
+    },
+    {
+      "pid": "neurips_2020:0feced7c",
+      "title": "Variational Bayesian Unlearning",
+      "conf_id": "neurips_2020"
+    },
+    {
+      "pid": "neurips_2021:1925b6db",
+      "title": "Adaptive Machine Unlearning",
+      "conf_id": "neurips_2021"
+    },
+    {
+      "pid": "neurips_2021:66909182",
+      "title": "Remember What You Want to Forget: Algorithms for Machine Unlearning",
+      "conf_id": "neurips_2021"
+    },
+    {
+      "pid": "neurips_2023:266e0176",
+      "title": "Static and Sequential Malicious Attacks in the Context of Selective Forgetting",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:d91db3cb",
+      "title": "Hidden Poison: Machine Unlearning Enables Camouflaged Poisoning Attacks",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2024:25306423",
+      "title": "Large Language Model Unlearning",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:2d10b12f",
+      "title": "Boosting Alignment for Post-Unlearning Text-to-Image Generative Models",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:3ceda3a4",
+      "title": "Single Image Unlearning: Efficient Machine Unlearning in Multimodal Large Language Models",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:8fa095f3",
+      "title": "UnlearnCanvas:  Stylized Image Dataset for Enhanced Machine Unlearning Evaluation in Diffusion Models",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:9712eab3",
+      "title": "Large Language Model Unlearning via Embedding-Corrupted Prompts",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:bd1a7225",
+      "title": "RWKU: Benchmarking Real-World Knowledge Unlearning for Large Language Models",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:f1824a04",
+      "title": "Defensive Unlearning with Adversarial Training for Robust Concept Erasure in Diffusion Models",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "tmlr_2025:250b5192",
+      "title": "Offset Unlearning for Large Language Models",
+      "conf_id": "tmlr_2025"
+    },
+    {
+      "pid": "usenix_security_2022:c235e488",
+      "title": "On the Necessity of Auditable Algorithmic Definitions for Machine Unlearning",
+      "conf_id": "usenix_security_2022"
+    },
+    {
+      "pid": "usenix_security_2023:67f3cd7a",
+      "title": "Inductive Graph Unlearning",
+      "conf_id": "usenix_security_2023"
+    },
+    {
+      "pid": "usenix_security_2024:79c030a2",
+      "title": "UBA-Inf: Unlearning Activated Backdoor Attack with Influence-Driven Camouflage",
+      "conf_id": "usenix_security_2024"
+    }
+  ],
+  "excluded": [
+    {
+      "pid": "cvpr_2022:ecb22922",
+      "title": "Learning to Prompt for Continual Learning",
+      "conf_id": "cvpr_2022",
+      "reason": "no: Continual learning prompting, not unlearning"
+    },
+    {
+      "pid": "iccv_2015:0360fcce",
+      "title": "Scalable Person Re-identification: A Benchmark",
+      "conf_id": "iccv_2015",
+      "reason": "no: Re-identification benchmark, unrelated"
+    },
+    {
+      "pid": "iclr_2014:52dc3707",
+      "title": "Auto-Encoding Variational Bayes",
+      "conf_id": "iclr_2014",
+      "reason": "no: Generative model, unrelated"
+    },
+    {
+      "pid": "iclr_2015:6ddfe707",
+      "title": "Explaining and Harnessing Adversarial Examples",
+      "conf_id": "iclr_2015",
+      "reason": "no: Adversarial examples, unrelated"
+    },
+    {
+      "pid": "iclr_2021:2af80a92",
+      "title": "Unlearnable Examples: Making Personal Data Unexploitable",
+      "conf_id": "iclr_2021",
+      "reason": "low: Data protection before training, no removal"
+    },
+    {
+      "pid": "icml_2016:fa41dd82",
+      "title": "Revisiting Semi-Supervised Learning with Graph Embeddings",
+      "conf_id": "icml_2016",
+      "reason": "no: Semi-supervised graph embeddings, unrelated"
+    },
+    {
+      "pid": "icml_2017:edb02d2b",
+      "title": "Understanding Black-box Predictions via Influence Functions",
+      "conf_id": "icml_2017",
+      "reason": "low: Influence functions, related tool but not unlearning"
+    },
+    {
+      "pid": "ijcai_2022:5378d578",
+      "title": "Membership Inference via Backdooring",
+      "conf_id": "ijcai_2022",
+      "reason": "low: Membership inference not used to test unlearning"
+    },
+    {
+      "pid": "neurips_2015:315cc9dc",
+      "title": "Character-level Convolutional Networks for Text Classification",
+      "conf_id": "neurips_2015",
+      "reason": "no: Text classification, unrelated"
+    },
+    {
+      "pid": "neurips_2017:df578077",
+      "title": "Gradient Episodic Memory for Continual Learning",
+      "conf_id": "neurips_2017",
+      "reason": "no: Continual learning forgetting, out of scope"
+    },
+    {
+      "pid": "neurips_2019:1646556e",
+      "title": "Experience Replay for Continual Learning",
+      "conf_id": "neurips_2019",
+      "reason": "no: Continual learning replay, out of scope"
+    },
+    {
+      "pid": "neurips_2019:c469b40f",
+      "title": "Implicit Posterior Variational Inference for Deep Gaussian Processes",
+      "conf_id": "neurips_2019",
+      "reason": "no: Gaussian process inference, unrelated"
+    },
+    {
+      "pid": "neurips_2020:e8e0b2c7",
+      "title": "Open Graph Benchmark: Datasets for Machine Learning on Graphs",
+      "conf_id": "neurips_2020",
+      "reason": "no: Graph benchmark datasets, unrelated"
+    },
+    {
+      "pid": "neurips_2021:1c162bec",
+      "title": "Knowledge-Adaptation Priors",
+      "conf_id": "neurips_2021",
+      "reason": "low: Model adaptation priors, not removal"
+    },
+    {
+      "pid": "neurips_2023:4332999b",
+      "title": "Shared Adversarial Unlearning: Backdoor Mitigation by Unlearning Shared Adversarial Examples",
+      "conf_id": "neurips_2023",
+      "reason": "low: Backdoor purification, not data removal"
+    },
+    {
+      "pid": "usenix_security_2014:89edb960",
+      "title": "Privacy in Pharmacogenetics: An End-to-End Case Study of Personalized Warfarin Dosing",
+      "conf_id": "usenix_security_2014",
+      "reason": "no: Genomic privacy with DP, unrelated"
+    },
+    {
+      "pid": "usenix_security_2020:a9ea86e1",
+      "title": "Updates-Leak: Data Set Inference and Reconstruction Attacks in Online Learning",
+      "conf_id": "usenix_security_2020",
+      "reason": "low: Dataset inference from model updates, not unlearning"
+    }
+  ]
+}

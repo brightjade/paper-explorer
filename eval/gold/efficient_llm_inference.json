@@ -1,0 +1,851 @@
+{
+  "topic": "efficient_llm_inference",
+  "survey": {
+    "id": "ARXIV:2404.14294",
+    "title": "A Survey on Efficient Inference for Large Language Models"
+  },
+  "criteria": [
+    "Core: makes inference of large language models (transformer LMs) faster, cheaper or lighter in memory.",
+    "Data-level (prompt compression, output organization), model-level (quantization, pruning, low-rank or knowledge distillation for deployment, efficient attention, efficient architectures, mixture of experts) and system-level (speculative decoding, KV-cache management, batching and serving systems, kernels, offloading) techniques all count, as do benchmarks of inference efficiency.",
+    "Out of scope: methods that only make training or fine-tuning cheaper (e.g. parameter-efficient fine-tuning) with no inference saving; efficiency of non-language models (vision CNNs) unless the method is applied to LLMs; papers about LLM capabilities rather than cost."
+  ],
+  "queries": [
+    "speculative decoding",
+    "KV cache",
+    "LLM inference",
+    "post-training quantization",
+    "weight quantization",
+    "prompt compression",
+    "efficient inference",
+    "LLM serving",
+    "mixture of experts",
+    "pruning large language models"
+  ],
+  "references_total": 285,
+  "references_in_dataset": 156,
+  "gold": [
+    {
+      "pid": "aaai_2023:8e911a92",
+      "title": "Diffuser: Efficient Transformers with Multi-Hop Attention Diffusion for Long Sequences",
+      "conf_id": "aaai_2023"
+    },
+    {
+      "pid": "aaai_2024:2d599d89",
+      "title": "Norm Tweaking: High-Performance Low-Bit Quantization of Large Language Models",
+      "conf_id": "aaai_2024"
+    },
+    {
+      "pid": "acl_2020:7a0ca9ef",
+      "title": "DeeBERT: Dynamic Early Exiting for Accelerating BERT Inference",
+      "conf_id": "acl_2020"
+    },
+    {
+      "pid": "acl_2020:b3d52a1b",
+      "title": "FastBERT: a Self-distilling BERT with Adaptive Inference Time",
+      "conf_id": "acl_2020"
+    },
+    {
+      "pid": "acl_2022:2b6894eb",
+      "title": "MoEfication: Transformer Feed-forward Layers are Mixtures of Experts",
+      "conf_id": "acl_2022"
+    },
+    {
+      "pid": "acl_2022:623e977d",
+      "title": "StableMoE: Stable Routing Strategy for Mixture of Experts",
+      "conf_id": "acl_2022"
+    },
+    {
+      "pid": "acl_2022:87e00899",
+      "title": "Structured Pruning Learns Compact and Accurate Models",
+      "conf_id": "acl_2022"
+    },
+    {
+      "pid": "acl_2022:bab3dc5b",
+      "title": "A Simple Hash-Based Early Exiting Approach For Language Understanding and Generation",
+      "conf_id": "acl_2022"
+    },
+    {
+      "pid": "acl_2023:43baf296",
+      "title": "Structured Pruning for Efficient Generative Pre-trained Language Models",
+      "conf_id": "acl_2023"
+    },
+    {
+      "pid": "acl_2023:8e6518a3",
+      "title": "Distilling Step-by-Step! Outperforming Larger Language Models with Less Training Data and Smaller Model Sizes",
+      "conf_id": "acl_2023"
+    },
+    {
+      "pid": "acl_2023:d710c015",
+      "title": "Lifting the Curse of Capacity Gap in Distilling Language Models",
+      "conf_id": "acl_2023"
+    },
+    {
+      "pid": "acl_2024:629ded22",
+      "title": "LoRAPrune: Structured Pruning Meets Low-Rank Parameter-Efficient Fine-Tuning",
+      "conf_id": "acl_2024"
+    },
+    {
+      "pid": "acl_2024:6a1f3c60",
+      "title": "Unlocking Efficiency in Large Language Model Inference: A Comprehensive Survey of Speculative Decoding",
+      "conf_id": "acl_2024"
+    },
+    {
+      "pid": "acl_2024:918c80ae",
+      "title": "Extending Context Window of Large Language Models via Semantic Compression",
+      "conf_id": "acl_2024"
+    },
+    {
+      "pid": "acl_2024:94b6aa76",
+      "title": "Not All Experts are Equal: Efficient Expert Pruning and Skipping for Mixture-of-Experts Large Language Models",
+      "conf_id": "acl_2024"
+    },
+    {
+      "pid": "acl_2024:d5a53a33",
+      "title": "LongLLMLingua: Accelerating and Enhancing LLMs in Long Context Scenarios via Prompt Compression",
+      "conf_id": "acl_2024"
+    },
+    {
+      "pid": "acl_2025:0c3d28a7",
+      "title": "Towards the Law of Capacity Gap in Distilling Language Models",
+      "conf_id": "acl_2025"
+    },
+    {
+      "pid": "coling_2022:21b6bc9e",
+      "title": "Parameter-Efficient Mixture-of-Experts Architecture for Pre-trained Language Models",
+      "conf_id": "coling_2022"
+    },
+    {
+      "pid": "coling_2022:3c0d7ce7",
+      "title": "Accelerating Inference for Pretrained Language Models by Unified Multi-Perspective Early Exiting",
+      "conf_id": "coling_2022"
+    },
+    {
+      "pid": "colm_2024:768e917e",
+      "title": "Mamba: Linear-Time Sequence Modeling with Selective State Spaces",
+      "conf_id": "colm_2024"
+    },
+    {
+      "pid": "colm_2025:ca3501a3",
+      "title": "Plato: Plan to Efficient Decode for Large Language Model Inference",
+      "conf_id": "colm_2025"
+    },
+    {
+      "pid": "eacl_2023:22816890",
+      "title": "A Survey on Dynamic Neural Networks for Natural Language Processing",
+      "conf_id": "eacl_2023"
+    },
+    {
+      "pid": "eacl_2024:c99fd69b",
+      "title": "LaMini-LM: A Diverse Herd of Distilled Models from Large-Scale Instructions",
+      "conf_id": "eacl_2024"
+    },
+    {
+      "pid": "emnlp_2022:515d0783",
+      "title": "The Optimal BERT Surgeon: Scalable and Accurate Second-Order Pruning for Large Language Models",
+      "conf_id": "emnlp_2022"
+    },
+    {
+      "pid": "emnlp_2023:3eaedbdf",
+      "title": "LLM-FP4: 4-Bit Floating-Point Quantized Transformers",
+      "conf_id": "emnlp_2023"
+    },
+    {
+      "pid": "emnlp_2023:666c6c94",
+      "title": "Adapting Language Models to Compress Contexts",
+      "conf_id": "emnlp_2023"
+    },
+    {
+      "pid": "emnlp_2023:74486e1e",
+      "title": "RWKV: Reinventing RNNs for the Transformer Era",
+      "conf_id": "emnlp_2023"
+    },
+    {
+      "pid": "emnlp_2023:ac993c7b",
+      "title": "Compressing Context to Enhance Inference Efficiency of Large Language Models",
+      "conf_id": "emnlp_2023"
+    },
+    {
+      "pid": "emnlp_2023:bb7ef460",
+      "title": "Pretraining Without Attention",
+      "conf_id": "emnlp_2023"
+    },
+    {
+      "pid": "emnlp_2023:ded3a639",
+      "title": "GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints",
+      "conf_id": "emnlp_2023"
+    },
+    {
+      "pid": "emnlp_2023:e521743a",
+      "title": "LLMLingua: Compressing Prompts for Accelerated Inference of Large Language Models",
+      "conf_id": "emnlp_2023"
+    },
+    {
+      "pid": "iclr_2017:924353b3",
+      "title": " Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer",
+      "conf_id": "iclr_2017"
+    },
+    {
+      "pid": "iclr_2020:ded487d9",
+      "title": "Reformer: The Efficient Transformer",
+      "conf_id": "iclr_2020"
+    },
+    {
+      "pid": "iclr_2021:355eccd5",
+      "title": "Random Feature Attention",
+      "conf_id": "iclr_2021"
+    },
+    {
+      "pid": "iclr_2021:d1037000",
+      "title": "Rethinking Attention with Performers",
+      "conf_id": "iclr_2021"
+    },
+    {
+      "pid": "iclr_2022:0e489b34",
+      "title": "Efficiently Modeling Long Sequences with Structured State Spaces",
+      "conf_id": "iclr_2022"
+    },
+    {
+      "pid": "iclr_2023:24496630",
+      "title": "Long Range Language Modeling via Gated State Spaces",
+      "conf_id": "iclr_2023"
+    },
+    {
+      "pid": "iclr_2023:5ee5ea09",
+      "title": "Simplified State Space Layers for Sequence Modeling",
+      "conf_id": "iclr_2023"
+    },
+    {
+      "pid": "iclr_2023:9d9f2ae0",
+      "title": "What Makes Convolutional Models Great on Long Sequence Modeling?",
+      "conf_id": "iclr_2023"
+    },
+    {
+      "pid": "iclr_2023:ecb3cf64",
+      "title": "Hungry Hungry Hippos: Towards Language Modeling with State Space Models",
+      "conf_id": "iclr_2023"
+    },
+    {
+      "pid": "iclr_2024:01bb8be0",
+      "title": "SpQR: A Sparse-Quantized Representation for Near-Lossless LLM Weight Compression",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:0b704ddc",
+      "title": "Dynamic Sparse No Training:  Training-Free Fine-tuning for Sparse LLMs",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:17cb732c",
+      "title": "Efficient Streaming Language Models with Attention Sinks",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:1be36313",
+      "title": "A Simple and Effective Pruning Approach for Large Language Models",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:1ecc773c",
+      "title": "Sheared LLaMA: Accelerating Language Model Pre-training via Structured Pruning",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:2025bf59",
+      "title": "SliceGPT: Compress Large Language Models by Deleting Rows and Columns",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:31f28341",
+      "title": "In-context Autoencoder for Context Compression in a Large Language Model",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:39abdeea",
+      "title": "QLLM: Accurate and Efficient Low-Bitwidth Quantization for Large Language Models",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:42c5146b",
+      "title": "BESA: Pruning Large Language Models with Blockwise Parameter-Efficient Sparsity Allocation",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:6942141f",
+      "title": "LUT-GEMM: Quantized Matrix Multiplication based on LUTs for Efficient Inference in Large-Scale Generative Language Models",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:6ec37162",
+      "title": "DistillSpec: Improving Speculative Decoding via Knowledge Distillation",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:82178011",
+      "title": "LoftQ: LoRA-Fine-Tuning-aware Quantization for Large Language Models",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:82ce2516",
+      "title": "OmniQuant: Omnidirectionally Calibrated Quantization for Large Language Models",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:9ed436b3",
+      "title": "RECOMP: Improving Retrieval-Augmented LMs with Context Compression and Selective Augmentation",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:cb5cd0ca",
+      "title": "Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:d45cbe91",
+      "title": "Is attention required for ICL? Exploring the Relationship Between Model Architecture and In-Context Learning Ability",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:da21390a",
+      "title": "Compressing LLMs: The Truth is Rarely Pure and Never Simple",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2024:eaa6fb7c",
+      "title": "QA-LoRA: Quantization-Aware Low-Rank Adaptation of Large Language Models",
+      "conf_id": "iclr_2024"
+    },
+    {
+      "pid": "iclr_2025:75d760ea",
+      "title": "SVD-LLM: Truncation-aware Singular Value Decomposition for Large Language Model Compression",
+      "conf_id": "iclr_2025"
+    },
+    {
+      "pid": "iclr_2025:da24a063",
+      "title": "SpinQuant: LLM Quantization with Learned Rotations",
+      "conf_id": "iclr_2025"
+    },
+    {
+      "pid": "icml_2020:4c953e9d",
+      "title": "Sparse Sinkhorn Attention",
+      "conf_id": "icml_2020"
+    },
+    {
+      "pid": "icml_2021:82b03f36",
+      "title": "BASE Layers: Simplifying Training of Large, Sparse Models",
+      "conf_id": "icml_2021"
+    },
+    {
+      "pid": "icml_2022:0381e7b6",
+      "title": "PLATON: Pruning Large Transformer Models with Upper Confidence Bound of Weight Importance",
+      "conf_id": "icml_2022"
+    },
+    {
+      "pid": "icml_2022:b57360c2",
+      "title": "Transformer Quality in Linear Time",
+      "conf_id": "icml_2022"
+    },
+    {
+      "pid": "icml_2023:0a05b0cb",
+      "title": "Pythia: A Suite for Analyzing Large Language Models Across Training and Scaling",
+      "conf_id": "icml_2023"
+    },
+    {
+      "pid": "icml_2023:11ea8b36",
+      "title": "Less is More: Task-aware Layer-wise Distillation for Language Model Compression",
+      "conf_id": "icml_2023"
+    },
+    {
+      "pid": "icml_2023:23f5e3fe",
+      "title": "LoSparse: Structured Compression of Large Language Models based on Low-Rank and Sparse Approximation",
+      "conf_id": "icml_2023"
+    },
+    {
+      "pid": "icml_2023:a210f8c5",
+      "title": "SparseGPT: Massive Language Models Can be Accurately Pruned in One-Shot",
+      "conf_id": "icml_2023"
+    },
+    {
+      "pid": "icml_2023:a52b8d45",
+      "title": "SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models",
+      "conf_id": "icml_2023"
+    },
+    {
+      "pid": "icml_2023:a5b9ee73",
+      "title": "Hyena Hierarchy: Towards Larger Convolutional Language Models",
+      "conf_id": "icml_2023"
+    },
+    {
+      "pid": "icml_2023:bbd46666",
+      "title": "FlexGen: High-Throughput Generative Inference of Large Language Models with a Single GPU",
+      "conf_id": "icml_2023"
+    },
+    {
+      "pid": "icml_2024:20fa044c",
+      "title": "Can Mamba Learn How To Learn? A Comparative Study on In-Context Learning Tasks",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "icml_2024:2ae227ed",
+      "title": "SqueezeLLM: Dense-and-Sparse Quantization",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "icml_2024:32f3ca5f",
+      "title": "Break the Sequential Dependency of LLM Inference Using Lookahead Decoding",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "icml_2024:59eac096",
+      "title": "QuIP$\\#$: Even Better LLM Quantization with Hadamard Incoherence and Lattice Codebooks",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "icml_2024:5f101ea4",
+      "title": "Evaluating Quantized Large Language Models",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "icml_2024:72b731d9",
+      "title": "Pruner-Zero: Evolving Symbolic Pruning Metric From Scratch for Large Language Models",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "icml_2024:9aa2dea8",
+      "title": "MobileLLM: Optimizing Sub-billion Parameter Language Models for On-Device Use Cases",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "icml_2024:9f0f573a",
+      "title": "BiLLM: Pushing the Limit of Post-Training Quantization for LLMs",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "icml_2024:cfd3806c",
+      "title": "Medusa: Simple LLM Inference Acceleration Framework with Multiple Decoding Heads",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "icml_2024:dbb6e1f4",
+      "title": "Online Speculative Decoding",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "icml_2024:ec15ab69",
+      "title": "KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache",
+      "conf_id": "icml_2024"
+    },
+    {
+      "pid": "naacl_2021:7b8050c7",
+      "title": "A Global Past-Future Early Exit Method for Accelerating Inference of Pre-trained Language Models",
+      "conf_id": "naacl_2021"
+    },
+    {
+      "pid": "naacl_2024:3fed68d8",
+      "title": "REST: Retrieval-Based Speculative Decoding",
+      "conf_id": "naacl_2024"
+    },
+    {
+      "pid": "neurips_2018:66f05dda",
+      "title": "Blockwise Parallel Decoding for Deep Autoregressive Models",
+      "conf_id": "neurips_2018"
+    },
+    {
+      "pid": "neurips_2020:1d660a92",
+      "title": "BERT Loses Patience: Fast and Robust Inference with Early Exit",
+      "conf_id": "neurips_2020"
+    },
+    {
+      "pid": "neurips_2020:604bb446",
+      "title": "Big Bird: Transformers for Longer Sequences",
+      "conf_id": "neurips_2020"
+    },
+    {
+      "pid": "neurips_2020:983d7e47",
+      "title": "DynaBERT: Dynamic BERT with Adaptive Width and Depth",
+      "conf_id": "neurips_2020"
+    },
+    {
+      "pid": "neurips_2020:dd0edff6",
+      "title": "Funnel-Transformer: Filtering out Sequential Redundancy for Efficient Language Processing",
+      "conf_id": "neurips_2020"
+    },
+    {
+      "pid": "neurips_2021:eae17d73",
+      "title": "Luna: Linear Unified Nested Attention",
+      "conf_id": "neurips_2021"
+    },
+    {
+      "pid": "neurips_2022:100e0765",
+      "title": "Mixture-of-Experts with Expert Choice Routing",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2022:42f11690",
+      "title": "Diagonal State Spaces are as Effective as Structured State Spaces",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2022:46543ada",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2022:515145a4",
+      "title": "Confident Adaptive Language Modeling",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2022:5b014ee8",
+      "title": "ZeroQuant: Efficient and Affordable Post-Training Quantization for Large-Scale Transformers",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2022:5d3c4a8d",
+      "title": "Optimal Brain Compression: A Framework for Accurate Post-Training Quantization and Pruning",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2022:60e29ceb",
+      "title": "LiteTransformerSearch: Training-free Neural Architecture Search for Efficient Language Models",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2022:90bbf4e5",
+      "title": "Few-shot Task-agnostic Neural Architecture Search for Distilling Large Language Models",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2022:e2de8cea",
+      "title": "A Fast Post-Training Pruning Framework for Transformers",
+      "conf_id": "neurips_2022"
+    },
+    {
+      "pid": "neurips_2023:1ebd2185",
+      "title": "QuIP: 2-Bit Quantization of Large Language Models With Guarantees",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:302d85be",
+      "title": "$S^3$: Increasing GPU Utilization during Generative Inference for Higher Throughput",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:32b4aead",
+      "title": "H2O: Heavy-Hitter Oracle for Efficient Generative Inference of Large Language Models",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:396965be",
+      "title": "Dynamic Context Pruning for Efficient and Interpretable Autoregressive Transformers",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:3a1c6548",
+      "title": "Sparse Modular Activation for Efficient Sequence Modeling",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:44c74e1d",
+      "title": "LLM-Pruner: On the Structural Pruning of Large Language Models",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:8a834b1f",
+      "title": "Learning to Compress Prompts with Gist Tokens",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:b6aaa2ed",
+      "title": "SpecTr: Fast Speculative Decoding via Optimal Transport",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:d911d186",
+      "title": "ZipLM: Inference-Aware Structured Pruning of Language Models",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:e9ae9589",
+      "title": "Matrix Compression via Randomized Low Rank and Low Precision Factorization",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2023:fbee187e",
+      "title": "Block-State Transformers",
+      "conf_id": "neurips_2023"
+    },
+    {
+      "pid": "neurips_2024:84bbcda6",
+      "title": "KVQuant: Towards 10 Million Context Length LLM Inference with KV Cache Quantization",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:ac50ef23",
+      "title": "SGLang: Efficient Execution of Structured Language Model Programs",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:ddd0aa57",
+      "title": "Cascade Speculative Drafting for Even Faster LLM Inference",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "neurips_2024:f6aa4c18",
+      "title": "QuaRot: Outlier-Free 4-Bit Inference in Rotated LLMs",
+      "conf_id": "neurips_2024"
+    },
+    {
+      "pid": "tmlr_2024:2fe4c52e",
+      "title": "FrugalGPT: How to Use Large Language Models While Reducing Cost and Improving Performance",
+      "conf_id": "tmlr_2024"
+    }
+  ],
+  "excluded": [
+    {
+      "pid": "aaai_2024:9ab19462",
+      "title": "Graph of Thoughts: Solving Elaborate Problems with Large Language Models",
+      "conf_id": "aaai_2024",
+      "reason": "no: prompting for reasoning, not cost"
+    },
+    {
+      "pid": "acl_2021:12b05e8d",
+      "title": "Prefix-Tuning: Optimizing Continuous Prompts for Generation",
+      "conf_id": "acl_2021",
+      "reason": "no: parameter-efficient tuning only"
+    },
+    {
+      "pid": "acl_2022:ccffacae",
+      "title": "GLM: General Language Model Pretraining with Autoregressive Blank Infilling",
+      "conf_id": "acl_2022",
+      "reason": "no: pretraining objective, not efficiency"
+    },
+    {
+      "pid": "acl_2023:564ab549",
+      "title": "Teaching Small Language Models to Reason",
+      "conf_id": "acl_2023",
+      "reason": "low: distillation for reasoning capability"
+    },
+    {
+      "pid": "acl_2023:65e31e26",
+      "title": "Did You Read the Instructions? Rethinking the Effectiveness of Task Definitions in Instruction Learning",
+      "conf_id": "acl_2023",
+      "reason": "no: instruction learning, not cost"
+    },
+    {
+      "pid": "acl_2023:6bf3cf7d",
+      "title": "Large Language Models Are Reasoning Teachers",
+      "conf_id": "acl_2023",
+      "reason": "low: distillation into smaller models for reasoning"
+    },
+    {
+      "pid": "acl_2023:7d283f1a",
+      "title": "DISCO: Distilling Counterfactuals with Large Language Models",
+      "conf_id": "acl_2023",
+      "reason": "no: counterfactual data generation"
+    },
+    {
+      "pid": "acl_2023:813503c0",
+      "title": "Distilling Reasoning Capabilities into Smaller Language Models",
+      "conf_id": "acl_2023",
+      "reason": "low: distillation for reasoning capability"
+    },
+    {
+      "pid": "acl_2023:9d7ccdaa",
+      "title": "Symbolic Chain-of-Thought Distillation: Small Models Can Also \"Think\" Step-by-Step",
+      "conf_id": "acl_2023",
+      "reason": "low: CoT distillation for capability"
+    },
+    {
+      "pid": "acl_2023:9f24593d",
+      "title": "SCOTT: Self-Consistent Chain-of-Thought Distillation",
+      "conf_id": "acl_2023",
+      "reason": "low: CoT distillation for capability"
+    },
+    {
+      "pid": "acl_2024:87f4502d",
+      "title": "Multistage Collaborative Knowledge Distillation from a Large Language Model for Semi-Supervised Sequence Generation",
+      "conf_id": "acl_2024",
+      "reason": "low: distillation for sequence generation labels"
+    },
+    {
+      "pid": "colm_2024:791fd248",
+      "title": "Corex: Pushing the Boundaries of Complex Reasoning through Multi-Model Collaboration",
+      "conf_id": "colm_2024",
+      "reason": "low: multi-model reasoning, not cost"
+    },
+    {
+      "pid": "emnlp_2022:033d6159",
+      "title": "Prompt Compression and Contrastive Conditioning for Controllability and Toxicity Reduction in Language Models",
+      "conf_id": "emnlp_2022",
+      "reason": "low: prompt compression for controllability, not speed"
+    },
+    {
+      "pid": "emnlp_2023:1369ba0c",
+      "title": "Lion: Adversarial Distillation of Proprietary Large Language Models",
+      "conf_id": "emnlp_2023",
+      "reason": "low: distillation for capability"
+    },
+    {
+      "pid": "emnlp_2023:7925deef",
+      "title": "MCC-KD: Multi-CoT Consistent Knowledge Distillation",
+      "conf_id": "emnlp_2023",
+      "reason": "low: multi-CoT distillation for reasoning"
+    },
+    {
+      "pid": "iclr_2017:cec601e7",
+      "title": "Neural Architecture Search with Reinforcement Learning",
+      "conf_id": "iclr_2017",
+      "reason": "no: neural architecture search, not LLM"
+    },
+    {
+      "pid": "iclr_2021:3925d582",
+      "title": "GShard: Scaling Giant Models with Conditional Computation and Automatic Sharding",
+      "conf_id": "iclr_2021",
+      "reason": "low: MoE scaling and sharding for training"
+    },
+    {
+      "pid": "iclr_2022:312859bd",
+      "title": "CKConv: Continuous Kernel Convolution For Sequential Data",
+      "conf_id": "iclr_2022",
+      "reason": "low: convolutional sequence model, not LLM"
+    },
+    {
+      "pid": "iclr_2022:35d6d978",
+      "title": "LoRA: Low-Rank Adaptation of Large Language Models",
+      "conf_id": "iclr_2022",
+      "reason": "no: fine-tuning efficiency only"
+    },
+    {
+      "pid": "iclr_2023:229fe606",
+      "title": "Sparse Upcycling: Training Mixture-of-Experts from Dense Checkpoints",
+      "conf_id": "iclr_2023",
+      "reason": "low: MoE training from dense checkpoints"
+    },
+    {
+      "pid": "iclr_2023:41eb65f2",
+      "title": "Sparse MoE as the New Dropout: Scaling Dense and Self-Slimmable Transformers",
+      "conf_id": "iclr_2023",
+      "reason": "low: MoE dropout for training"
+    },
+    {
+      "pid": "iclr_2023:a25f426e",
+      "title": "Liquid Structural State-Space Models",
+      "conf_id": "iclr_2023",
+      "reason": "low: state space models, not inference efficiency"
+    },
+    {
+      "pid": "iclr_2024:aef75fd4",
+      "title": "AffineQuant: Affine Transformation Quantization for Large Language Models",
+      "conf_id": "iclr_2024",
+      "reason": "low: retrieval-augmented generation, not cost"
+    },
+    {
+      "pid": "iclr_2024:ce68ab83",
+      "title": "FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning",
+      "conf_id": "iclr_2024",
+      "reason": "low: architecture vs ICL ability"
+    },
+    {
+      "pid": "icml_2020:bbf18ecb",
+      "title": "Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention",
+      "conf_id": "icml_2020",
+      "reason": "low: MoE layer for training simplicity"
+    },
+    {
+      "pid": "icml_2022:fe7fef2a",
+      "title": "GLaM: Efficient Scaling of Language Models with Mixture-of-Experts",
+      "conf_id": "icml_2022",
+      "reason": "no: model suite for analysis"
+    },
+    {
+      "pid": "icml_2023:bfadfb06",
+      "title": "Fast Inference from Transformers via Speculative Decoding",
+      "conf_id": "icml_2023",
+      "reason": "low: SSM in-context learning study"
+    },
+    {
+      "pid": "icml_2024:6629ae81",
+      "title": "Vision Mamba: Efficient Visual Representation Learning with Bidirectional State Space Model",
+      "conf_id": "icml_2024",
+      "reason": "low: efficient vision backbone, not LLM"
+    },
+    {
+      "pid": "ijcai_2024:4e6a9e97",
+      "title": "Large Language Model Based Multi-agents: A Survey of Progress and Challenges",
+      "conf_id": "ijcai_2024",
+      "reason": "no: multi-agent survey"
+    },
+    {
+      "pid": "naacl_2024:f37351d9",
+      "title": "REPLUG: Retrieval-Augmented Black-Box Language Models",
+      "conf_id": "naacl_2024",
+      "reason": "no: retrieval augmentation, not cost"
+    },
+    {
+      "pid": "neurips_2017:0ea83918",
+      "title": "Attention is All you Need",
+      "conf_id": "neurips_2017",
+      "reason": "low: original Transformer, not efficiency focus"
+    },
+    {
+      "pid": "neurips_2020:17e446ff",
+      "title": "HiPPO: Recurrent Memory with Optimal Polynomial Projections",
+      "conf_id": "neurips_2020",
+      "reason": "low: SSM memory theory"
+    },
+    {
+      "pid": "neurips_2020:76873ac2",
+      "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+      "conf_id": "neurips_2020",
+      "reason": "no: RAG, not cost"
+    },
+    {
+      "pid": "neurips_2020:bf09905b",
+      "title": "Language Models are Few-Shot Learners",
+      "conf_id": "neurips_2020",
+      "reason": "no: capabilities of LLMs"
+    },
+    {
+      "pid": "neurips_2021:01384d3f",
+      "title": "Combining Recurrent, Convolutional, and Continuous-time Models with Linear State Space Layers",
+      "conf_id": "neurips_2021",
+      "reason": "low: SSM layers, not inference efficiency"
+    },
+    {
+      "pid": "neurips_2022:620ba346",
+      "title": "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models",
+      "conf_id": "neurips_2022",
+      "reason": "no: CoT prompting capability"
+    },
+    {
+      "pid": "neurips_2022:92228b38",
+      "title": "On the Parameterization and Initialization of Diagonal State Space Models",
+      "conf_id": "neurips_2022",
+      "reason": "low: SSM parameterization, not inference efficiency"
+    },
+    {
+      "pid": "neurips_2022:c6aaf8be",
+      "title": "Training language models to follow instructions with human feedback",
+      "conf_id": "neurips_2022",
+      "reason": "no: alignment, not cost"
+    },
+    {
+      "pid": "neurips_2023:3dcfbb01",
+      "title": "QLoRA: Efficient Finetuning of Quantized LLMs",
+      "conf_id": "neurips_2023",
+      "reason": "no: fine-tuning cost only"
+    },
+    {
+      "pid": "neurips_2023:4a945f24",
+      "title": "Tree of Thoughts: Deliberate Problem Solving with Large Language Models",
+      "conf_id": "neurips_2023",
+      "reason": "no: reasoning framework, not cost"
+    },
+    {
+      "pid": "neurips_2023:ffb3188f",
+      "title": "Propagating Knowledge Updates to LMs Through Distillation",
+      "conf_id": "neurips_2023",
+      "reason": "no: knowledge editing via distillation"
+    }
+  ]
+}
