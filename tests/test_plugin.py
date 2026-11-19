@@ -44,6 +44,18 @@ def test_venue_check_grounds_through_lookup_and_status():
     assert "Agent" not in text
 
 
+@pytest.mark.parametrize("skill", ["survey", "venue-check"])
+def test_skill_runs_downloads_under_a_long_timeout(skill):
+    text = (SKILLS / skill / "SKILL.md").read_text()
+    assert "ppr data status --json" in text and "ppr data update" in text and "600000" in text
+
+
+def test_survey_leaves_venue_grounding_to_venue_check():
+    front = (SKILLS / "survey" / "SKILL.md").read_text().split("---")[1]
+    assert "venue-check" in front
+    assert "to ground or complete" not in front and "this repository" not in front
+
+
 def test_survey_outputs_are_ignored():
     assert "surveys/" in (ROOT / ".gitignore").read_text().splitlines()
 

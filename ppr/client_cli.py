@@ -9,6 +9,7 @@ pipeline commands around the same parsers.
 import argparse
 import logging
 import os
+import signal
 import sys
 from pathlib import Path
 
@@ -108,7 +109,13 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _exit_on_sigterm(signum, frame) -> None:
+    raise SystemExit(128 + signum)
+
+
 def dispatch(args: argparse.Namespace) -> None:
+    # A Bash tool timeout ends ppr with SIGTERM; as an exit, it runs the download's and index build's cleanup.
+    signal.signal(signal.SIGTERM, _exit_on_sigterm)
     if args.command == "data":
         _cmd_data(args)
     else:
@@ -252,7 +259,11 @@ def _cmd_data(args: argparse.Namespace) -> None:
         print(json.dumps(st, ensure_ascii=False) if args.json else data_home.format_status(st))
         return
 
+    from ppr.search.index import open_index
+
     with data_home.home_lock(home.root, say=_err):
+        if home.managed:
+            data_home.clear_leftovers(home.root)
         try:
             status, old, new = data_sync.sync(home.root, data_sync.fetch_latest_tag, data_sync.fetch_zip,
                                               force=args.force)
@@ -263,4 +274,9 @@ def _cmd_data(args: argparse.Namespace) -> None:
             raise SystemExit(f"data update failed: {exc}")
         if home.managed:
             data_home.record_check(home.root, time.time())
+        # The index build is the other slow step; doing it here keeps it out of the next search.
+        try:
+            open_index(home.data_dir, home.index_path).close()
+        except Exception as exc:
+            raise SystemExit(f"data updated to {new}, but the search index build failed: {exc}")
     print(f"data/ already at {new}" if status == "current" else f"data/ updated: {old or 'none'} -> {new}")

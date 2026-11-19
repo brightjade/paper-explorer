@@ -1,6 +1,6 @@
 ---
 name: survey
-description: "Find and synthesize related work from real accepted papers at top-tier venues: this repository's conference data, searched in rounds, extended by citation chasing and web search. Use when the user invokes /survey, asks to 'find related work', 'survey papers', 'literature review', 'is this idea new / has this been done', or describes a research idea and wants to know what exists. Also when they hand over a paper list from Asta, Undermind or a web search to ground or complete, or ask about research gaps, datasets or baselines for a topic."
+description: "Find and synthesize related work from real accepted papers at top-tier venues: paper-explorer's accepted-paper dataset (the ppr tool), searched in rounds, extended by citation chasing and web search. Use when the user invokes /paper-explorer:survey, asks to 'find related work', 'survey papers', 'literature review', 'is this idea new / has this been done', or describes a research idea and wants to know what exists. Also use it when they want a paper list from Asta, Undermind or a web search completed across a topic: what else exists and what the list missed. Do not use it to look up where the papers on a list were accepted, or their tracks or awards; that is the venue-check skill. Also use it when they ask about research gaps, datasets or baselines for a topic."
 ---
 
 # Literature Survey
@@ -12,7 +12,7 @@ You search the way Asta Paper Finder and Undermind do: many phrasings, every can
 The tool is the `ppr` command, from any directory.
 
 - If `ppr` is not found, tell the user to install it with `uv tool install git+https://github.com/brightjade/paper-explorer` and stop.
-- The first search on a machine downloads the newest data release (about 124 MB) and builds a search index, once, which takes a few minutes. After that, `ppr` checks for a newer release at most once a day. Download messages go to stderr; `--json` output stays clean.
+- Start with `ppr data status --json`. If `managed` is true and `tag` is null, or `last_check` is null or over a day old, run `ppr data update` before any search, with the Bash tool's timeout raised to 600000 ms. The first download (about 124 MB) and the index build take minutes. A search would otherwise do them under the default 2-minute timeout and be cut off. After that, `ppr` checks for a newer release at most once a day. Download messages go to stderr; `--json` output stays clean.
 - If a command fails with an unknown subcommand or option, the tool is older than this skill. Tell the user to run `uv tool upgrade ppr` and `claude plugin update paper-explorer@paper-explorer`, then stop.
 - If a command reports no data, pass its message on to the user and stop.
 - `ppr data status` names the release in use and the venues and years it holds.

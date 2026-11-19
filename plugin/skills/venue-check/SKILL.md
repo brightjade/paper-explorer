@@ -12,7 +12,7 @@ Literature tools built on Semantic Scholar often label accepted papers as arXiv 
 The tool is the `ppr` command, from any directory.
 
 - If `ppr` is not found, tell the user to install it with `uv tool install git+https://github.com/brightjade/paper-explorer` and stop.
-- The first call on a machine downloads the newest data release (about 124 MB) and builds a search index, once, which takes a few minutes. After that, `ppr` checks for a newer release at most once a day. Messages go to stderr.
+- Start with `ppr data status --json`. If `managed` is true and `tag` is null, or `last_check` is null or over a day old, run `ppr data update` before anything else, with the Bash tool's timeout raised to 600000 ms. The first download (about 124 MB) and the index build take minutes. A search would otherwise do them under the default 2-minute timeout and be cut off. After that, `ppr` checks for a newer release at most once a day. Messages go to stderr.
 - If a command fails with an unknown subcommand or option, the tool is older than this skill. Tell the user to run `uv tool upgrade ppr` and `claude plugin update paper-explorer@paper-explorer`, then stop.
 - If a command reports no data, pass its message on and stop.
 
@@ -27,7 +27,7 @@ Work in `surveys/venue-check_<YYYY-MM-DD_HH-MM-SS>/` (`<D>` below; write the lit
    - `CorpusId:N`
    - else `Title ;; First Author, Second Author` (the authors break ties between similar titles)
 2. Run `ppr search lookup --file <D>/items.txt --json > <D>/lookup.jsonl`. You get one JSON object per input line: `input`, `kind`, `status` (`found`, `fuzzy` or `not in dataset`) and `papers`. Each paper has `pid`, `venue`, `venue_name`, `year`, `title`, `selection` (the track), `awards` and `citation_count`.
-3. Run `ppr data status --json` to see the release in use (`tag`) and the years held per venue (`venues`).
+3. Use the `ppr data status --json` you ran first: `tag` is the release in use, and `venues` gives the years held per venue.
 
 ## 2. Report
 

@@ -9,6 +9,7 @@ calls at once. Messages go through `say` (stderr in the CLI), never stdout.
 import fcntl
 import json
 import os
+import shutil
 import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
@@ -41,14 +42,22 @@ fetch_zip = data_sync.fetch_zip
 
 @contextmanager
 def home_lock(root: Path, say: Say) -> Iterator[None]:
-    """Exclusive lock on `<root>/.lock`; says so when it has to wait for another process."""
+    """Exclusive lock on `<root>/.lock`; says so when it has to wait for another process.
+
+    A filesystem without locks (an NFS home without lockd) gets a warning and no lock, not a failed search.
+    """
     root.mkdir(parents=True, exist_ok=True)
     with open(root / LOCK_FILE, "a") as handle:
         try:
-            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            say(f"waiting for another ppr process using {root}…")
-            fcntl.flock(handle, fcntl.LOCK_EX)
+            try:
+                fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                say(f"waiting for another ppr process using {root}…")
+                fcntl.flock(handle, fcntl.LOCK_EX)
+        except OSError as exc:
+            say(f"warning: cannot lock {root} ({exc}); continuing without a lock")
+            yield
+            return
         try:
             yield
         finally:
@@ -89,6 +98,7 @@ def ensure_data(root: Path, *, auto_update: bool, say: Say,
     latest_tag = latest_tag or fetch_latest_tag_short
     fetch = download or fetch_zip
     root.mkdir(parents=True, exist_ok=True)
+    clear_leftovers(root)
 
     def announced(tag: str, dest: Path) -> None:
         say(f"downloading data release {tag} into {root} ({DOWNLOAD_SIZE})…")
@@ -106,6 +116,8 @@ def ensure_data(root: Path, *, auto_update: bool, say: Say,
 
     if not auto_update or not check_due(root, now()):
         return
+    # Recorded first: a run killed mid-update (a Bash tool timeout) must not retry on every call that day.
+    record_check(root, now())
     try:
         status, old, new = sync(root, latest_tag, announced)
     except Exception as exc:
@@ -115,11 +127,21 @@ def ensure_data(root: Path, *, auto_update: bool, say: Say,
     else:
         if status == "updated":
             say(f"data updated: {old or 'none'} -> {new}")
-    record_check(root, now())
 
 
 def record_check(root: Path, when: float) -> None:
     (root / CHECK_FILE).write_text(str(when), encoding="utf-8")
+
+
+def clear_leftovers(root: Path) -> None:
+    """Work files of a run killed before its cleanup: a sync's `.data-sync-*` dir, an index build's temp file.
+
+    Only called under `home_lock`, so no live run owns them.
+    """
+    for work in root.glob(".data-sync-*"):
+        shutil.rmtree(work, ignore_errors=True)
+    for tmp in (root / ".cache").glob(".search-*.tmp"):
+        tmp.unlink(missing_ok=True)
 
 
 def _tree_bytes(path: Path) -> int:

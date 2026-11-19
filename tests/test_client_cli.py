@@ -71,6 +71,49 @@ def test_data_update_reports_like_sync_data(managed, tmp_path, monkeypatch, caps
     assert f"already at {TAG}" in capsys.readouterr().out
 
 
+def test_data_update_builds_the_index(managed, tmp_path, monkeypatch, capsys):
+    gh = FakeGitHub(tmp_path, TAG, dataset_files(tmp_path))
+    monkeypatch.setattr(data_sync, "fetch_latest_tag", gh.latest_tag)
+    monkeypatch.setattr(data_sync, "fetch_zip", gh.download)
+    client_cli.main(["data", "update"])
+    assert managed.index_path.is_file()
+
+
+SIGTERM_SCRIPT = """
+import sys, time
+from pathlib import Path
+from ppr import client_cli, data_home, layout
+home = layout.Home(Path(sys.argv[1]), True)
+client_cli._home = lambda: home
+data_home.fetch_latest_tag_short = lambda: "data-2026-11-03"
+def slow(tag, dest):
+    dest.write_bytes(b"PK partial")
+    time.sleep(60)
+data_home.fetch_zip = slow
+client_cli.main(["search", "lookup", "x"])
+"""
+
+
+def test_sigterm_during_a_download_cleans_up(tmp_path):
+    import signal
+    import subprocess
+    import time
+
+    script = tmp_path / "run.py"
+    script.write_text(SIGTERM_SCRIPT)
+    home = tmp_path / "h"
+    proc = subprocess.Popen([sys.executable, str(script), str(home)], cwd=layout.ROOT,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    deadline = time.time() + 30
+    while not list(home.glob(".data-sync-*/data.zip")) and time.time() < deadline:
+        time.sleep(0.05)
+    assert list(home.glob(".data-sync-*/data.zip")), "the download never started"
+    proc.send_signal(signal.SIGTERM)
+    proc.wait(30)
+    assert proc.returncode == 143
+    assert not list(home.glob(".data-sync-*"))
+
+
 def test_auto_update_off_with_no_data_says_data_update(managed, monkeypatch):
     monkeypatch.setenv(layout.AUTO_UPDATE_ENV, "0")
     with pytest.raises(SystemExit) as exc:

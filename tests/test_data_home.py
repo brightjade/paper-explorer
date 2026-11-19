@@ -121,6 +121,46 @@ def test_interrupted_first_download_leaves_nothing_and_retries(tmp_path):
     assert gh.downloads == 1 and data_home.has_data(tmp_path)
 
 
+def test_update_records_the_check_before_downloading(tmp_path):
+    seed(tmp_path, "data-2026-10-19", checked_at=0.0)
+    seen = []
+
+    def killed(tag, dest):
+        seen.append(data_home.check_due(tmp_path, 2 * DAY + 60))
+        raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        ensure(tmp_path, [], latest_tag=lambda: "data-2026-11-03", download=killed, now=2 * DAY)
+    assert seen == [False]
+    assert data_home.check_due(tmp_path, 2 * DAY + 60) is False
+
+
+def test_leftovers_of_a_killed_run_are_removed(tmp_path):
+    seed(tmp_path, "data-2026-10-19", checked_at=1000.0)
+    (tmp_path / ".data-sync-abc123" / "new").mkdir(parents=True)
+    (tmp_path / ".data-sync-abc123" / "data.zip").write_bytes(b"PK partial")
+    (tmp_path / ".cache").mkdir()
+    (tmp_path / ".cache" / ".search-xyz.tmp").write_bytes(b"partial index")
+    ensure(tmp_path, [], latest_tag=boom, download=boom, now=1000.0)
+    assert not list(tmp_path.glob(".data-sync-*"))
+    assert not list((tmp_path / ".cache").glob(".search-*.tmp"))
+    assert data_home.has_data(tmp_path)
+
+
+def test_lock_unsupported_warns_and_continues(tmp_path, monkeypatch):
+    import errno
+
+    def no_locks(handle, op):
+        raise OSError(errno.ENOLCK, "No locks available")
+
+    monkeypatch.setattr(data_home.fcntl, "flock", no_locks)
+    said, ran = [], []
+    with data_home.home_lock(tmp_path, say=said.append):
+        ran.append(True)
+    assert ran == [True]
+    assert said and said[0].startswith("warning: cannot lock") and "No locks available" in said[0]
+
+
 def _parallel_worker(home, log, zip_src, tag, out):
     def download(t, dest):
         with open(log, "a") as f:
