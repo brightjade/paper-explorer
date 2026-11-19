@@ -127,7 +127,8 @@ def _parse_paper_paragraphs(soup: BeautifulSoup, selection: str) -> list[Paper]:
         else:
             full_text = p.get_text()
             authors_text = full_text[len(title):].strip()
-        authors_text = authors_text.replace(" and ", ", ")
+        # EMNLP 2026's industry page separates authors with semicolons.
+        authors_text = authors_text.replace(" and ", ", ").replace(";", ",")
         authors = [a.strip() for a in authors_text.split(",") if a.strip()]
         papers.append(Paper(
             title=title,
@@ -193,6 +194,18 @@ def _scrape_paragraph_pages(base_url: str, pages: dict[str, str]) -> list[Paper]
         logger.info("  Found %d papers", len(papers))
         all_papers.extend(papers)
     return all_papers
+
+
+def scrape_emnlp_2026() -> list[Paper]:
+    # 2026 keeps 2025's track paths but moves to the paragraph layout,
+    # <p><strong>Title</strong><br/><em>Authors</em></p>. /program/demo_papers/,
+    # /program/tacl_papers/ and /program/cl_papers/ exist too and are excluded,
+    # as in every other year.
+    return _scrape_paragraph_pages("https://2026.emnlp.org", {
+        "main": "/program/main_papers/",
+        "findings": "/program/find_papers/",
+        "industry": "/program/ind_papers/",
+    })
 
 
 def scrape_emnlp_2023() -> list[Paper]:
@@ -375,4 +388,5 @@ SCRAPERS = {
     "naacl_2025": scrape_naacl_2025,
     "acl_2026": scrape_acl_2026,
     "eacl_2026": scrape_eacl_2026,
+    "emnlp_2026": scrape_emnlp_2026,
 }

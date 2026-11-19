@@ -1,4 +1,4 @@
-from ppr.scrapers.acl import _parse_anthology, _parse_paper_list
+from ppr.scrapers.acl import _parse_anthology, _parse_paper_list, _parse_paper_paragraphs
 from bs4 import BeautifulSoup
 
 
@@ -103,3 +103,22 @@ class TestParseAuthorDelimiter:
         soup = BeautifulSoup(html, "html.parser")
         papers = _parse_paper_list(soup, "main")
         assert papers[0].authors == ["Alice Smith", "Bob Jones", "Carol Lee"]
+
+    def test_semicolon_separated_paragraph(self):
+        # EMNLP 2026's industry page: <p><strong>Title</strong><br/><em>A; B; C</em></p>
+        html = '<p><strong>Title</strong><br/><em>Nicolas Bougie; Gian Maria Marconi; jufeng chen</em></p>'
+        papers = _parse_paper_paragraphs(BeautifulSoup(html, "html.parser"), "industry")
+        assert papers[0].authors == ["Nicolas Bougie", "Gian Maria Marconi", "jufeng chen"]
+
+
+def test_emnlp_2026_is_registered_with_the_three_tracks(monkeypatch):
+    from ppr.scrapers import SCRAPERS, acl
+
+    calls = []
+    monkeypatch.setattr(acl, "_scrape_paragraph_pages", lambda base, pages: calls.append((base, pages)) or [])
+    SCRAPERS["emnlp_2026"]()
+    assert calls == [("https://2026.emnlp.org", {
+        "main": "/program/main_papers/",
+        "findings": "/program/find_papers/",
+        "industry": "/program/ind_papers/",
+    })]
