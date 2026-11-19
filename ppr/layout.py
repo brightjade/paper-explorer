@@ -13,10 +13,23 @@ is grouped by venue:
 
 `configs/venues.yaml`, `data/pipeline_state.json` and `data/citation_updated.txt`
 sit at the roots and are no conference's.
+
+`ppr search` and `ppr data` read a data home laid out like the repository root:
+the checkout itself, or, for an installed `ppr`, a cache it fills from the
+newest data release (`ppr/data_home.py`):
+
+    <home>/data/...                      as above
+    <home>/.data-release.json            the installed release tag and file CRCs
+    <home>/.cache/search.sqlite          the search index
+    <home>/.update-check                 when the newest release was last checked
+    <home>/.lock                         held while data or the index changes
 """
 
+import os
 import re
+from collections.abc import Mapping
 from pathlib import Path
+from typing import NamedTuple
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
@@ -87,3 +100,39 @@ def search_index_path(root: Path = ROOT) -> Path:
     """`ppr search`'s index. Derived from data/ but kept outside it: scripts/sync_data.py
     tracks every file under data/ and would refuse the next sync as a local edit."""
     return root / ".cache" / "search.sqlite"
+
+
+HOME_ENV = "PPR_HOME"
+AUTO_UPDATE_ENV = "PPR_AUTO_UPDATE"
+CACHE_DIR_NAME = "paper-explorer"
+
+
+class Home(NamedTuple):
+    """Where `ppr search` reads data; `managed` homes are downloaded and kept current by ppr itself."""
+
+    root: Path
+    managed: bool
+
+    @property
+    def data_dir(self) -> Path:
+        return self.root / "data"
+
+    @property
+    def index_path(self) -> Path:
+        return search_index_path(self.root)
+
+
+def is_checkout(root: Path = ROOT) -> bool:
+    """Running from a clone (or an editable install of one), judged by the package's location, never the cwd."""
+    return (root / "pyproject.toml").is_file()
+
+
+def data_home(env: Mapping[str, str] | None = None, root: Path = ROOT) -> Home:
+    """`PPR_HOME` if set; else the checkout; else `${XDG_CACHE_HOME:-~/.cache}/paper-explorer`."""
+    env = os.environ if env is None else env
+    if env.get(HOME_ENV):
+        return Home(Path(env[HOME_ENV]).expanduser(), True)
+    if is_checkout(root):
+        return Home(root, False)
+    cache = Path(env["XDG_CACHE_HOME"]).expanduser() if env.get("XDG_CACHE_HOME") else Path.home() / ".cache"
+    return Home(cache / CACHE_DIR_NAME, True)

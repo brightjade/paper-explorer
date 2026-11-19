@@ -106,3 +106,55 @@ def test_search_index_path_is_outside_data(tmp_path):
     assert search_index_path(tmp_path) == tmp_path / ".cache" / "search.sqlite"
     assert search_index_path() == ROOT / ".cache" / "search.sqlite"
     assert DATA_DIR not in search_index_path().parents
+
+
+class TestDataHome:
+    def test_ppr_home_wins_and_is_managed(self, tmp_path):
+        (tmp_path / "repo").mkdir()
+        (tmp_path / "repo" / "pyproject.toml").write_text("")
+        home = layout.data_home({"PPR_HOME": str(tmp_path / "h")}, root=tmp_path / "repo")
+        assert home == layout.Home(tmp_path / "h", True)
+
+    def test_checkout_is_root_and_unmanaged(self, tmp_path):
+        (tmp_path / "pyproject.toml").write_text("")
+        home = layout.data_home({}, root=tmp_path)
+        assert home == layout.Home(tmp_path, False)
+        assert home.data_dir == tmp_path / "data"
+        assert home.index_path == tmp_path / ".cache" / "search.sqlite"
+
+    def test_installed_uses_xdg_cache_home(self, tmp_path):
+        home = layout.data_home({"XDG_CACHE_HOME": str(tmp_path / "xdg")}, root=tmp_path / "site-packages")
+        assert home == layout.Home(tmp_path / "xdg" / "paper-explorer", True)
+
+    def test_installed_default_is_dot_cache(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("HOME", str(tmp_path))
+        home = layout.data_home({}, root=tmp_path / "site-packages")
+        assert home == layout.Home(tmp_path / ".cache" / "paper-explorer", True)
+
+    def test_empty_variables_count_as_unset(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("HOME", str(tmp_path))
+        home = layout.data_home({"PPR_HOME": "", "XDG_CACHE_HOME": ""}, root=tmp_path / "site-packages")
+        assert home == layout.Home(tmp_path / ".cache" / "paper-explorer", True)
+
+    def test_cwd_pyproject_does_not_make_a_checkout(self, tmp_path, monkeypatch):
+        project = tmp_path / "my-research"
+        project.mkdir()
+        (project / "pyproject.toml").write_text("[project]\nname = 'mine'\n")
+        monkeypatch.chdir(project)
+        home = layout.data_home({"XDG_CACHE_HOME": str(tmp_path / "xdg")}, root=tmp_path / "site-packages")
+        assert home.managed
+
+    def test_this_repository_is_a_checkout(self):
+        assert layout.is_checkout()
+
+
+@pytest.mark.parametrize("module", ["layout", "matching"])
+def test_module_stays_stdlib_only(module):
+    import ast
+    import importlib
+    import sys
+
+    tree = ast.parse(Path(importlib.import_module(f"ppr.{module}").__file__).read_text())
+    mods = {a.name.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names}
+    mods |= {n.module.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.module}
+    assert mods - {"ppr"} <= set(sys.stdlib_module_names)
