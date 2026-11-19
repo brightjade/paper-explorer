@@ -1,33 +1,9 @@
 import json
-import zipfile
 
 import pytest
 
-from scripts.sync_data import STATE_FILE, SyncRefused, newest_data_tag, sync
-
-
-def make_release_zip(path, files):
-    with zipfile.ZipFile(path, "w") as z:
-        for name, text in files.items():
-            z.writestr(name, text)
-
-
-class FakeGitHub:
-    """Stands in for the two network calls: the newest tag and its data.zip."""
-
-    def __init__(self, tmp_path, tag, files):
-        self.tmp_path = tmp_path
-        self.tag = tag
-        self.files = files
-        self.downloads = 0
-
-    def latest_tag(self):
-        return self.tag
-
-    def download(self, tag, dest):
-        assert tag == self.tag
-        self.downloads += 1
-        make_release_zip(dest, self.files)
+from ppr.data_sync import STATE_FILE, SyncRefused, newest_data_tag, sync
+from tests.release_helpers import FakeGitHub, make_release_zip
 
 
 RELEASE_A = {
@@ -50,6 +26,18 @@ def installed(root, gh_a):
 def tree(root):
     data = root / "data"
     return {p.relative_to(root).as_posix(): p.read_text() for p in data.rglob("*") if p.is_file()}
+
+
+def test_script_main_still_mirrors(tmp_path, monkeypatch, capsys):
+    import scripts.sync_data as script
+
+    gh = FakeGitHub(tmp_path, "data-2026-11-03", RELEASE_A)
+    monkeypatch.setattr(script, "fetch_latest_tag", gh.latest_tag)
+    monkeypatch.setattr(script, "fetch_zip", gh.download)
+    monkeypatch.setattr(script, "ROOT", tmp_path)
+    assert script.main([]) == 0
+    assert "updated: none -> data-2026-11-03" in capsys.readouterr().out
+    assert (tmp_path / "data" / "iclr" / "2025.jsonl").exists()
 
 
 class TestNewestDataTag:

@@ -1,0 +1,12 @@
+{
+  "name": "paper-explorer",
+  "owner": { "name": "brightjade" },
+  "description": "Skills over paper-explorer's accepted-paper dataset: venue, track and award grounding, and grounded literature surveys",
+  "plugins": [
+    {
+      "name": "paper-explorer",
+      "source": "./plugin",
+      "description": "venue-check (where each paper on a list was accepted, its track and awards) and survey (a grounded literature survey over accepted papers)"
+    }
+  ]
+}
