@@ -95,9 +95,11 @@ def test_every_config_file_follows_the_layout():
 
 
 def test_the_move_kept_every_config():
+    # Lower bounds: the 2026-10-19 move held 33 crawl configs and 40 award lists.
+    # Registrations add more (autoregister, then the monthly run's test step).
     configs = layout.CONFIGS_DIR
-    assert len(layout.crawl_config_ids(configs)) == 33
-    assert len(list(configs.glob("*/awards/*.yaml"))) == 40
+    assert len(layout.crawl_config_ids(configs)) >= 33
+    assert len(list(configs.glob("*/awards/*.yaml"))) >= 40
 
 
 def test_search_index_path_is_outside_data(tmp_path):

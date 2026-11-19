@@ -1,0 +1,8 @@
+conference:
+  name: "NeurIPS"
+  year: 2026
+  venue_id: "NeurIPS.cc/2026/Conference"
+  selections:
+    oral: "NeurIPS 2026 oral"
+    poster: "NeurIPS 2026 poster"
+    spotlight: "NeurIPS 2026 spotlight"

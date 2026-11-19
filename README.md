@@ -169,14 +169,14 @@ A conference ID is `<venue>_<year>`, with the venue IDs listed under [Conference
 
 | Field | Venue | ID | Years | Tracks |
 |---|---|---|---|---|
-| ML | NeurIPS | `neurips` | 2013–2025 | oral, spotlight, poster, main, datasets |
+| ML | NeurIPS | `neurips` | 2013–2026 | oral, spotlight, poster, main, datasets |
 | | ICML | `icml` | 2013–2026 | oral, spotlight, poster, main |
 | | ICLR | `iclr` | 2013–2026 | oral, spotlight, poster, main |
 | | TMLR | `tmlr` | 2022–2026 | main |
 | | AAAI | `aaai` | 2013–2026 | main |
 | | IJCAI | `ijcai` | 2013, 2015–2026 | main |
 | NLP | ACL | `acl` | 2013–2026 | main, findings, industry |
-| | EMNLP | `emnlp` | 2013–2025 | main, findings, industry |
+| | EMNLP | `emnlp` | 2013–2026 | main, findings, industry |
 | | NAACL | `naacl` | 2013, 2015–2016, 2018–2019, 2021–2022, 2024–2025 | main, findings, industry |
 | | COLM | `colm` | 2024–2026 | main |
 | | EACL | `eacl` | 2014, 2017, 2021, 2023–2024, 2026 | main, findings, industry |
