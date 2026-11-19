@@ -6,7 +6,10 @@ from pathlib import Path
 
 import yaml
 
-REGISTRY_PATH = Path(__file__).resolve().parent.parent / "configs" / "venues.yaml"
+# A checkout reads configs/venues.yaml; an installed ppr reads the copy its wheel carries.
+REPO_REGISTRY_PATH = Path(__file__).resolve().parent.parent / "configs" / "venues.yaml"
+PACKAGED_REGISTRY_PATH = Path(__file__).resolve().parent / "_venues.yaml"
+REGISTRY_PATH = REPO_REGISTRY_PATH if REPO_REGISTRY_PATH.is_file() else PACKAGED_REGISTRY_PATH
 
 SOURCES = {"openreview", "dblp", "researchr", "crossref", "roboticsproceedings", "cvf", "usenix", "acl", "aaai", "bespoke"}
 CADENCES = {"annual", "biennial-odd", "biennial-even"}

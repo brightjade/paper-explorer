@@ -270,13 +270,9 @@ name = "ppr"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "beautifulsoup4" },
     { name = "httpx" },
-    { name = "openreview-py" },
     { name = "python-dotenv" },
     { name = "pyyaml" },
-    { name = "requests" },
-    { name = "tqdm" },
 ]
 
 [package.dev-dependencies]
@@ -285,16 +281,18 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "respx" },
 ]
+pipeline = [
+    { name = "beautifulsoup4" },
+    { name = "openreview-py" },
+    { name = "requests" },
+    { name = "tqdm" },
+]
 
 [package.metadata]
 requires-dist = [
-    { name = "beautifulsoup4", specifier = ">=4.14.3" },
     { name = "httpx", specifier = ">=0.28" },
-    { name = "openreview-py", specifier = ">=1.40" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "pyyaml", specifier = ">=6.0" },
-    { name = "requests", specifier = ">=2.33.0" },
-    { name = "tqdm", specifier = ">=4.67" },
 ]
 
 [package.metadata.requires-dev]
@@ -302,6 +300,12 @@ dev = [
     { name = "pytest", specifier = ">=8.0" },
     { name = "pytest-asyncio", specifier = ">=0.25" },
     { name = "respx", specifier = ">=0.22" },
+]
+pipeline = [
+    { name = "beautifulsoup4", specifier = ">=4.14.3" },
+    { name = "openreview-py", specifier = ">=1.40" },
+    { name = "requests", specifier = ">=2.33.0" },
+    { name = "tqdm", specifier = ">=4.67" },
 ]
 
 [[package]]

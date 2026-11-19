@@ -21,6 +21,15 @@ def _write(tmp_path, data):
     return p
 
 
+def test_registry_path_prefers_the_checkout():
+    from ppr import venues
+
+    assert venues.REGISTRY_PATH == venues.REPO_REGISTRY_PATH
+    assert venues.REPO_REGISTRY_PATH.name == "venues.yaml" and venues.REPO_REGISTRY_PATH.parent.name == "configs"
+    assert venues.PACKAGED_REGISTRY_PATH.name == "_venues.yaml"
+    assert venues.PACKAGED_REGISTRY_PATH.parent == venues.REPO_REGISTRY_PATH.parent.parent / "ppr"
+
+
 VALID = {
     "venues": {
         "icse": {

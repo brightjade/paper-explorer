@@ -29,3 +29,4 @@ outputs/
 # Remote execution
 .remote.env
 logs/
+ppr/_venues.yaml

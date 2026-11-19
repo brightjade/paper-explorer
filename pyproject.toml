@@ -5,14 +5,13 @@ description = "Crawl accepted papers and citation data from top AI/ML, CV, robot
 authors = [{ name = "Minseok Choi", email = "minseok.choi@kaist.ac.kr" }]
 readme = "README.md"
 requires-python = ">=3.13"
+# What `uv tool install git+https://github.com/brightjade/paper-explorer` installs:
+# the search side only. The pipeline runs from a checkout, where `uv sync` adds
+# the `pipeline` group by default (tool.uv.default-groups).
 dependencies = [
     "pyyaml>=6.0",
-    "openreview-py>=1.40",
     "httpx>=0.28",
-    "tqdm>=4.67",
     "python-dotenv>=1.2.2",
-    "beautifulsoup4>=4.14.3",
-    "requests>=2.33.0",
 ]
 
 [dependency-groups]
@@ -21,12 +20,24 @@ dev = [
     "pytest-asyncio>=0.25",
     "respx>=0.22",
 ]
+pipeline = [
+    "openreview-py>=1.40",
+    "beautifulsoup4>=4.14.3",
+    "requests>=2.33.0",
+    "tqdm>=4.67",
+]
+
+[tool.uv]
+default-groups = ["dev", "pipeline"]
 
 [project.scripts]
 ppr = "ppr.entry:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["ppr"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"configs/venues.yaml" = "ppr/_venues.yaml"
 
 [build-system]
 requires = ["hatchling"]
