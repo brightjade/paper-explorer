@@ -101,7 +101,7 @@ def ensure_data(root: Path, *, auto_update: bool, say: Say,
             sync(root, latest_tag, announced)
         except Exception as exc:
             raise DataUnavailable(f"no data in {root}, and could not download it: {exc}") from exc
-        _record_check(root, now())
+        record_check(root, now())
         return
 
     if not auto_update or not check_due(root, now()):
@@ -115,10 +115,10 @@ def ensure_data(root: Path, *, auto_update: bool, say: Say,
     else:
         if status == "updated":
             say(f"data updated: {old or 'none'} -> {new}")
-    _record_check(root, now())
+    record_check(root, now())
 
 
-def _record_check(root: Path, when: float) -> None:
+def record_check(root: Path, when: float) -> None:
     (root / CHECK_FILE).write_text(str(when), encoding="utf-8")
 
 

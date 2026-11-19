@@ -23,7 +23,7 @@ dev = [
 ]
 
 [project.scripts]
-ppr = "ppr.cli:main"
+ppr = "ppr.entry:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["ppr"]

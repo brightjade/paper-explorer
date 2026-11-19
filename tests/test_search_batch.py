@@ -2,8 +2,9 @@ import json
 
 import pytest
 
-from ppr import cli
+from ppr import client_cli
 from ppr.search import batch, find
+from tests.search_helpers import never_home
 
 
 def write_jsonl(path, records):
@@ -75,13 +76,13 @@ def test_batches_are_sized_and_numbered(tmp_path):
 @pytest.fixture
 def run(capsys):
     def go(*argv):
-        cli.cmd_search(cli.build_parser().parse_args(["search", "batch", *argv]))
+        client_cli.dispatch(client_cli.build_parser().parse_args(["search", "batch", *argv]))
         return capsys.readouterr().out
     return go
 
 
 def test_cli_prints_one_line_per_file_and_a_summary(tmp_path, run, monkeypatch):
-    monkeypatch.setattr(cli, "DATA_DIR", tmp_path / "no-data")  # batch never opens the index
+    monkeypatch.setattr(client_cli, "_home", never_home)  # batch never touches the data home
     f = write_jsonl(tmp_path / "f.jsonl", [paper(f"x_2024:{i:08d}") for i in range(3)])
     prefix = tmp_path / "out" / "round-1-batch"
     out = run(str(f), "--out", str(prefix), "--size", "2").splitlines()

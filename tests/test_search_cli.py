@@ -2,20 +2,20 @@ import json
 
 import pytest
 
-from ppr import cli
+from ppr import cli, client_cli, layout
 from ppr.search import cites
 from tests.search_helpers import MU, make_dataset
 
 
 @pytest.fixture
 def search_env(tmp_path, monkeypatch):
-    monkeypatch.setattr(cli, "DATA_DIR", make_dataset(tmp_path))
-    monkeypatch.setattr(cli, "SEARCH_INDEX", tmp_path / ".cache" / "search.sqlite")
+    root = make_dataset(tmp_path).parent
+    monkeypatch.setattr(client_cli, "_home", lambda: layout.Home(root, False))
     return tmp_path
 
 
 def run(*argv):
-    cli.cmd_search(cli.build_parser().parse_args(["search", *argv]))
+    client_cli.dispatch(client_cli.build_parser().parse_args(["search", *argv]))
 
 
 def test_find_prints_ranked_lines(search_env, capsys):
@@ -98,8 +98,7 @@ def test_cites_s2_down_exits_1(search_env, monkeypatch):
 
 @pytest.mark.parametrize("argv", [("find", "x"), ("lookup", "2401.00001"), ("cites", "CorpusId:1")])
 def test_no_data_exits_with_the_sync_hint(tmp_path, monkeypatch, argv):
-    monkeypatch.setattr(cli, "DATA_DIR", tmp_path / "data")
-    monkeypatch.setattr(cli, "SEARCH_INDEX", tmp_path / ".cache" / "search.sqlite")
+    monkeypatch.setattr(client_cli, "_home", lambda: layout.Home(tmp_path, False))
     with pytest.raises(SystemExit) as exc:
         run(*argv)
     assert "sync_data" in str(exc.value.code)
@@ -107,9 +106,8 @@ def test_no_data_exits_with_the_sync_hint(tmp_path, monkeypatch, argv):
 
 def test_main_dispatches_search(monkeypatch):
     called = []
-    monkeypatch.setattr(cli, "cmd_search", lambda args: called.append(args.search_command))
-    monkeypatch.setattr("sys.argv", ["ppr", "search", "find", "x"])
-    cli.main()
+    monkeypatch.setattr(client_cli, "dispatch", lambda args: called.append(args.search_command))
+    cli.main(["search", "find", "x"])
     assert called == ["find"]
 
 

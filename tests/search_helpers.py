@@ -5,7 +5,13 @@ from pathlib import Path
 
 from ppr.layout import awards_path, papers_path
 
-MU = "Machine Unlearning for Large Language Models"
+
+def never_home():
+    """A `client_cli._home` for commands that must not touch the data home."""
+    raise AssertionError("the data home was touched")
+
+
+MU ="Machine Unlearning for Large Language Models"
 CDR = "Certified Data Removal from Machine Learning Models"
 FORGET = "Catastrophic Forgetting in Continual Learning"
 ERASE = "Erasing Concepts from Diffusion Models"

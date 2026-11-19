@@ -2,8 +2,9 @@ import json
 
 import pytest
 
-from ppr import cli
+from ppr import client_cli
 from ppr.search import verdicts
+from tests.search_helpers import never_home
 
 HEADER = "pid\tverdict\tround\tsource\treason\n"
 
@@ -84,12 +85,12 @@ def test_no_batches(tmp_path):
 
 @pytest.fixture
 def go(capsys, monkeypatch, tmp_path):
-    monkeypatch.setattr(cli, "DATA_DIR", tmp_path / "no-data")  # verdicts never opens the index
+    monkeypatch.setattr(client_cli, "_home", never_home)  # verdicts never touches the data home
 
     def call(*argv):
         code = 0
         try:
-            cli.cmd_search(cli.build_parser().parse_args(["search", "verdicts", *argv]))
+            client_cli.dispatch(client_cli.build_parser().parse_args(["search", "verdicts", *argv]))
         except SystemExit as exc:
             code = exc.code
         return code, capsys.readouterr().out
