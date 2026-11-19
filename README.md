@@ -44,20 +44,29 @@ Paper Explorer collects every accepted paper from the venues below, matches each
   <img src="docs/images/conference-light.webp" width="880" alt="The ICLR 2025 conference page: papers sorted by citations, with track labels and a search box">
 </picture>
 
-### Write a grounded literature survey with Claude Code
+### Check venues and write grounded surveys with Claude Code
 
-The repository ships a `/survey` skill for [Claude Code](https://claude.com/claude-code). Describe a research idea and it searches the accepted papers in `data/` (after [Quick start](#quick-start)) the way Asta or Undermind search, in rounds: many phrasings through a ranked search index, every candidate judged against criteria it writes down, new phrasings and citation chasing from the relevant papers, and a stop once new finds dry up. It checks an idea's novelty, drafts a paper's related work, or maps a new field, and every paper it cites shows where it was accepted (`ICLR 2025 · oral · Outstanding Paper`). Hand it a paper list from Asta, Undermind or a web search and it marks which are accepted papers and adds the accepted ones the list missed. Papers from outside these venues (web search, citation chasing) are marked as such.
+Two [Claude Code](https://claude.com/claude-code) skills come with the [search tool](#install-the-search-tool):
+
+- **`venue-check`**: hand it a paper list from Asta, Undermind or a bibliography, and it says where each paper was accepted, with its track and awards. Tools built on Semantic Scholar often label accepted ICML, ICLR and COLM papers as arXiv for months. On request it also lists the accepted papers at named venues that the list missed.
+- **`survey`**: describe a research idea, and it searches the accepted papers the way Asta or Undermind search, in rounds:
+  - many phrasings through a ranked search index;
+  - every candidate judged against criteria it writes down;
+  - new phrasings and citation chasing from the relevant papers;
+  - a stop once new finds dry up.
+
+  It checks an idea's novelty, drafts a paper's related work, or maps a new field. Every paper it cites shows where it was accepted (`ICLR 2025 · oral · Outstanding Paper`). Papers from outside these venues (web search, citation chasing) are marked as such.
 
 ```text
-/survey Is there work on unlearning specific facts from LLMs without retraining?
+/paper-explorer:venue-check Where were these accepted? 2303.07345, 2310.10683, 2402.03300
 
-/survey Related work for my paper on speculative decoding and early-exit inference,
+/paper-explorer:survey Is there work on unlearning specific facts from LLMs without retraining?
+
+/paper-explorer:survey Related work for my paper on speculative decoding and early-exit inference,
 NLP and ML venues from 2023 on.
-
-/survey What papers exist on 3D object detection from point clouds?
 ```
 
-The report and its working files (criteria, every judged paper, a search log) are saved under `outputs/<topic>_<timestamp>/`.
+Their reports and working files (for a survey: criteria, every judged paper, a search log) are saved under `surveys/<topic>_<timestamp>/` in the directory you run Claude Code from.
 
 ### Query the data in Python
 
@@ -81,9 +90,34 @@ for path in Path("data").glob("*/202[45].jsonl"):
             print(path.parent.name, path.stem, p.get("citation_count", 0), p["title"])
 ```
 
+## Install the search tool
+
+To search the data from any machine, without a clone, you need [uv](https://docs.astral.sh/uv/getting-started/installation/). It installs Python 3.13 for you.
+
+```bash
+uv tool install git+https://github.com/brightjade/paper-explorer   # the ppr command
+claude plugin marketplace add brightjade/paper-explorer             # the two skills, for Claude Code
+claude plugin install paper-explorer@paper-explorer
+```
+
+The first search downloads the newest data release into `~/.cache/paper-explorer` (about 1.2 GB with its search index). After that, `ppr` checks for a newer release at most once a day.
+
+```bash
+ppr search lookup 2303.07345 "Some Title ;; Author"    # where was it accepted, with track and awards
+ppr search find "machine unlearning" --venue iclr,neurips --years 2024-2026 --sort citations
+ppr data status                                         # release in use, venues and years held
+```
+
+- **Update.** `uv tool upgrade ppr` updates the tool. `claude plugin marketplace update paper-explorer && claude plugin update paper-explorer@paper-explorer` updates the skills.
+- **Data location.** `PPR_HOME=/some/path` keeps the data elsewhere, for example on a bigger disk.
+- **Daily check.** `PPR_AUTO_UPDATE=0` turns it off; `ppr data update` then fetches on demand.
+- **Semantic Scholar key (optional).** `export SEMANTIC_SCHOLAR_API_KEY=…` raises the rate limits `ppr search cites` runs under.
+- **No GitHub SSH key.** On such a machine, set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` for plugin installs and updates.
+- **Machine with a clone.** Install from the clone instead: `uv tool install --editable <path to your clone>`. `ppr` then searches the clone's `data/`, kept current by `scripts.sync_data` (below), so there is one copy of the data.
+
 ## Quick start
 
-You need [uv](https://docs.astral.sh/uv/getting-started/installation/), which installs Python 3.13 for you.
+To crawl, enrich or build the site, work in a clone. You need [uv](https://docs.astral.sh/uv/getting-started/installation/), which installs Python 3.13 for you.
 
 ```bash
 git clone https://github.com/brightjade/paper-explorer.git

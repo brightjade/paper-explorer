@@ -1,0 +1,8 @@
+{
+  "name": "paper-explorer",
+  "description": "venue-check and survey skills over paper-explorer's accepted-paper dataset; needs the ppr tool (uv tool install git+https://github.com/brightjade/paper-explorer)",
+  "author": { "name": "brightjade" },
+  "homepage": "https://github.com/brightjade/paper-explorer",
+  "repository": "https://github.com/brightjade/paper-explorer",
+  "license": "MIT"
+}

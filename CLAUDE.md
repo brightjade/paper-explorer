@@ -45,7 +45,7 @@ Conference ID = `<venue>_<year>`: the config path `configs/<venue>/<year>.yaml` 
 
 Paths come from `ppr/layout.py`; the conference ID stays `<venue>_<year>`.
 
-A new venue *prefix* (not a new year) is mirrored by hand in places autoregister never touches: `configs/venues.yaml`, `VENUE_NAMES` and `VENUE_CATEGORIES` in `scripts/build_data.py` (else it lands in "Others"), `VENUE_ORDER` in `web/src/categories.ts`, a row in README's conference table (autoregister only extends existing rows), the venue table in `.claude/skills/survey/SKILL.md`, and if it has awards `SOURCES_BY_PREFIX` in `ppr/awards/collect.py`. `ANNOUNCED_YEAR_BEFORE` / `CONFERENCE_MONTHS` in `scripts/impact.py` only if the venue announces outside its registry `announce_month`.
+A new venue *prefix* (not a new year) is mirrored by hand in places autoregister never touches: `configs/venues.yaml`, `VENUE_NAMES` and `VENUE_CATEGORIES` in `scripts/build_data.py` (else it lands in "Others"), `VENUE_ORDER` in `web/src/categories.ts`, a row in README's conference table (autoregister only extends existing rows), the venue tables in `plugin/skills/survey/SKILL.md` and `plugin/skills/venue-check/SKILL.md`, and if it has awards `SOURCES_BY_PREFIX` in `ppr/awards/collect.py`. `ANNOUNCED_YEAR_BEFORE` / `CONFERENCE_MONTHS` in `scripts/impact.py` only if the venue announces outside its registry `announce_month`.
 
 ## Architecture
 
@@ -111,7 +111,12 @@ Pipeline code lives in the `ppr/` package; `scripts/` holds the web-data build a
 
 ### Project skills
 
-`.claude/skills/`: `survey` (`/survey`, README's headline example: a grounded literature survey in rounds over `ppr search` -- criteria, Sonnet subagents judging every candidate by `judging.md`, vocabulary and citation expansion, a saturation stop -- in novelty, related-work or landscape mode, grounding external lists from Asta/Undermind), `check-new-conferences` (what the monthly run held or could not register), `release-data` (`ppr release`).
+**The `paper-explorer` plugin.** `.claude-plugin/marketplace.json` makes this repository a Claude Code marketplace. It serves one plugin, `plugin/`, installed with `claude plugin install paper-explorer@paper-explorer`. `plugin.json` has no `version` on purpose, so updates follow commits. The plugin's skills call the installed `ppr` command, not `uv run ppr`:
+
+- `plugin/skills/survey` (`/paper-explorer:survey`, README's headline example): a grounded literature survey in rounds over `ppr search`. It writes criteria, has Sonnet subagents judge every candidate by `${CLAUDE_SKILL_DIR}/judging.md`, expands by vocabulary and citations, and stops at saturation. Modes: novelty, related-work or landscape. It also grounds external lists from Asta/Undermind. Working folders go under `surveys/`.
+- `plugin/skills/venue-check` (`/paper-explorer:venue-check`): one `ppr search lookup` over a paper list, giving each paper's venue, track and awards. Misses are explained from `ppr data status --json`. On request it sweeps the named venues with `ppr search find`.
+
+**Maintainer-only skills** stay in `.claude/skills/`: `check-new-conferences` (what the monthly run held or could not register) and `release-data` (`ppr release`).
 
 ### OpenReview API notes
 

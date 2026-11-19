@@ -17,7 +17,8 @@ web/node_modules/
 web/dist/
 web/public/data/
 
-# Survey outputs
+# Survey outputs (surveys/ since the plugin; outputs/ before)
+surveys/
 outputs/
 
 # Search index (ppr search), rebuilt from data/
@@ -29,4 +30,6 @@ outputs/
 # Remote execution
 .remote.env
 logs/
+
+# The wheel's copy of configs/venues.yaml (pyproject force-include); never committed
 ppr/_venues.yaml
